@@ -19,11 +19,6 @@ const attr = {
 		allowNull: false,
 		unique: "email",
 	},
-	phone: {
-		type: DataTypes.STRING,
-		allowNull: false,
-		defaultValue: "",
-	},
 	password: {
 		type: DataTypes.STRING,
 		allowNull: false,
