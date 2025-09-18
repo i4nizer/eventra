@@ -1,0 +1,3 @@
+# Avoid compat issues
+node_modules
+package-lock.json
