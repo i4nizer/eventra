@@ -43,6 +43,16 @@ const signIn = async (req, res) => {
     res.json({ ...user.dataValues, password: "" })
 }
 
+const signOut = async (req, res) => {
+    res.clearCookie("access", {
+        httpOnly: true,
+        secure: false,
+        sameSite: false,
+    })
+
+    res.json({})
+}
+
 //
 
-export default { signUp, signIn }
+export default { signUp, signIn, signOut }
