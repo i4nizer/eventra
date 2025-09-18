@@ -45,8 +45,7 @@ const patch = async (req, res) => {
 }
 
 const destroy = async (req, res) => {
-    const parser = schema.section.SectionSchema.pick({ id: true })
-    const parsed = parser.safeParse(req.query)
+    const parsed = z.object({ id: z.coerce.string() }).safeParse(req.query)
     if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
     
     const rows = await models.section.Section.destroy({ where: { id: parsed.data.id } })
