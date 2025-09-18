@@ -1,3 +1,9 @@
 # Avoid compat issues
 node_modules
 package-lock.json
+
+# Private vars
+*.env
+
+# Format
+.vscode

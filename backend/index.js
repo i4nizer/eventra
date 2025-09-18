@@ -21,82 +21,14 @@
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
-    */
-    
-import express from "express";
-import path from "path";
-import session from "express-session";
-import router from "./routes/index.js";
-import fs from 'fs';
-import hbs from "hbs";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+*/
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import boot from "./boot/index.js"
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+//
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(process.cwd(), "public")));
+const app = express()
 
-app.use(session({
-  secret: "xianfire-secret-key",
-  resave: false,
-  saveUninitialized: false
-}));
+//
 
-app.engine("xian", async (filePath, options, callback) => {
-  try {
-     const originalPartialsDir = hbs.partialsDir;
-    hbs.partialsDir = path.join(__dirname, 'views');
-
-    const result = await new Promise((resolve, reject) => {
-      hbs.__express(filePath, options, (err, html) => {
-        if (err) return reject(err);
-        resolve(html);
-      });
-    });
-
-    hbs.partialsDir = originalPartialsDir;
-    callback(null, result);
-  } catch (err) {
-    callback(err);
-  }
-});
-
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "xian");
-const partialsDir = path.join(__dirname, "views/partials");
-fs.readdir(partialsDir, (err, files) => {
-  if (err) {
-    console.error("❌ Could not read partials directory:", err);
-    return;
-  }
-
-   files
-    .filter(file => file.endsWith('.xian'))
-    .forEach(file => {
-      const partialName = file.replace('.xian', ''); 
-      const fullPath = path.join(partialsDir, file);
-
-      fs.readFile(fullPath, 'utf8', (err, content) => {
-        if (err) {
-          console.error(`❌ Failed to read partial: ${file}`, err);
-          return;
-        }
-        hbs.registerPartial(partialName, content);
-        
-      });
-    });
-});
-
-app.use("/", router);
-
-export default app;
-
-if (!process.env.ELECTRON) {
-  app.listen(PORT, () => console.log(`🔥 XianFire running at http://localhost:${PORT}`));
-}
+await boot.run()
