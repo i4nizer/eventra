@@ -7,6 +7,7 @@ const run = async () => {
     // --- Init
     models.user.User.init(models.user.attr, models.user.opts(config.sequelize))
     models.section.Section.init(models.section.attr, models.section.opts(config.sequelize))
+    models.student.Student.init(models.student.attr, models.student.opts(config.sequelize))
 
     // --- Relationship
 
