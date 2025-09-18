@@ -44,6 +44,16 @@ const patch = async (req, res) => {
     res.json(student.dataValues)
 }
 
+const destroy = async (req, res) => {
+    const parsed = z.object({ id: z.coerce.string() }).safeParse(req.query)
+    if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
+    
+    const rows = await models.student.Student.destroy({ where: { id: parsed.data.id } })
+    
+    if (rows <= 0) res.status(404).send("Student not found.")
+    else res.json({})
+}
+
 //
 
-export default { get, post, patch }
+export default { get, post, patch, destroy }
