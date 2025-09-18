@@ -23,12 +23,18 @@
     SOFTWARE.
 */
 
+import express from "express"
+import env from "./config/env.js"
 import boot from "./boot/index.js"
+import routes from "./routes/index.js"
 
 //
 
 const app = express()
+app.use(express.json())
+app.use("/", routes)
 
 //
 
 await boot.run()
+app.listen(env.port, "0.0.0.0", () => console.info(`Api running on http://0.0.0.0:${env.port}.`))
