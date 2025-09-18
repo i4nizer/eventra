@@ -22,7 +22,7 @@ const get = async (req, res) => {
         offset: parsed.data.offset,
     })
 
-    req.json(sections.map((s) => s.dataValues))
+    res.json(sections.map((s) => s.dataValues))
 }
 
 const post = async (req, res) => {
