@@ -6,3 +6,9 @@
  - post /sign-up => { name, email, password }
  - post /sign-in => { email, password }
  - post /sign-out => {}
+
+##### /section
+ - get / => { id?, alpha?, omega?, limit?, offset? }
+ - post / => { name, year }
+ - patch / => { id, name, year }
+ - delete / => { id }
