@@ -24,17 +24,21 @@
 */
 
 import express from "express"
-import env from "./config/env.js"
 import boot from "./boot/index.js"
 import routes from "./routes/index.js"
+import config from "./config/index.js"
+import cookieParser from "cookie-parser"
 
 //
 
 const app = express()
 app.use(express.json())
+app.use(cookieParser)
 app.use("/", routes)
 
 //
 
 await boot.run()
-app.listen(env.port, "0.0.0.0", () => console.info(`Api running on http://0.0.0.0:${env.port}.`))
+
+const url = `http://0.0.0.0:${config.env.port}`
+app.listen(config.env.port, "0.0.0.0", () => console.info(`Api running on ${url}.`))
