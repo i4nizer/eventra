@@ -6,6 +6,7 @@ import models from "../models/index.js";
 const run = async () => {
     // --- Init
     models.user.User.init(models.user.attr, models.user.opts(config.sequelize))
+    models.section.Section.init(models.section.attr, models.section.opts(config.sequelize))
 
     // --- Relationship
 
