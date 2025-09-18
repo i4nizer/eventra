@@ -6,6 +6,7 @@ import middlewares from "../middlewares/index.js"
 
 const student = express.Router()
 student.route("/")
+    .get(middlewares.auth.access, controllers.student.get)
     .post(middlewares.auth.access, controllers.student.post)
 
 //
