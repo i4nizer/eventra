@@ -9,7 +9,9 @@ const run = async () => {
     models.section.Section.init(models.section.attr, models.section.opts(config.sequelize))
     models.student.Student.init(models.student.attr, models.student.opts(config.sequelize))
 
-    // --- Relationship
+    // --- Assoc
+    models.section.Section.hasMany(models.student.Student, { foreignKey: "sectionId", onDelete: "CASCADE" })
+    models.student.Student.belongsTo(models.section.Section, { as: "section", foreignKey: "sectionId" })
 
     // --- Connection
     await config.sequelize.authenticate()
