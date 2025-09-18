@@ -3,4 +3,5 @@
  - Expect object for success.
 
 ##### /auth
- - /signup => { name, email, password }
+ - post /signup => { name, email, password }
+ - post /signin => { email, password }
