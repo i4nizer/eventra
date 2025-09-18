@@ -9,6 +9,7 @@ student.route("/")
     .get(middlewares.auth.access, controllers.student.get)
     .post(middlewares.auth.access, controllers.student.post)
     .patch(middlewares.auth.access, controllers.student.patch)
+    .delete(middlewares.auth.access, controllers.student.destroy)
 
 //
 
