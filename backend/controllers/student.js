@@ -33,6 +33,17 @@ const post = async (req, res) => {
     res.json(student.dataValues)
 }
 
+const patch = async (req, res) => {
+    const parsed = schema.student.StudentUpdateSchema.safeParse(req.body)
+    if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
+    
+    const student = await models.student.Student.findOne({ where: { id: parsed.data.id } })
+    if (!student) return res.status(404).send("Student not found.")
+
+    await student.update({ ...parsed.data })
+    res.json(student.dataValues)
+}
+
 //
 
-export default { get, post }
+export default { get, post, patch }
