@@ -24,14 +24,16 @@
 */
 
 import express from "express"
+import cors from "cors"
+import cookieParser from "cookie-parser"
 import boot from "./boot/index.js"
 import routes from "./routes/index.js"
 import config from "./config/index.js"
-import cookieParser from "cookie-parser"
 
 //
 
 const app = express()
+app.use(cors({ origin: "*", credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
 app.use("/", routes)
