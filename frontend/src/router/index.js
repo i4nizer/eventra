@@ -1,17 +1,53 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "@/views/HomeView.vue";
+import Auth from "@/views/Auth.vue";
 
 const routes = [
   // make home available at "/"
+
   {
     path: "/",
-    name: "home",
-    component: HomeView,
+    name: "Auth",
+    component: Auth,
   },
   {
-    path: "/about",
-    name: "about",
-    component: () => import("@/views/AboutView.vue"),
+    path: "/dashboard",
+    name: "Dashboard",
+    component: () => import("@/views/Dashboard.vue"),
+  },
+  {
+    path: "/students",
+    name: "Students",
+    component: () => import("@/views/Students.vue"),
+  },
+  {
+    path: "/reports",
+    name: "Reports",
+    component: () => import("@/views/Reports.vue"),
+  },
+  {
+    path: "/attendance-logs",
+    name: "AttendaceLogs",
+    component: () => import("@/views/AttendanceLogs.vue"),
+  },
+  {
+    path: "/rfid-tags",
+    name: "RFIDTags",
+    component: () => import("@/views/RFIDTags.vue"),
+  },
+  {
+    path: "/notifications",
+    name: "Notifications",
+    component: () => import("@/views/Notifiation.vue"),
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    component: () => import("@/views/Settings.vue"),
+  },
+  {
+    path: "/accounts",
+    name: "Accounts",
+    component: () => import("@/views/Accounts.vue"),
   },
   {
     path: "/:pathMatch(.*)*",

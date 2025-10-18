@@ -88,15 +88,32 @@ const hasAccess = () => true;
 const sidebarItems = computed(() =>
   [
     { to: "/dashboard", icon: "fa-solid fa-house", label: "Dashboard" },
-    { to: "/feed", icon: "fa-solid fa-user-graduate", label: "Students List" },
-    { to: "/reports", icon: "fa-solid fa-chart-bar", label: "Reports" },
-    { to: "/profile", icon: "fa-regular fa-circle-user", label: "Profile" },
-    { to: "/accounts", icon: "fa-solid fa-shield-halved", label: "Accounts" },
     {
-      to: "/system-logs",
-      icon: "fa-solid fa-file-lines",
-      label: "System Logs",
+      to: "/students",
+      icon: "fa-solid fa-user-graduate",
+      label: "Students",
     },
+    { to: "/rfid-tags", icon: "fa-solid fa-id-badge", label: "RFID Tags" },
+    {
+      to: "/attendance-logs",
+      icon: "fa-solid fa-file-lines",
+      label: "Attendance Logs",
+    },
+    { to: "/reports", icon: "fa-solid fa-chart-bar", label: "Reports" },
+
+    { to: "/accounts", icon: "fa-solid fa-shield-halved", label: "Accounts" },
+
+    {
+      to: "/notifications",
+      icon: "fa-solid fa-bell",
+      label: "Notifications",
+    },
+    { to: "/settings", icon: "fa-solid fa-cog", label: "Settings" },
+    // {
+    //   to: "/logout",
+    //   icon: "fa-solid fa-right-from-bracket",
+    //   label: "Logout",
+    // },
   ].filter((item) => hasAccess(item.roles))
 );
 
