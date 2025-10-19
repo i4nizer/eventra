@@ -33,9 +33,9 @@ import { computed } from "vue";
 
 const props = defineProps({
   count: { type: Number, default: 7 },
-  title: { type: String, default: "Sections" },
-  subtitle: { type: String, default: "Number of class sections" },
-  icon: { type: String, default: "fa-solid fa-layer-group" },
+  title: { type: String, default: "Accounts" },
+  subtitle: { type: String, default: "Admins / organizers accounts" },
+  icon: { type: String, default: "fa-solid fa-user-graduate" },
   loading: { type: Boolean, default: false },
 });
 

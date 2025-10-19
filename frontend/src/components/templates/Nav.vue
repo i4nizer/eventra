@@ -93,6 +93,7 @@ const sidebarItems = computed(() =>
       icon: "fa-solid fa-user-graduate",
       label: "Students",
     },
+    { to: "/events", icon: "fa-solid fa-calendar-days", label: "Events" },
     { to: "/rfid-tags", icon: "fa-solid fa-id-badge", label: "RFID Tags" },
     {
       to: "/attendance-logs",
@@ -109,6 +110,7 @@ const sidebarItems = computed(() =>
       label: "Notifications",
     },
     { to: "/settings", icon: "fa-solid fa-cog", label: "Settings" },
+
     // {
     //   to: "/logout",
     //   icon: "fa-solid fa-right-from-bracket",

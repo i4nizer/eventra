@@ -95,6 +95,7 @@ const mainStyle = computed(() => {
 #app {
   font-family: "Poppins", sans-serif;
   overflow-x: hidden;
+  background-color: #fdfdff;
 }
 
 /* Sidebar slide-in animation for mobile */

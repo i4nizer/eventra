@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-white shadow-lg rounded-lg p-4 flex items-center gap-4 w-full max-w-sm"
+    class="bg-green shadow-lg rounded-lg p-4 flex items-center gap-4 w-full max-w-sm"
   >
     <div
       class="flex items-center justify-center w-14 h-14 rounded-md bg-emerald-50 text-emerald-600"
@@ -32,10 +32,13 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  count: { type: Number, default: 7 },
-  title: { type: String, default: "Sections" },
-  subtitle: { type: String, default: "Number of class sections" },
-  icon: { type: String, default: "fa-solid fa-layer-group" },
+  count: { type: Number, default: 90 },
+  title: { type: String, default: "Tags" },
+  subtitle: {
+    type: String,
+    default: "Number of distributed/activated RFID tags",
+  },
+  icon: { type: String, default: "fa-solid fa-user-graduate" },
   loading: { type: Boolean, default: false },
 });
 
