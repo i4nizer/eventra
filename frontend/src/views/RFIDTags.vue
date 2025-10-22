@@ -1,7 +1,9 @@
 <template>
   <div class="about">
-    <h1>This is an RFIDTAGS page</h1>
+    <tagsList />
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import tagsList from "@/components/Tags/tagsList.vue";
+</script>

@@ -7,7 +7,7 @@
       <tagCount />
       <accountsCount />
     </div>
-    <div class="charts mt-6">
+    <div class="charts">
       <eventChart />
     </div>
     <!-- <div class="tables">
@@ -29,5 +29,10 @@ import eventChart from "@/components/Events/eventChart.vue";
 .stats {
   display: flex;
   gap: 1rem;
+}
+
+.charts {
+  margin-top: 1.5rem;
+  height: 40vh;
 }
 </style>

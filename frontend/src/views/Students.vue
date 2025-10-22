@@ -1,6 +1,8 @@
 <template>
   <div class="students">
-    <h1>This is an students page</h1>
+    <studentTable />
   </div>
 </template>
-<script setup></script>
+<script setup>
+import studentTable from "@/components/students/studentTable.vue";
+</script>

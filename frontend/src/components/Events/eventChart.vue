@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white p-4 rounded-lg shadow">
-    <div class="flex justify-between items-center mb-3">
-      <h3 class="text-lg font-semibold">Events: Registered vs Attendees</h3>
+  <div class="chart bg-white p-4 rounded-lg shadow">
+    <div class="flex justify-between items-center mb-3 sort">
+      <h3 class="text-lg font-semibold">Events: Sign-Ups & Participants</h3>
 
       <!-- ✅ Category Filter -->
       <select
@@ -186,7 +186,11 @@ const chartOptions = {
 </script>
 
 <style scoped>
-div {
-  height: 360px;
+.sort {
+  height: 10vh;
+}
+
+.chart {
+  height: 70vh;
 }
 </style>
