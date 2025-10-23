@@ -1,0 +1,35 @@
+GET http://localhost:4000/section/3/student
+
+###
+
+POST http://localhost:4000/section/3/student
+Content-Type: application/json
+
+{
+    "sid": "MCC2022-0481",
+    "rfid": "0001",
+    "name": "ian",
+    "email": "iansandoval264@gmail.com",
+    "photo": ""
+}
+
+###
+
+GET http://localhost:4000/section/3/student/1
+
+###
+
+PATCH http://localhost:4000/section/3/student/1
+Content-Type: application/json
+
+{
+    "sid": "MCC2022-0481",
+    "rfid": "0001",
+    "name": "ian",
+    "email": "iansandoval264@gmail.com",
+    "photo": ""
+}
+
+###
+
+DELETE  http://localhost:4000/section/3/student/1

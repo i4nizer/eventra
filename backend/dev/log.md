@@ -9,3 +9,5 @@
  - Created auth api test.
  - Used secid param in section route.
  - Created section api test.
+ - Used stuid param in section route.
+ - Created student api test.
