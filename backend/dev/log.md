@@ -5,3 +5,4 @@
 
 ##### 10/23/2025
  - Created .env.example for env vars guide.
+ - Added sequelize raw url and database name.
