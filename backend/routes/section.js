@@ -6,10 +6,12 @@ import student from "./student.js"
 //
 
 const section = express.Router()
-section.use("/student", student)
+section.use("/:secid/student", student)
 section.route("/")
     .get(middlewares.auth.access, controllers.section.get)
     .post(middlewares.auth.access, controllers.section.post)
+section.route("/:secid")
+    .get(middlewares.auth.access, controllers.section.get)
     .patch(middlewares.auth.access, controllers.section.patch)
     .delete(middlewares.auth.access, controllers.section.destroy)
 
