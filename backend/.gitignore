@@ -3,7 +3,8 @@ node_modules
 package-lock.json
 
 # Private vars
-*.env
+.env*
+!.env.example
 
 # Format
 .vscode
