@@ -7,3 +7,5 @@
  - Created .env.example for env vars guide.
  - Added sequelize raw url and database name.
  - Created auth api test.
+ - Used secid param in section route.
+ - Created section api test.
