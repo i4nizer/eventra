@@ -1,4 +1,3 @@
-import z from "zod"
 import models from "../models/index.js"
 import schema from "../schema/index.js"
 import { Op } from "sequelize"
@@ -6,22 +5,27 @@ import { Op } from "sequelize"
 //
 
 const get = async (req, res) => {
-    const parser = schema.pagination.PaginationSchema.extend({ id: z.coerce.number().optional() })
-    const parsed = parser.safeParse(req.query)
-    if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
-    
-    const filter = {
-        ...(parsed.data.id && { id: parsed.data.id }),
-        ...(parsed.data.alpha && { createdAt: { [Op.gte]: new Date(parsed.data.alpha) } }),
-        ...(parsed.data.omega && { createdAt: { [Op.gte]: new Date(parsed.data.omega) } }),
+    if (req.params.secid) {
+        const secid = req.params.secid
+        const section = await models.section.Section.findOne({ where: { id: secid } })
+        
+        if (!section) return res.status(404).send("Section not found.")
+        return res.json(section.dataValues)
     }
 
-    const sections = await models.section.Section.findAll({
-        where: filter,
-        limit: parsed.data.limit,
-        offset: parsed.data.offset,
-    })
+    const parsed = schema.pagination.PaginationSchema.safeParse(req.query)
+    if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
+    
+    const options = {
+        where: {
+            ...(parsed.data.alpha && { createdAt: { [Op.gte]: new Date(parsed.data.alpha) } }),
+            ...(parsed.data.omega && { createdAt: { [Op.gte]: new Date(parsed.data.omega) } }),
+        },
+        ...(parsed.data.limit && { limit: parsed.data.limit }),
+        ...(parsed.data.offset && { offset: parsed.data.offset }),
+    }
 
+    const sections = await models.section.Section.findAll(options)
     res.json(sections.map((s) => s.dataValues))
 }
 
@@ -34,24 +38,28 @@ const post = async (req, res) => {
 }
 
 const patch = async (req, res) => {
+    const secid = req.params.secid
+    if (!secid) return res.status(400).send("Section id expected.")
+
+    const section = await models.section.Section.findOne({ where: { id: secid } })
+    if (!section) return res.status(404).send("Section not found.")
+    
     const parsed = schema.section.SectionUpdateSchema.safeParse(req.body)
     if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
-    
-    const section = await models.section.Section.findOne({ where: { id: parsed.data.id } })
-    if (!section) return res.status(404).send("Section not found.")
 
     await section.update({ ...parsed.data })
     res.json(section.dataValues)
 }
 
 const destroy = async (req, res) => {
-    const parsed = z.object({ id: z.coerce.string() }).safeParse(req.query)
-    if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
+    const secid = req.params.secid
+    if (!secid) return res.status(400).send("Section id expected.")
     
-    const rows = await models.section.Section.destroy({ where: { id: parsed.data.id } })
-    
-    if (rows <= 0) res.status(404).send("Section not found.")
-    else res.json({})
+    const section = await models.section.Section.findOne({ where: { id: secid } })
+    if (!section) return res.status(404).send("Section not found.")
+
+    await section.destroy()
+    res.json({})
 }
 
 //
