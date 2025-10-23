@@ -1,0 +1,22 @@
+POST http://localhost:4000/auth/sign-up
+Content-Type: application/json
+
+{
+    "name": "ian",
+    "email": "iansandoval264@gmail.com",
+    "password": "********"
+}
+
+###
+
+POST http://localhost:4000/auth/sign-in
+Content-Type: application/json
+
+{
+    "email": "iansandoval264@gmail.com",
+    "password": "********"
+}
+
+###
+
+POST http://localhost:4000/auth/sign-out

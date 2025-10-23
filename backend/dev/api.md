@@ -5,6 +5,7 @@
  - Expect object for success.
 
 ---
+*You may use REST Client VSCode extension.*
 
 | Route                               | Method  | Request                               | Notes                                 | Response                              |
 | ----------------------------------- | ------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
