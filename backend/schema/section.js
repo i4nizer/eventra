@@ -16,10 +16,9 @@ const SectionCreateSchema = SectionSchema.pick({
 })
 
 const SectionUpdateSchema = SectionSchema.pick({
-	id: true,
 	name: true,
 	year: true,
-})
+}).partial()
 
 //
 
