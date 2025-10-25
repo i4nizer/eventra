@@ -10,4 +10,4 @@ const run = async () => {
 
 //
 
-export default { run, sequelize }
+export default { run, database, sequelize }
