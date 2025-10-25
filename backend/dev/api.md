@@ -37,3 +37,11 @@
 | ↳/:entid                            | get     |                                          |                                       | *entry object*                        |
 | ↳/:entid                            | patch   | *?: startAt, finishAt                    | *update entry*                        | *entry object*                        |
 | ↳/:entid                            | delete  |                                          | *delete entry*                        |                                       |
+| /activity/:actid/section            |         |                                          |                                       |                                       |
+| ↳/                                  | get     |                                          | *pagination applied*                  | *array of activity-section object*    |
+| ↳/section/:secid                    | post    |                                          | *create activity-section*             | *activity-section object*             |
+| ↳/:aseid                            | get     |                                          |                                       | *activity-section object*             |
+| ↳/:aseid                            | delete  |                                          | *delete activity-section*             |                                       |
+| ↳/:aseid/section/:secid             | get     |                                          |                                       | *activity-section object*             |
+| ↳/:aseid/section/:secid             | patch   |                                          | *update activity-section*             | *activity-section object*             |
+| ↳/:aseid/section/:secid             | delete  |                                          | *delete activity-section*             |                                       |
