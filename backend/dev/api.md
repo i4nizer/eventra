@@ -31,3 +31,9 @@
 | ↳/:actid                            | get     |                                          |                                       | *activity object*                     |
 | ↳/:actid                            | patch   | *?: name, description, startAt, finishAt | *update activity*                     | *activity object*                     |
 | ↳/:actid                            | delete  |                                          | *delete activity*                     |                                       |
+| /activity/:actid/entry              |         |                                          |                                       |                                       |
+| ↳/                                  | get     |                                          | *pagination applied*                  | *array of entry object*               |
+| ↳/                                  | post    | startAt, finishAt                        | *create entry*                        | *entry object*                        |
+| ↳/:entid                            | get     |                                          |                                       | *entry object*                        |
+| ↳/:entid                            | patch   | *?: startAt, finishAt                    | *update entry*                        | *entry object*                        |
+| ↳/:entid                            | delete  |                                          | *delete entry*                        |                                       |
