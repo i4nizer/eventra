@@ -9,10 +9,13 @@ const run = async () => {
     models.section.Section.init(models.section.attr, models.section.opts(config.sequelize))
     models.student.Student.init(models.student.attr, models.student.opts(config.sequelize))
     models.activity.Activity.init(models.activity.attr, models.activity.opts(config.sequelize))
+    models.activityEntry.ActivityEntry.init(models.activityEntry.attr, models.activityEntry.opts(config.sequelize))
 
     // --- Assoc
     models.section.Section.hasMany(models.student.Student, { foreignKey: "sectionId", onDelete: "CASCADE" })
     models.student.Student.belongsTo(models.section.Section, { as: "section", foreignKey: "sectionId" })
+    models.activity.Activity.hasMany(models.activityEntry.ActivityEntry, { foreignKey: "activityId", onDelete: "CASCADE" })
+    models.activityEntry.ActivityEntry.belongsTo(models.activity.Activity, { as: "activity", foreignKey: "activityId" })
 
     // --- Connection
     await config.sequelize.authenticate()
