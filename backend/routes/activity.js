@@ -1,10 +1,12 @@
 import express from "express"
 import controllers from "../controllers/index.js"
 import middlewares from "../middlewares/index.js"
+import activityEntry from "./activity-entry.js"
 
 //
 
 const activity = express.Router()
+activity.use("/:actid/entry", activityEntry)
 activity.route("/")
     .get(middlewares.auth.access, controllers.activity.get)
     .post(middlewares.auth.access, controllers.activity.post)
