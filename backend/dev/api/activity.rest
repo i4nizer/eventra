@@ -1,0 +1,33 @@
+GET http://localhost:4000/activity
+
+###
+
+POST http://localhost:4000/activity
+Content-Type: application/json
+
+{
+    "name": "recess",
+    "description": "",
+    "startAt": "2025-10-25T15:29:24.164Z",
+    "finishAt": "2025-10-25T16:29:24.164Z"
+}
+
+###
+
+GET http://localhost:4000/activity/1
+
+###
+
+PATCH http://localhost:4000/activity/1
+Content-Type: application/json
+
+{
+    "name": "uwian",
+    "description": "",
+    "startAt": "2025-10-25T15:29:24.164Z",
+    "finishAt": "2025-10-25T16:29:24.164Z"
+}
+
+###
+
+DELETE  http://localhost:4000/activity/1

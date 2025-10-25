@@ -11,3 +11,4 @@
  - Created section api test.
  - Used stuid param in section route.
  - Created student api test.
+ - Created activity schema, model, boot, controller, route, and api test.
