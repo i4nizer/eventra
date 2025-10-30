@@ -1,0 +1,29 @@
+GET http://localhost:4000/activity/2/entry
+
+###
+
+POST http://localhost:4000/activity/2/entry
+Content-Type: application/json
+
+{
+    "startAt": "2025-10-25T15:29:24.164Z",
+    "finishAt": "2025-10-25T16:29:24.164Z"
+}
+
+###
+
+GET http://localhost:4000/activity/2/entry/3
+
+###
+
+PATCH http://localhost:4000/activity/2/entry/3
+Content-Type: application/json
+
+{
+    "startAt": "2025-10-25T15:29:24.164Z",
+    "finishAt": "2025-10-25T16:29:24.164Z"
+}
+
+###
+
+DELETE  http://localhost:4000/activity/2/entry/3
