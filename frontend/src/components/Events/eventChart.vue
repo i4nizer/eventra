@@ -177,8 +177,23 @@ const chartOptions = {
       },
     },
   },
+  elements: {
+    bar: {
+      maxBarThickness: 64,
+      barPercentage: 0.65,
+      categoryPercentage: 0.8,
+    },
+  },
   scales: {
-    x: { ticks: { maxRotation: 30, minRotation: 0 } },
+    x: {
+      ticks: {
+        maxRotation: 45,
+        minRotation: 0,
+        autoSkip: false,
+        autoSkipPadding: 8,
+      },
+      grid: { display: false },
+    },
     y: { beginAtZero: true, ticks: { precision: 0 } },
   },
   layout: { padding: 6 },
@@ -191,6 +206,19 @@ const chartOptions = {
 }
 
 .chart {
-  height: 70vh;
+  height: 60vh;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.chart canvas,
+.chart svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  display: block;
+  box-sizing: border-box;
 }
 </style>

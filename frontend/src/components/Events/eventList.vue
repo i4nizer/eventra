@@ -23,11 +23,12 @@
     </div>
 
     <!-- Horizontal Scroll Event Cards -->
-    <div class="flex overflow-x-auto gap-4 pb-2">
+    <!-- use wrapping grid-like flex so cards don't overflow the viewport -->
+    <div class="event-cards flex flex-wrap gap-4 pb-2">
       <div
         v-for="event in filteredAndSortedEvents"
         :key="event.id"
-        class="min-w-[300px] flex-shrink-0 bg-white border border-emerald-100 rounded-2xl shadow-md hover:shadow-[0_0_15px_3px_rgba(144,238,144,0.4)] hover:border-emerald-300 transition-all duration-300"
+        class="w-full sm:w-[48%] md:w-[31%] lg:w-[23%] bg-white border border-emerald-100 rounded-2xl shadow-md hover:shadow-[0_0_15px_3px_rgba(144,238,144,0.4)] hover:border-emerald-300 transition-all duration-300"
       >
         <div class="flex flex-col justify-between h-full p-5">
           <!-- Event Info -->
@@ -130,14 +131,14 @@ const viewEvent = (event) => {
 </script>
 
 <style scoped>
-.flex::-webkit-scrollbar {
+.event-cards::-webkit-scrollbar {
   height: 8px;
 }
-.flex::-webkit-scrollbar-thumb {
+.event-cards::-webkit-scrollbar-thumb {
   background-color: rgba(144, 238, 144, 0.6);
   border-radius: 8px;
 }
-.flex::-webkit-scrollbar-track {
+.event-cards::-webkit-scrollbar-track {
   background-color: #f3f3f3;
 }
 </style>

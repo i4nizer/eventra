@@ -1,27 +1,28 @@
 <template>
   <div
     id="app"
-    class="relative font-poppins bg-gray-50 min-h-screen flex transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+    class="relative font-poppins bg-gray-50 min-h-screen flex transition-all duration-300 ease"
   >
     <!-- Sidebar -->
     <transition name="sidebar-slide">
       <Nav
-        v-if="showNav"
+        v-if="showNav && (!isMobile || isSidebarOpen)"
         class="fixed top-0 left-0 h-screen z-50"
         @toggle="onToggleSidebar"
+        @close="closeSidebar"
       />
     </transition>
 
     <!-- Dark overlay for mobile -->
     <div
       v-if="isMobile && isSidebarOpen"
-      class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300"
+      class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ease"
       @click="closeSidebar"
     ></div>
 
     <!-- Main content -->
     <main
-      class="flex-1 min-h-screen transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] p-6"
+      class="flex-1 min-h-screen transition-all duration-300 ease p-6"
       :style="mainStyle"
     >
       <router-view />
@@ -84,7 +85,7 @@ const mainStyle = computed(() => {
   // DESKTOP: adjust margin-left based on collapsed width
   return {
     marginLeft: isCollapsed.value ? "5rem" : "16rem",
-    transition: "margin-left 0.5s cubic-bezier(0.25,0.1,0.25,1)",
+    transition: "margin-left 0.3s ease",
   };
 });
 </script>
@@ -98,10 +99,10 @@ const mainStyle = computed(() => {
   background-color: #fdfdff;
 }
 
-/* Sidebar slide-in animation for mobile */
+/* Sidebar slide-in animation for mobile — smoother 300ms ease */
 .sidebar-slide-enter-active,
 .sidebar-slide-leave-active {
-  transition: transform 0.4s ease, opacity 0.3s ease;
+  transition: transform 300ms ease, opacity 300ms ease;
 }
 .sidebar-slide-enter-from,
 .sidebar-slide-leave-to {

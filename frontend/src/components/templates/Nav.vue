@@ -75,12 +75,16 @@
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+const emit = defineEmits(["toggle", "close"]);
+
 const route = useRoute();
 const router = useRouter();
 const isCollapsed = ref(false);
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
+  // inform parent about collapse state
+  emit("toggle", isCollapsed.value);
 };
 
 const hasAccess = () => true;
@@ -122,8 +126,11 @@ const sidebarItems = computed(() =>
 const onItemClick = (item) => {
   if (item.to && route.path !== item.to) {
     router.push(item.to).catch(() => {});
+    // tell parent to close overlay on mobile
+    emit("close");
   } else if (typeof item.onClick === "function") {
     item.onClick();
+    emit("close");
   }
 };
 </script>
@@ -133,6 +140,9 @@ aside {
   min-height: 100vh;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+
+  /* make transitions smooth and consistent */
+  transition: all 300ms ease;
 }
 
 /* Scrollbar styling */
