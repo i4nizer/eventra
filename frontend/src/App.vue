@@ -96,7 +96,15 @@ const mainStyle = computed(() => {
 #app {
   font-family: "Poppins", sans-serif;
   overflow-x: hidden;
-  background-color: #fdfdff;
+
+  /* default: use page background variable */
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* when dark mode is enabled on <html>, use surface for the app background */
+.dark #app {
+  background-color: var(--surface);
 }
 
 /* Sidebar slide-in animation for mobile — smoother 300ms ease */

@@ -31,6 +31,7 @@ import eventChart from "@/components/Events/eventChart.vue";
   gap: 1rem;
 }
 
+
 .charts {
   margin-top: 1.5rem;
   height: 40vh;

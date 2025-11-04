@@ -1,20 +1,15 @@
 <template>
-  <div class="w-full p-6 bg-white text-gray-800">
+  <div class="event-list-wrapper">
     <!-- Search & Sort -->
-    <div
-      class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3"
-    >
+    <div class="header-controls">
       <input
         v-model="searchQuery"
         type="text"
         placeholder="Search events..."
-        class="w-full sm:w-1/3 px-4 py-2 border border-emerald-200 rounded-full shadow-sm focus:ring-2 focus:ring-emerald-300 focus:outline-none transition"
+        class="search-input"
       />
 
-      <select
-        v-model="sortBy"
-        class="px-4 py-2 border border-emerald-200 bg-white shadow-sm text-gray-800 focus:ring-2 focus:ring-emerald-300 focus:outline-none transition"
-      >
+      <select v-model="sortBy" class="sort-select">
         <option value="name">Name</option>
         <option value="startTime">Start Time</option>
         <option value="endTime">End Time</option>
@@ -22,34 +17,30 @@
       </select>
     </div>
 
-    <!-- Horizontal Scroll Event Cards -->
-    <!-- use wrapping grid-like flex so cards don't overflow the viewport -->
-    <div class="event-cards flex flex-wrap gap-4 pb-2">
+    <!-- Event Cards Grid -->
+    <div class="event-cards">
       <div
         v-for="event in filteredAndSortedEvents"
         :key="event.id"
-        class="w-full sm:w-[48%] md:w-[31%] lg:w-[23%] bg-white border border-emerald-100 rounded-2xl shadow-md hover:shadow-[0_0_15px_3px_rgba(144,238,144,0.4)] hover:border-emerald-300 transition-all duration-300"
+        class="event-card"
       >
-        <div class="flex flex-col justify-between h-full p-5">
+        <div class="event-card-content">
           <!-- Event Info -->
           <div>
-            <h3 class="text-lg font-semibold text-emerald-700 mb-1">
+            <h3 class="event-title">
               {{ event.name }}
             </h3>
-            <p class="text-sm text-gray-600">
+            <p class="event-time">
               📅 {{ event.startTime }} — {{ event.endTime }}
             </p>
-            <p class="text-sm text-gray-700">🎓 {{ event.section }}</p>
-            <p class="text-sm text-red-500 font-medium">
+            <p class="event-section">🎓 {{ event.section }}</p>
+            <p class="event-fines">
               💰 Fines: ₱{{ event.fines.toLocaleString() }}
             </p>
           </div>
 
           <!-- Action Button -->
-          <button
-            class="mt-3 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-            @click="viewEvent(event)"
-          >
+          <button class="view-btn" @click="viewEvent(event)">
             View Details →
           </button>
         </div>
@@ -57,10 +48,7 @@
     </div>
 
     <!-- No Results -->
-    <p
-      v-if="filteredAndSortedEvents.length === 0"
-      class="text-center text-gray-500 mt-6"
-    >
+    <p v-if="filteredAndSortedEvents.length === 0" class="no-results">
       No events found.
     </p>
   </div>
@@ -131,14 +119,193 @@ const viewEvent = (event) => {
 </script>
 
 <style scoped>
+.event-list-wrapper {
+  width: 100%;
+  padding: 1.5rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Header Controls */
+.header-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .header-controls {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  outline: none;
+  transition: all 0.2s;
+}
+
+@media (min-width: 640px) {
+  .search-input {
+    width: 33.333333%;
+  }
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+}
+
+.sort-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  outline: none;
+  transition: all 0.2s;
+  border-radius: 0.375rem;
+}
+
+.sort-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Event Cards Grid */
+.event-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.event-card {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+@media (min-width: 640px) {
+  .event-card {
+    width: calc(50% - 0.5rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .event-card {
+    width: calc(33.333333% - 0.667rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .event-card {
+    width: calc(25% - 0.75rem);
+  }
+}
+
+.event-card:hover {
+  box-shadow: 0 0 15px 3px rgba(16, 185, 129, 0.25);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.event-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1.25rem;
+}
+
+/* Event Info */
+.event-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.event-time {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.event-section {
+  font-size: 0.875rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.event-fines {
+  font-size: 0.875rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* View Button */
+.view-btn {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.view-btn:hover {
+  opacity: 0.8;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 1.5rem;
+}
+
+/* Scrollbar Styling */
 .event-cards::-webkit-scrollbar {
   height: 8px;
 }
+
 .event-cards::-webkit-scrollbar-thumb {
-  background-color: rgba(144, 238, 144, 0.6);
+  background-color: var(--accent);
+  opacity: 0.6;
   border-radius: 8px;
 }
+
 .event-cards::-webkit-scrollbar-track {
-  background-color: #f3f3f3;
+  background-color: var(--surface);
+}
+
+/* Dark mode specific adjustments */
+:global(.dark) .event-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .event-card:hover {
+  box-shadow: 0 0 15px 3px rgba(16, 185, 129, 0.4);
 }
 </style>
