@@ -126,7 +126,7 @@ const onItemClick = (item) => {
 <style scoped>
 .nav-root {
   border-right: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface2);
   color: var(--accent);
   min-height: 100vh;
 }
@@ -169,29 +169,19 @@ const onItemClick = (item) => {
 }
 
 .nav-root::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  opacity: 0.5;
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 4px;
-  transition: opacity 0.2s;
+  transition: background 0.2s;
 }
 
 .nav-root::-webkit-scrollbar-thumb:hover {
-  opacity: 0.8;
-}
-
-/* Custom Scrollbar - Dark Mode Track */
-:global(.dark) .nav-root::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* Firefox Scrollbar */
 .nav-root {
   scrollbar-width: thin;
-  scrollbar-color: var(--accent) rgba(0, 0, 0, 0.02);
-}
-
-:global(.dark) .nav-root {
-  scrollbar-color: var(--accent) rgba(255, 255, 255, 0.02);
+  scrollbar-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.02);
 }
 
 /* keep transitions */

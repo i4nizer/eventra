@@ -40,3 +40,21 @@ html, body, #app {
 .text-muted {
   color: var(--muted);
 }
+
+/* Dark mode scrollbar for nav */
+.dark .nav-root::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dark .nav-root::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.dark .nav-root::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.2);
+}
+
+.dark .nav-root {
+  scrollbar-color: var(--accent) rgba(255, 255, 255, 0.02);
+}
