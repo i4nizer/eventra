@@ -12,6 +12,8 @@ student.route("/:stuid")
     .get(middlewares.auth.access, controllers.student.get)
     .patch(middlewares.auth.access, controllers.student.patch)
     .delete(middlewares.auth.access, controllers.student.destroy)
+student.route("/:stuid/balance")
+    .get(middlewares.auth.access, controllers.student.balance)
 
 //
 
