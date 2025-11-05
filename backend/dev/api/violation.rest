@@ -1,0 +1,23 @@
+GET http://localhost:4000/attendance
+
+###
+
+GET http://localhost:4000/attendance/1
+
+###
+
+GET http://localhost:4000/attendance/student/1
+
+###
+
+GET http://localhost:4000/attendance/activity-entry/1
+
+###
+
+GET http://localhost:4000/attendance/student/1/activity-entry/1
+
+###
+
+GET http://localhost:4000/attendance/1/student/1/activity-entry/1
+
+###

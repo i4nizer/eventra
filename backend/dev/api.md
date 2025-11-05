@@ -53,3 +53,10 @@
 | ↳/student/:stuid/activity-entry/:entid        | get     |                                          | *pagination applied*                  | *array of attendance object*          |
 | ↳/student/:stuid/activity-entry/:entid        | post    |                                          | *pagination applied*                  | *attendance object*                   |
 | ↳/:attid/student/:stuid/activity-entry/:entid | get     |                                          | *pagination applied*                  | *attendance object*                   |
+| /violation                                    |         |                                          |                                       |                                       |
+| ↳/                                            | get     |                                          | *pagination applied*                  | *array of violation object*           |
+| ↳/:attid                                      | get     |                                          | *pagination applied*                  | *violation object*                    |
+| ↳/student/:stuid                              | get     |                                          | *pagination applied*                  | *array of violation object*           |
+| ↳/activity-entry/:entid                       | get     |                                          | *pagination applied*                  | *array of violation object*           |
+| ↳/student/:stuid/activity-entry/:entid        | get     |                                          | *pagination applied*                  | *array of violation object*           |
+| ↳/:attid/student/:stuid/activity-entry/:entid | get     |                                          | *pagination applied*                  | *violation object*                    |

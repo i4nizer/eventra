@@ -19,4 +19,5 @@
 
 ##### 11/05/2025
  - Created attendance schema, model, boot, controller, route, and api test.
+ - Created violation schema, model, boot, controller, route, and api test.
  
