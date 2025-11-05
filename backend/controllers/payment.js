@@ -39,11 +39,11 @@ const get = async (req, res) => {
 const post = async (req, res) => {
     if (!req.params.vioid) return res.status(400).send("Missing violation id.")
     const { vioid } = req.params
-    
+
     const parsed = schema.payment.PaymentCreateSchema.safeParse(req.body)
     if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
 
-    const payment = await models.payment.Payment.create({ ...parsed, violationId: vioid })
+    const payment = await models.payment.Payment.create({ ...parsed.data, violationId: vioid })
     res.json(payment.dataValues)
 }
 
@@ -57,7 +57,7 @@ const patch = async (req, res) => {
     const parsed = schema.payment.PaymentUpdateSchema.safeParse(req.body)
     if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
 
-    await payment.update(parsed)
+    await payment.update(parsed.data)
     res.json(payment.dataValues)
 }
 
