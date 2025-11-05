@@ -6,6 +6,7 @@ import activityEntry from "./activity-entry.js";
 import activitySection from "./activity-section.js";
 import attendance from "./attendance.js";
 import violation from "./violation.js";
+import payment from "./payment.js";
 
 //
 
@@ -18,4 +19,5 @@ export default {
 	activitySection,
 	attendance,
 	violation,
+	payment,
 }
