@@ -5,6 +5,7 @@ import auth from "./auth.js"
 import section from "./section.js"
 import student from "./student.js"
 import attendance from "./attendance.js"
+import violation from "./violation.js"
 
 //
 
@@ -16,4 +17,5 @@ export default {
 	activityEntry,
 	activitySection,
 	attendance,
+	violation,
 }
