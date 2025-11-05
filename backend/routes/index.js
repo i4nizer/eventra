@@ -3,6 +3,7 @@ import auth from "./auth.js"
 import section from "./section.js"
 import activity from "./activity.js"
 import attendance from "./attendance.js"
+import violation from "./violation.js"
 
 //
 
@@ -11,6 +12,7 @@ routes.use("/auth", auth)
 routes.use("/section", section)
 routes.use("/activity", activity)
 routes.use("/attendance", attendance)
+routes.use("/violation", violation)
 
 //
 
