@@ -21,4 +21,4 @@
  - Created attendance schema, model, boot, controller, route, and api test.
  - Created violation schema, model, boot, controller, route, and api test.
  - Created payment schema, model, boot, controller, route, and api test.
- 
+ - Created student balance checking endpoint and api test.

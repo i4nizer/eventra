@@ -25,6 +25,7 @@
 | ↳/:stuid                                      | get     |                                          |                                       | *student object*                      |
 | ↳/:stuid                                      | patch   | *?: sid, rfid, name, email, photo        | *update student*                      | *student object*                      |
 | ↳/:stuid                                      | delete  |                                          | *delete student*                      |                                       |
+| ↳/:stuid/balance                              | get     |                                          | *calculates balance*                  | *{ balance: # }*                      |
 | /activity                                     |         |                                          |                                       |                                       |
 | ↳/                                            | get     |                                          | *pagination applied*                  | *array of activity object*            |
 | ↳/                                            | post    | name, description, startAt, finishAt     | *create activity*                     | *activity object*                     |
