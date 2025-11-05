@@ -4,6 +4,7 @@ import activitySection from "./activity-section.js"
 import auth from "./auth.js"
 import section from "./section.js"
 import student from "./student.js"
+import attendance from "./attendance.js"
 
 //
 
@@ -14,4 +15,5 @@ export default {
 	activity,
 	activityEntry,
 	activitySection,
+	attendance,
 }
