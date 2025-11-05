@@ -13,6 +13,7 @@ const run = async () => {
     models.activitySection.ActivitySection.init(models.activitySection.attr, models.activitySection.opts(config.sequelize))
     models.attendance.Attendance.init(models.attendance.attr, models.attendance.opts(config.sequelize))
     models.violation.Violation.init(models.violation.attr, models.violation.opts(config.sequelize))
+    models.payment.Payment.init(models.payment.attr, models.payment.opts(config.sequelize))
 
     // --- Assoc
     models.section.Section.hasMany(models.student.Student, { foreignKey: "sectionId", onDelete: "CASCADE" })
@@ -29,6 +30,8 @@ const run = async () => {
     models.attendance.Attendance.belongsTo(models.activityEntry.ActivityEntry, { as: "activityEntry", foreignKey: "activityEntryId" })
     models.violation.Violation.belongsTo(models.student.Student, { as: "student", foreignKey: "studentId" })
     models.violation.Violation.belongsTo(models.activityEntry.ActivityEntry, { as: "activityEntry", foreignKey: "activityEntryId" })
+    models.violation.Violation.hasMany(models.payment.Payment, { foreignKey: "violationId", onDelete: "CASCADE" })
+    models.payment.Payment.belongsTo(models.violation.Violation, { as: "violation", foreignKey: "violationId" })
 
     // --- Connection
     await config.sequelize.authenticate()
