@@ -16,3 +16,7 @@
  - Created activity schema, model, boot, controller, route, and api test.
  - Created activity-entry schema, model, boot, controller, route, and api test.
  - Created activity-section schema, model, boot, controller, route, and api test.
+
+##### 11/05/2025
+ - Created attendance schema, model, boot, controller, route, and api test.
+ 
