@@ -1,7 +1,7 @@
 <template>
   <aside
     :class="[
-      'fixed left-0 top-0 h-screen z-50 border-r border-gray-200 bg-white shadow-lg transition-all duration-300 overflow-y-auto',
+      'fixed left-0 top-0 h-screen z-50 shadow-lg transition-all duration-300 overflow-y-auto nav-root',
       isCollapsed ? 'w-20' : 'w-64',
     ]"
     aria-label="Sidebar"
@@ -10,19 +10,19 @@
     <div class="p-3 mt-6 flex items-center gap-3">
       <button
         @click="toggleCollapse"
-        class="p-4 rounded-lg hover:bg-gray-100 transition"
+        class="p-4 rounded-lg hover:bg-[rgba(0,0,0,0.04)] transition"
         aria-label="Toggle sidebar"
       >
         <i
           :class="
             isCollapsed
-              ? 'fa-solid fa-bars text-xl text-black-600'
-              : 'fa-solid fa-xmark text-xl text-black-600'
+              ? 'fa-solid fa-bars text-xl nav-icon'
+              : 'fa-solid fa-xmark text-xl nav-icon'
           "
         ></i>
       </button>
 
-      <h1 v-if="!isCollapsed" class="text-xl font-bold text-black-600">RFID</h1>
+      <h1 v-if="!isCollapsed" class="text-xl font-bold nav-title">RFID</h1>
     </div>
 
     <!-- Navigation -->
@@ -38,29 +38,25 @@
             :to="item.to"
             @click="onItemClick(item)"
             :title="isCollapsed ? item.label : undefined"
-            class="group flex items-center gap-10 rounded-lg px-3 py-5 text-gray-700 hover:bg-emerald-50 transition-all duration-200"
+            class="group flex items-center gap-10 rounded-lg px-3 py-5 nav-item transition-all duration-200"
             :class="{
-              'bg-emerald-100 text-emerald-700 font-semibold shadow-sm':
-                route.path === item.to,
+              'nav-item-active': route.path === item.to,
               'justify-center': isCollapsed,
             }"
           >
             <!-- Active indicator -->
             <span
               v-if="route.path === item.to"
-              class="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-600 rounded-r-full"
+              class="absolute left-0 top-0 bottom-0 w-[3px] nav-active-indicator"
             ></span>
 
             <i
-              :class="[
-                item.icon,
-                'text-lg transition-transform duration-200 group-hover:scale-110 text-emerald-600',
-              ]"
+              :class="[ item.icon, 'text-lg transition-transform duration-200 group-hover:scale-110 nav-icon' ]"
             ></i>
 
             <span
               v-if="!isCollapsed"
-              class="truncate group-hover:text-emerald-700"
+              class="truncate group-hover:font-semibold nav-label"
             >
               {{ item.label }}
             </span>
@@ -75,12 +71,15 @@
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+const emit = defineEmits(["toggle", "close"]);
+
 const route = useRoute();
 const router = useRouter();
 const isCollapsed = ref(false);
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
+  emit("toggle", isCollapsed.value);
 };
 
 const hasAccess = () => true;
@@ -110,37 +109,81 @@ const sidebarItems = computed(() =>
       label: "Notifications",
     },
     { to: "/settings", icon: "fa-solid fa-cog", label: "Settings" },
-
-    // {
-    //   to: "/logout",
-    //   icon: "fa-solid fa-right-from-bracket",
-    //   label: "Logout",
-    // },
   ].filter((item) => hasAccess(item.roles))
 );
 
 const onItemClick = (item) => {
   if (item.to && route.path !== item.to) {
     router.push(item.to).catch(() => {});
+    emit("close");
   } else if (typeof item.onClick === "function") {
     item.onClick();
+    emit("close");
   }
 };
 </script>
 
 <style scoped>
-aside {
+.nav-root {
+  border-right: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--accent);
   min-height: 100vh;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
-/* Scrollbar styling */
-aside::-webkit-scrollbar {
-  width: 6px;
+/* nav elements */
+.nav-item {
+  color: var(--text);
+  background: transparent;
 }
-aside::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
+.nav-item:hover {
+  background: rgba(16,185,129,0.04);
 }
+
+/* active state */
+.nav-item-active {
+  background: rgba(16,185,129,0.08);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+}
+
+/* left active indicator */
+.nav-active-indicator {
+  background: var(--accent);
+}
+
+/* icon and text */
+.nav-icon { color: var(--accent); }
+.nav-title { color: var(--text); }
+.nav-label { color: var(--text); }
+
+/* Custom Scrollbar */
+.nav-root::-webkit-scrollbar {
+  width: 8px;
+}
+
+.nav-root::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+}
+
+.nav-root::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.nav-root::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Firefox Scrollbar */
+.nav-root {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.02);
+}
+
+/* keep transitions */
+aside { transition: all 300ms ease; }
 </style>

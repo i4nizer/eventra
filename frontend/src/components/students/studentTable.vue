@@ -1,22 +1,21 @@
 <template>
-  <div class="bg-white shadow rounded-lg overflow-hidden">
-    <div
-      class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 border-b"
-    >
+  <div class="student-table-wrapper">
+    <!-- Header -->
+    <div class="table-header">
       <div class="flex items-center gap-3">
         <div class="relative">
           <input
             v-model="q"
             type="search"
-            placeholder="Search by name, rfid or section..."
-            class="pl-10 pr-3 py-2 rounded-md border focus:ring-2 focus:ring-emerald-300"
+            placeholder="Search by name, TAG or section..."
+            class="search-input"
           />
           <i
-            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 search-icon"
           ></i>
         </div>
 
-        <select v-model="perPage" class="py-2 px-3 rounded-md border">
+        <select v-model="perPage" class="select-input">
           <option v-for="n in [5, 10, 20, 50]" :key="n" :value="n">
             {{ n }} / page
           </option>
@@ -24,19 +23,17 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button
-          @click="$emit('refresh')"
-          class="px-3 py-2 bg-emerald-50 text-emerald-700 rounded-md hover:bg-emerald-100"
-        >
+        <button @click="$emit('refresh')" class="btn-refresh">
           <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh
         </button>
         <slot name="controls"></slot>
       </div>
     </div>
 
+    <!-- Table -->
     <div class="overflow-x-auto">
       <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50">
+        <thead class="table-head">
           <tr>
             <th class="p-3">#</th>
             <th class="p-3 cursor-pointer" @click="sortBy('name')">
@@ -47,10 +44,10 @@
               Section
               <SortIcon :field="'section'" :sort="sort" />
             </th>
-            <th class="p-3">RFID</th>
-            <th class="p-3 cursor-pointer" @click="sortBy('status')">
-              Status
-              <SortIcon :field="'status'" :sort="sort" />
+            <th class="p-3">RFID Tags</th>
+            <th class="p-3 cursor-pointer" @click="sortBy('balance')">
+              Balance
+              <SortIcon :field="'balance'" :sort="sort" />
             </th>
             <th class="p-3">Actions</th>
           </tr>
@@ -59,52 +56,47 @@
         <tbody>
           <tr
             v-for="(s, idx) in paged"
-            :key="s.id || s.rfid || idx"
-            class="border-b hover:bg-gray-50"
+            :key="s.id || s.tag || idx"
+            class="table-row"
           >
-            <td class="p-3 align-middle">{{ startIndex + idx + 1 }}</td>
-            <td class="p-3 align-middle">
-              <div class="font-medium">{{ s.name }}</div>
-              <div class="text-xs text-gray-500">{{ s.email }}</div>
-            </td>
-            <td class="p-3 align-middle">{{ s.section }}</td>
-            <td class="p-3 align-middle">
-              <span
-                class="inline-block px-2 py-1 rounded bg-gray-100 text-xs"
-                >{{ s.rfid }}</span
-              >
+            <td class="p-3 align-middle row-number">
+              {{ startIndex + idx + 1 }}
             </td>
             <td class="p-3 align-middle">
-              <span
-                :class="[
-                  'px-2 py-1 rounded-full text-xs font-semibold',
-                  s.status === 'active'
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-red-100 text-red-700',
-                ]"
-              >
-                {{ s.status }}
+              <div class="student-name">{{ s.name }}</div>
+              <div class="student-email">{{ s.email }}</div>
+            </td>
+            <td class="p-3 align-middle section-text">{{ s.section }}</td>
+            <td class="p-3 align-middle">
+              <span class="badge-tag">
+                {{ s.tag }}
               </span>
             </td>
+            <td class="p-3 align-middle">
+              <span class="badge-balance">
+                ₱ {{ s.balance }}
+              </span>
+            </td>
+
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
                 <button
                   @click="$emit('edit', s)"
-                  class="px-2 py-1 rounded-md text-emerald-700 hover:bg-emerald-50"
+                  class="action-btn btn-edit"
                   title="Edit"
                 >
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
                 <button
                   @click="$emit('view', s)"
-                  class="px-2 py-1 rounded-md text-gray-700 hover:bg-gray-100"
+                  class="action-btn btn-view"
                   title="View"
                 >
                   <i class="fa-solid fa-eye"></i>
                 </button>
                 <button
                   @click="$emit('delete', s)"
-                  class="px-2 py-1 rounded-md text-red-600 hover:bg-red-50"
+                  class="action-btn btn-delete"
                   title="Delete"
                 >
                   <i class="fa-solid fa-trash"></i>
@@ -114,7 +106,7 @@
           </tr>
 
           <tr v-if="paged.length === 0">
-            <td class="p-6 text-center text-sm text-gray-500" :colspan="6">
+            <td class="p-6 text-center text-sm empty-state" :colspan="6">
               No students found.
             </td>
           </tr>
@@ -122,24 +114,26 @@
       </table>
     </div>
 
-    <!-- pagination -->
-    <div class="p-3 border-t flex items-center justify-between">
-      <div class="text-sm text-gray-600">
+    <!-- Pagination -->
+    <div class="table-footer">
+      <div class="pagination-info">
         Showing {{ startIndex + 1 }} - {{ startIndex + paged.length }} of
         {{ filtered.length }}
       </div>
 
       <div class="flex items-center gap-2">
         <button
-          class="px-3 py-1 rounded-md border disabled:opacity-40"
+          class="pagination-btn"
           :disabled="page === 1"
           @click="page--"
         >
           Prev
         </button>
-        <div class="px-3 py-1 rounded-md border">{{ page }}</div>
+        <div class="pagination-current">
+          {{ page }}
+        </div>
         <button
-          class="px-3 py-1 rounded-md border disabled:opacity-40"
+          class="pagination-btn"
           :disabled="page >= totalPages"
           @click="page++"
         >
@@ -153,10 +147,9 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 
-/* small inline SortIcon component */
 const SortIcon = {
   props: ["field", "sort"],
-  template: `<span class="inline-block ml-2 text-xs text-gray-400">
+  template: `<span class="inline-block ml-2 text-xs sort-icon">
     <i v-if="sort.field===field && sort.dir==='asc'" class="fa-solid fa-arrow-up"></i>
     <i v-else-if="sort.field===field && sort.dir==='desc'" class="fa-solid fa-arrow-down"></i>
   </span>`,
@@ -174,63 +167,71 @@ const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "name", dir: "asc" });
 
-/* fallback sample data when none provided */
+function sortBy(field) {
+  if (sort.value.field === field) {
+    sort.value.dir = sort.value.dir === "asc" ? "desc" : "asc";
+  } else {
+    sort.value.field = field;
+    sort.value.dir = "asc";
+  }
+}
+
 const sample = [
   {
     id: 1,
     name: "Alice Cruz",
     email: "alice@example.com",
     section: "A1",
-    rfid: "RFID-001",
-    status: "active",
+    tag: "TAG-001",
+    balance: "40.00",
   },
   {
     id: 2,
     name: "Ben Torres",
     email: "ben@example.com",
     section: "B2",
-    rfid: "RFID-002",
-    status: "inactive",
+    tag: "TAG-002",
+    balance: "50.00",
   },
   {
     id: 3,
     name: "Clara Reyes",
     email: "clara@example.com",
     section: "A1",
-    rfid: "RFID-003",
-    status: "active",
+    tag: "TAG-003",
+    balance: "30.00",
   },
   {
     id: 4,
     name: "David Li",
     email: "david@example.com",
     section: "C1",
-    rfid: "RFID-004",
-    status: "active",
+    tag: "TAG-004",
+    balance: "100.00",
   },
   {
     id: 5,
     name: "Ella Gomez",
     email: "ella@example.com",
     section: "B2",
-    rfid: "RFID-005",
-    status: "inactive",
+    tag: "TAG-005",
+    balance: "60.00",
   },
   {
     id: 6,
     name: "Frank Yu",
     email: "frank@example.com",
     section: "A2",
-    rfid: "RFID-006",
-    status: "active",
+    tag: "TAG-006",
+    balance: "80.00",
   },
   {
     id: 7,
     name: "Grace Park",
     email: "grace@example.com",
     section: "C1",
-    rfid: "RFID-007",
-    status: "active",
+    tag: "TAG-007",
+    balance: "20.00",
   },
 ];
 
@@ -244,7 +245,7 @@ const filtered = computed(() => {
     if (!qq) return true;
     return (
       (s.name || "").toLowerCase().includes(qq) ||
-      (s.rfid || "").toLowerCase().includes(qq) ||
+      (s.tag || "").toLowerCase().includes(qq) ||
       (s.section || "").toLowerCase().includes(qq) ||
       (s.email || "").toLowerCase().includes(qq)
     );
@@ -268,46 +269,243 @@ const sorted = computed(() => {
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(sorted.value.length / perPage.value))
 );
-watch([q, perPage], () => (page.value = 1));
-watch(sorted, (v) => {
-  if (page.value > totalPages.value) page.value = totalPages.value;
-});
-
 const startIndex = computed(() => (page.value - 1) * perPage.value);
 const paged = computed(() =>
   sorted.value.slice(startIndex.value, startIndex.value + perPage.value)
 );
 
-function sortBy(field) {
-  if (sort.value.field === field) {
-    sort.value.dir = sort.value.dir === "asc" ? "desc" : "asc";
-  } else {
-    sort.value.field = field;
-    sort.value.dir = "asc";
-  }
-}
-
-/* expose some internals if parent wants to control */
-watch([perPage, page], () => {
-  /* noop - placeholder for debug */
-});
+watch([q, perPage], () => (page.value = 1));
 </script>
 
 <style scoped>
-/* small responsive tweaks */
-@media (max-width: 640px) {
-  .max-w-sm {
-    max-width: 100% !important;
+/* Container */
+.student-table-wrapper {
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+/* Header */
+.table-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+@media (min-width: 768px) {
+  .table-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
-  table thead th:nth-child(2),
-  table thead th:nth-child(3),
-  table thead th:nth-child(5) {
-    display: none;
-  }
-  table tbody td:nth-child(2),
-  table tbody td:nth-child(3),
-  table tbody td:nth-child(5) {
-    display: none;
-  }
+}
+
+/* Search Input */
+.search-input {
+  padding-left: 2.5rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.search-icon {
+  color: var(--accent);
+}
+
+/* Select Input */
+.select-input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.select-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Buttons */
+.btn-refresh {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  color: var(--accent);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-refresh:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+
+/* Table */
+.table-head {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.table-row {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.table-row:hover {
+  background: var(--surface);
+}
+
+.row-number,
+.section-text {
+  color: var(--text);
+}
+
+.student-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.student-email {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* Badges */
+.badge-tag {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+
+.badge-balance {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+
+/* Action Buttons */
+.action-btn {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.btn-edit {
+  color: var(--accent);
+}
+
+.btn-edit:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.btn-view {
+  color: var(--muted);
+}
+
+.btn-view:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn-delete {
+  color: #ef4444;
+}
+
+.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+/* Empty State */
+.empty-state {
+  color: var(--muted);
+}
+
+/* Sort Icon */
+.sort-icon {
+  color: var(--accent);
+}
+
+/* Footer */
+.table-footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.pagination-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  transition: all 0.15s;
+  font-weight: 500;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--surface2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-current {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Dark mode specific adjustments */
+:global(.dark) .student-table-wrapper {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 </style>
