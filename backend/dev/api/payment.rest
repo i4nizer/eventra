@@ -1,0 +1,33 @@
+GET http://localhost:4000/payment
+
+###
+
+GET http://localhost:4000/payment/1
+
+###
+
+PATCH http://localhost:4000/payment/1
+Content-Type: application/json
+
+{
+    "value": "25",
+    "remarks": ""
+}
+
+###
+
+DELETE http://localhost:4000/payment/1
+
+###
+
+GET http://localhost:4000/payment/violation/1
+
+###
+
+POST http://localhost:4000/payment/violation/1
+Content-Type: application/json
+
+{
+    "value": "25",
+    "remarks": ""
+}
