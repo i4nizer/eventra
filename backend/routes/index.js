@@ -4,6 +4,7 @@ import section from "./section.js"
 import activity from "./activity.js"
 import attendance from "./attendance.js"
 import violation from "./violation.js"
+import payment from "./payment.js"
 
 //
 
@@ -13,6 +14,7 @@ routes.use("/section", section)
 routes.use("/activity", activity)
 routes.use("/attendance", attendance)
 routes.use("/violation", violation)
+routes.use("/payment", payment)
 
 //
 
