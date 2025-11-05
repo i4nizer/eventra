@@ -74,4 +74,25 @@ const destroy = async (req, res) => {
 
 //
 
-export default { get, post, patch, destroy }
+const balance = async (req, res) => {
+    const secid = req.params.secid
+    const stuid = req.params.stuid
+    if (!stuid) return res.status(400).send("Student id expected.")
+    
+    const filter = { id: stuid, ...(secid && { sectionId: secid }) }
+	const student = await models.student.Student.findOne({ where: filter })
+	if (!student) return res.status(404).send("Student not found.")
+    
+    const violations = await models.violation.Violation.findAll({ where: { studentId: stuid } })
+    const fines = violations.reduce((prev, curr) => prev + curr.dataValues.fine, 0)
+
+    const vioids = violations.map((v) => v.dataValues.id)
+    const payments = await models.payment.Payment.findAll({ where: { violationId: { [Op.in]: vioids } } })
+    const settled = payments.reduce((prev, curr) => prev + curr.dataValues.value, 0)
+
+    res.json({ balance: fines - settled })
+}
+
+//
+
+export default { get, post, patch, destroy, balance }
