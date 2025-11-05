@@ -41,4 +41,4 @@ const get = async (req, res) => {
 
 //
 
-export default { get, post }
+export default { get }
