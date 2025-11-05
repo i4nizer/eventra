@@ -6,6 +6,7 @@ import section from "./section.js"
 import student from "./student.js"
 import attendance from "./attendance.js"
 import violation from "./violation.js"
+import payment from "./payment.js"
 
 //
 
@@ -18,4 +19,5 @@ export default {
 	activitySection,
 	attendance,
 	violation,
+	payment,
 }
