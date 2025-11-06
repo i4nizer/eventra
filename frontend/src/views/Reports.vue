@@ -1,6 +1,13 @@
 <template>
+  <h1>Dito ko muna nilagay Payment</h1>
   <div class="reports">
-    <h1>This is an Reports page</h1>
+    <attendanceTable :data="paymentData" />
   </div>
 </template>
-<script setup></script>
+
+<script setup>
+import attendanceTable from "@/components/Payment/paymentLogs.vue"
+import { ref } from "vue"
+
+const paymentData = ref([])
+</script>

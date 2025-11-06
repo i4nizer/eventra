@@ -1,5 +1,5 @@
 <template>
-  <div class="attendance-table-wrapper">
+  <div class="payment-table-wrapper">
     <!-- Header -->
     <div class="table-header">
       <div class="flex items-center gap-3">
@@ -7,7 +7,7 @@
           <input
             v-model="q"
             type="search"
-            placeholder="Search by student name or activity..."
+            placeholder="Search by student, violation or remarks..."
             class="search-input"
           />
           <i
@@ -40,16 +40,17 @@
               Student Name
               <SortIcon :field="'studentName'" :sort="sort" />
             </th>
-            <th class="p-3 cursor-pointer" @click="sortBy('studentId')">
-              Student ID
-              <SortIcon :field="'studentId'" :sort="sort" />
+            <th class="p-3 cursor-pointer" @click="sortBy('violationType')">
+              Violation
+              <SortIcon :field="'violationType'" :sort="sort" />
             </th>
-            <th class="p-3 cursor-pointer" @click="sortBy('activityName')">
-              Activity
-              <SortIcon :field="'activityName'" :sort="sort" />
+            <th class="p-3 cursor-pointer" @click="sortBy('value')">
+              Amount
+              <SortIcon :field="'value'" :sort="sort" />
             </th>
+            <th class="p-3">Remarks</th>
             <th class="p-3 cursor-pointer" @click="sortBy('createdAt')">
-              Date Logged
+              Payment Date
               <SortIcon :field="'createdAt'" :sort="sort" />
             </th>
             <th class="p-3">Actions</th>
@@ -58,41 +59,47 @@
 
         <tbody>
           <tr
-            v-for="(a, idx) in paged"
-            :key="a.id || idx"
+            v-for="(p, idx) in paged"
+            :key="p.id || idx"
             class="table-row"
           >
             <td class="p-3 align-middle row-number">
               {{ startIndex + idx + 1 }}
             </td>
             <td class="p-3 align-middle">
-              <div class="student-name">{{ a.studentName }}</div>
+              <div class="student-name">{{ p.studentName }}</div>
+              <div class="student-id">ID: {{ p.studentId }}</div>
             </td>
-            <td class="p-3 align-middle section-text">
-              <span class="badge-id">
-                {{ a.studentId }}
+            <td class="p-3 align-middle">
+              <span class="badge-violation">
+                {{ p.violationType }}
               </span>
             </td>
-            <td class="p-3 align-middle activity-text">
-              {{ a.activityName }}
+            <td class="p-3 align-middle">
+              <span class="badge-amount">
+                ₱{{ p.value.toLocaleString() }}
+              </span>
+            </td>
+            <td class="p-3 align-middle remarks-text">
+              {{ p.remarks || '-' }}
             </td>
             <td class="p-3 align-middle">
               <span class="badge-date">
-                {{ formatDate(a.createdAt) }}
+                {{ formatDate(p.createdAt) }}
               </span>
             </td>
 
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
                 <button
-                  @click="$emit('view', a)"
+                  @click="$emit('view', p)"
                   class="action-btn btn-view"
-                  title="View"
+                  title="View Receipt"
                 >
-                  <i class="fa-solid fa-eye"></i>
+                  <i class="fa-solid fa-receipt"></i>
                 </button>
                 <button
-                  @click="$emit('delete', a)"
+                  @click="$emit('delete', p)"
                   class="action-btn btn-delete"
                   title="Delete"
                 >
@@ -103,8 +110,8 @@
           </tr>
 
           <tr v-if="paged.length === 0">
-            <td class="p-6 text-center text-sm empty-state" :colspan="6">
-              No attendance records found.
+            <td class="p-6 text-center text-sm empty-state" :colspan="7">
+              No payment records found.
             </td>
           </tr>
         </tbody>
@@ -147,14 +154,13 @@ import { ref, computed, watch } from "vue";
 const SortIcon = {
   props: ["field", "sort"],
   template: `<span class="inline-block ml-2 text-xs sort-icon">
-    <i v-if="sort.field===field && sort.dir==='asc'" class="fa-solid fa-caret-up"></i>
-    <i v-else-if="sort.field===field && sort.dir==='desc'" class="fa-solid fa-caret-down"></i>
-    <i v-else class="fa-solid fa-sort opacity-30"></i>
+    <i v-if="sort.field===field && sort.dir==='asc'" class="fa-solid fa-arrow-up"></i>
+    <i v-else-if="sort.field===field && sort.dir==='desc'" class="fa-solid fa-arrow-down"></i>
   </span>`,
 };
 
 const props = defineProps({
-  attendance: { type: Array, default: () => null },
+  payments: { type: Array, default: () => null },
   defaultPerPage: { type: Number, default: 10 },
 });
 
@@ -177,81 +183,96 @@ function sortBy(field) {
 const sample = [
   {
     id: 1,
+    value: 100,
+    remarks: "Paid in full",
+    violationId: 201,
+    violationType: "Late Attendance",
     studentId: 2021001,
     studentName: "Juan Dela Cruz",
-    activityEntryId: 101,
-    activityName: "Orientation - BSIT 1A",
-    createdAt: "2024-01-15T08:30:00",
-    updatedAt: "2024-01-15T08:30:00",
+    createdAt: "2024-01-15T14:30:00",
+    updatedAt: "2024-01-15T14:30:00",
   },
   {
     id: 2,
+    value: 150,
+    remarks: "Partial payment",
+    violationId: 202,
+    violationType: "Dress Code Violation",
     studentId: 2021045,
     studentName: "Maria Santos",
-    activityEntryId: 102,
-    activityName: "Tech Fair - BSCS 2B",
-    createdAt: "2024-01-16T13:15:00",
-    updatedAt: "2024-01-16T13:15:00",
+    createdAt: "2024-01-16T10:15:00",
+    updatedAt: "2024-01-16T10:15:00",
   },
   {
     id: 3,
+    value: 200,
+    remarks: "Cash payment",
+    violationId: 203,
+    violationType: "Missing ID",
     studentId: 2020123,
     studentName: "Jose Reyes",
-    activityEntryId: 103,
-    activityName: "Hackathon - BSIT 3C",
-    createdAt: "2024-01-17T09:00:00",
-    updatedAt: "2024-01-17T09:00:00",
+    createdAt: "2024-01-17T09:45:00",
+    updatedAt: "2024-01-17T09:45:00",
   },
   {
     id: 4,
+    value: 50,
+    remarks: "Trip Lang",
+    violationId: 204,
+    violationType: "Late Submission",
     studentId: 2019087,
     studentName: "Ana Lim",
-    activityEntryId: 104,
-    activityName: "General Assembly - BSIT 4A",
-    createdAt: "2024-01-18T10:30:00",
-    updatedAt: "2024-01-18T10:30:00",
+    createdAt: "2024-01-18T13:20:00",
+    updatedAt: "2024-01-18T13:20:00",
   },
   {
     id: 5,
+    value: 100,
+    remarks: "Paid via GCash",
+    violationId: 205,
+    violationType: "Late Attendance",
     studentId: 2021002,
     studentName: "Pedro Garcia",
-    activityEntryId: 101,
-    activityName: "Orientation - BSIT 1A",
-    createdAt: "2024-01-15T08:35:00",
-    updatedAt: "2024-01-15T08:35:00",
+    createdAt: "2024-01-19T08:00:00",
+    updatedAt: "2024-01-19T08:00:00",
   },
   {
     id: 6,
+    value: 175,
+    remarks: "First offense",
+    violationId: 206,
+    violationType: "Improper Uniform",
     studentId: 2021078,
     studentName: "Sofia Reyes",
-    activityEntryId: 102,
-    activityName: "Tech Fair - BSCS 2B",
-    createdAt: "2024-01-16T13:20:00",
-    updatedAt: "2024-01-16T13:20:00",
+    createdAt: "2024-01-20T11:30:00",
+    updatedAt: "2024-01-20T11:30:00",
   },
   {
     id: 7,
+    value: 300,
+    remarks: "Repeat violation",
+    violationId: 207,
+    violationType: "Absent Without Leave",
     studentId: 2020056,
     studentName: "Miguel Torres",
-    activityEntryId: 103,
-    activityName: "Hackathon - BSIT 3C",
-    createdAt: "2024-01-17T09:05:00",
-    updatedAt: "2024-01-17T09:05:00",
+    createdAt: "2024-01-21T15:45:00",
+    updatedAt: "2024-01-21T15:45:00",
   },
 ];
 
 const dataSource = computed(() =>
-  props.attendance && props.attendance.length ? props.attendance : sample
+  props.payments && props.payments.length ? props.payments : sample
 );
 
 const filtered = computed(() => {
   const qq = q.value.trim().toLowerCase();
-  return dataSource.value.filter((a) => {
+  return dataSource.value.filter((p) => {
     if (!qq) return true;
     return (
-      (a.studentName || "").toLowerCase().includes(qq) ||
-      (a.activityName || "").toLowerCase().includes(qq) ||
-      (a.studentId || "").toString().toLowerCase().includes(qq)
+      (p.studentName || "").toLowerCase().includes(qq) ||
+      (p.violationType || "").toLowerCase().includes(qq) ||
+      (p.remarks || "").toLowerCase().includes(qq) ||
+      (p.studentId || "").toString().toLowerCase().includes(qq)
     );
   });
 });
@@ -266,6 +287,10 @@ const sorted = computed(() => {
       const dateA = new Date(a[f]);
       const dateB = new Date(b[f]);
       return (dateA - dateB) * dir;
+    }
+    
+    if (f === "value") {
+      return (a[f] - b[f]) * dir;
     }
     
     const va = (a[f] || "").toString().toLowerCase();
@@ -301,7 +326,7 @@ watch([q, perPage], () => (page.value = 1));
 
 <style scoped>
 /* Container */
-.attendance-table-wrapper {
+.payment-table-wrapper {
   background: var(--bg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
@@ -399,8 +424,7 @@ watch([q, perPage], () => (page.value = 1));
 }
 
 .row-number,
-.section-text,
-.activity-text {
+.remarks-text {
   color: var(--text);
 }
 
@@ -409,16 +433,32 @@ watch([q, perPage], () => (page.value = 1));
   color: var(--text);
 }
 
+.student-id {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 /* Badges */
-.badge-id {
+.badge-violation {
   display: inline-block;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
-  background: var(--surface);
-  color: var(--accent);
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
   font-size: 0.75rem;
   font-weight: 500;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-amount {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .badge-date {
@@ -441,12 +481,12 @@ watch([q, perPage], () => (page.value = 1));
 }
 
 .btn-view {
-  color: var(--muted);
+  color: var(--accent);
 }
 
 .btn-view:hover {
-  background: var(--surface);
-  color: var(--text);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--accent);
 }
 
 .btn-delete {
@@ -514,7 +554,7 @@ watch([q, perPage], () => (page.value = 1));
 }
 
 /* Dark mode specific adjustments */
-:global(.dark) .attendance-table-wrapper {
+:global(.dark) .payment-table-wrapper {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 </style>
