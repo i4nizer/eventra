@@ -1,6 +1,12 @@
 <template>
   <div class="attendance-logs">
-    <h1>This is an attendance-logs</h1>
+    <attendanceTable :data="attendanceData" />
   </div>
 </template>
-<script setup></script>
+
+<script setup>
+import attendanceTable from "@/components/Attendance/attendanceTable.vue"
+import { ref } from "vue"
+
+const attendanceData = ref([])
+</script>

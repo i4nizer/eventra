@@ -239,7 +239,7 @@ const viewEvent = (event) => {
 .event-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--text);
   margin-bottom: 0.25rem;
 }
 

@@ -215,7 +215,7 @@ const chartOptions = computed(() => ({
 }
 
 .chart {
-  height: 60vh;
+  height: 70vh;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
