@@ -17,10 +17,10 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button @click="$emit('refresh')" class="btn-refresh">
+        <button @click="refreshTags" class="btn-refresh">
           <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh
         </button>
-        <button @click="$emit('addTag')" class="btn-add">
+        <button @click="showCreateModal = true" class="btn-add">
           + Add Tag
         </button>
       </div>
@@ -50,11 +50,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="tag in paginatedTags"
-            :key="tag.id"
-            class="table-row"
-          >
+          <tr v-for="tag in paginatedTags" :key="tag.id" class="table-row">
             <td class="p-3 align-middle tag-id">{{ tag.id }}</td>
             <td class="p-3 align-middle">
               <span :class="getStatusClass(tag.status)">
@@ -71,14 +67,14 @@
               <div class="flex justify-center gap-2">
                 <button
                   v-if="tag.status === 'Not Equipped'"
-                  @click="$emit('assign', tag)"
+                  @click="assignTag(tag)"
                   class="action-btn btn-assign"
                 >
                   Assign
                 </button>
                 <button
                   v-else
-                  @click="$emit('unassign', tag)"
+                  @click="unassignTag(tag)"
                   class="action-btn btn-unassign"
                 >
                   Unassign
@@ -102,11 +98,7 @@
         {{ page }} / {{ totalPages }})
       </div>
       <div class="flex items-center gap-2">
-        <button
-          class="pagination-btn"
-          :disabled="page === 1"
-          @click="page--"
-        >
+        <button class="pagination-btn" :disabled="page === 1" @click="page--">
           Prev
         </button>
         <div class="pagination-current">{{ page }}</div>
@@ -119,6 +111,81 @@
         </button>
       </div>
     </div>
+
+    <!-- Create Tag Modal -->
+    <transition name="fade">
+      <div
+        v-if="showCreateModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-xl p-6 w-96 relative transform transition-all duration-300 scale-100"
+        >
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+            Create New Tag
+          </h2>
+
+          <form @submit.prevent="addTag" class="space-y-4 text-gray-700">
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1"
+                >Tag ID</label
+              >
+              <input
+                v-model="form.tagId"
+                type="text"
+                placeholder="e.g., TAG-013"
+                required
+                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1"
+                >Status</label
+              >
+              <select
+                v-model="form.status"
+                required
+                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
+              >
+                <option disabled value="">Select status</option>
+                <option value="Equipped">Equipped</option>
+                <option value="Not Equipped">Not Equipped</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-1"
+                >Assigned Student</label
+              >
+              <input
+                v-model="form.assignedStudent"
+                type="text"
+                placeholder="e.g., John Doe or leave blank"
+                :disabled="form.status === 'Not Equipped'"
+                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
+              />
+            </div>
+
+            <div class="flex justify-end mt-6 space-x-2">
+              <button
+                type="button"
+                class="bg-gray-300 text-gray-800 px-4 py-2 rounded-xl hover:bg-gray-400 transition"
+                @click="showCreateModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -138,22 +205,49 @@ const searchQuery = ref("");
 const sort = ref({ field: "id", dir: "asc" });
 const page = ref(1);
 const perPage = ref(10);
+const showCreateModal = ref(false);
 
 const tags = ref([
   { id: "TAG-001", status: "Equipped", assignedStudent: "John Doe" },
   { id: "TAG-002", status: "Not Equipped", assignedStudent: "" },
   { id: "TAG-003", status: "Equipped", assignedStudent: "Jane Smith" },
-  { id: "TAG-004", status: "Not Equipped", assignedStudent: "" },
-  { id: "TAG-005", status: "Equipped", assignedStudent: "Alice Cruz" },
-  { id: "TAG-006", status: "Equipped", assignedStudent: "Michael Tan" },
-  { id: "TAG-007", status: "Not Equipped", assignedStudent: "" },
-  { id: "TAG-008", status: "Equipped", assignedStudent: "Sarah Lee" },
-  { id: "TAG-009", status: "Equipped", assignedStudent: "Carlos Reyes" },
-  { id: "TAG-010", status: "Not Equipped", assignedStudent: "" },
-  { id: "TAG-011", status: "Equipped", assignedStudent: "Anna Marie" },
-  { id: "TAG-012", status: "Not Equipped", assignedStudent: "" },
 ]);
 
+const form = ref({
+  tagId: "",
+  status: "",
+  assignedStudent: "",
+});
+
+function addTag() {
+  tags.value.push({
+    id: form.value.tagId,
+    status: form.value.status,
+    assignedStudent:
+      form.value.status === "Not Equipped"
+        ? ""
+        : form.value.assignedStudent || "—",
+  });
+  form.value = { tagId: "", status: "", assignedStudent: "" };
+  showCreateModal.value = false;
+}
+
+function assignTag(tag) {
+  tag.status = "Equipped";
+  tag.assignedStudent = prompt("Enter student name:") || "Unknown";
+}
+
+function unassignTag(tag) {
+  tag.status = "Not Equipped";
+  tag.assignedStudent = "";
+}
+
+function refreshTags() {
+  // Placeholder for backend refresh logic
+  alert("Tag list refreshed!");
+}
+
+/* Filtering and sorting logic */
 const filtered = computed(() =>
   tags.value.filter(
     (t) =>
@@ -195,7 +289,9 @@ function headerSort(field) {
 }
 
 function getStatusClass(status) {
-  return status === "Equipped" ? "status-badge equipped" : "status-badge not-equipped";
+  return status === "Equipped"
+    ? "status-badge equipped"
+    : "status-badge not-equipped";
 }
 </script>
 

@@ -23,13 +23,11 @@
         v-for="event in filteredAndSortedEvents"
         :key="event.id"
         class="event-card"
+        @click="openModal(event)"
       >
         <div class="event-card-content">
-          <!-- Event Info -->
           <div>
-            <h3 class="event-title">
-              {{ event.name }}
-            </h3>
+            <h3 class="event-title">{{ event.name }}</h3>
             <p class="event-time">
               📅 {{ event.startTime }} — {{ event.endTime }}
             </p>
@@ -38,11 +36,7 @@
               💰 Fines: ₱{{ event.fines.toLocaleString() }}
             </p>
           </div>
-
-          <!-- Action Button -->
-          <button class="view-btn" @click="viewEvent(event)">
-            View Details →
-          </button>
+          <button class="view-btn">View Details →</button>
         </div>
       </div>
     </div>
@@ -51,11 +45,21 @@
     <p v-if="filteredAndSortedEvents.length === 0" class="no-results">
       No events found.
     </p>
+
+    <!-- Event Modal -->
+    <EventModal
+      v-if="selectedEvent"
+      :event="selectedEvent"
+      @close="closeModal"
+      @edit="editEvent"
+      @delete="deleteEvent"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
+import EventModal from "./EventModal.vue"; // ✅ Import modal component
 
 const events = ref([
   {
@@ -94,10 +98,10 @@ const events = ref([
 
 const searchQuery = ref("");
 const sortBy = ref("name");
+const selectedEvent = ref(null);
 
 const filteredAndSortedEvents = computed(() => {
   let result = events.value;
-
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase();
     result = result.filter(
@@ -105,7 +109,6 @@ const filteredAndSortedEvents = computed(() => {
         e.name.toLowerCase().includes(q) || e.section.toLowerCase().includes(q)
     );
   }
-
   return [...result].sort((a, b) => {
     if (a[sortBy.value] < b[sortBy.value]) return -1;
     if (a[sortBy.value] > b[sortBy.value]) return 1;
@@ -113,8 +116,14 @@ const filteredAndSortedEvents = computed(() => {
   });
 });
 
-const viewEvent = (event) => {
-  alert(`Viewing details for ${event.name}`);
+const openModal = (event) => (selectedEvent.value = event);
+const closeModal = () => (selectedEvent.value = null);
+const editEvent = (event) => alert(`Editing ${event.name}`);
+const deleteEvent = (id) => {
+  if (confirm("Are you sure you want to delete this event?")) {
+    events.value = events.value.filter((e) => e.id !== id);
+    closeModal();
+  }
 };
 </script>
 
