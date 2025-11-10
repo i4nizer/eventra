@@ -15,14 +15,33 @@
           ></i>
         </div>
 
+        <button
+          @click="openCreateModal"
+          class="create-student-btn"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Add
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
         <select v-model="perPage" class="select-input">
           <option v-for="n in [5, 10, 20, 50]" :key="n" :value="n">
             {{ n }} / page
           </option>
         </select>
-      </div>
 
-      <div class="flex items-center gap-2">
         <button @click="$emit('refresh')" class="btn-refresh">
           <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh
         </button>
@@ -141,11 +160,20 @@
         </button>
       </div>
     </div>
+
+    <!-- Create Student Modal -->
+    <createStudent
+      :open="isCreateModalOpen"
+      :onClose="closeCreateModal"
+      :onCreate="handleCreateStudent"
+      :sections="sections"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import createStudent from "@/components/CRUD/createStudent.vue";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -158,15 +186,44 @@ const SortIcon = {
 const props = defineProps({
   students: { type: Array, default: () => null },
   defaultPerPage: { type: Number, default: 10 },
+  sections: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(["edit", "delete", "view", "refresh"]);
 
+// State
 const q = ref("");
 const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "name", dir: "asc" });
+const isCreateModalOpen = ref(false);
 
+// Modal functions
+function openCreateModal() {
+  isCreateModalOpen.value = true;
+}
+
+function closeCreateModal() {
+  isCreateModalOpen.value = false;
+}
+
+async function handleCreateStudent(studentData) {
+  // Implement your student creation logic here
+  console.log('Creating student:', studentData);
+  
+  // Example API call (uncomment and modify as needed):
+  // try {
+  //   await api.createStudent(studentData);
+  //   emit('refresh');
+  // } catch (error) {
+  //   throw new Error('Failed to create student');
+  // }
+  
+  // Emit refresh after creation
+  emit('refresh');
+}
+
+// Sorting function
 function sortBy(field) {
   if (sort.value.field === field) {
     sort.value.dir = sort.value.dir === "asc" ? "desc" : "asc";
@@ -176,6 +233,7 @@ function sortBy(field) {
   }
 }
 
+// Sample data
 const sample = [
   {
     id: 1,
@@ -235,6 +293,7 @@ const sample = [
   },
 ];
 
+// Computed properties
 const dataSource = computed(() =>
   props.students && props.students.length ? props.students : sample
 );
@@ -269,11 +328,14 @@ const sorted = computed(() => {
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(sorted.value.length / perPage.value))
 );
+
 const startIndex = computed(() => (page.value - 1) * perPage.value);
+
 const paged = computed(() =>
   sorted.value.slice(startIndex.value, startIndex.value + perPage.value)
 );
 
+// Watchers
 watch([q, perPage], () => (page.value = 1));
 </script>
 
@@ -345,6 +407,25 @@ watch([q, perPage], () => (page.value = 1));
 }
 
 /* Buttons */
+.create-student-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 0.375rem;
+  border: 1px solid var(--accent);
+  transition: all 0.2s;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.create-student-btn:hover {
+  opacity: 0.9;
+}
+
 .btn-refresh {
   padding: 0.5rem 0.75rem;
   background: var(--surface);
@@ -507,5 +588,15 @@ watch([q, perPage], () => (page.value = 1));
 /* Dark mode specific adjustments */
 :global(.dark) .student-table-wrapper {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .create-student-btn {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+:global(.dark) .create-student-btn:hover {
+  background: var(--surface2);
 }
 </style>

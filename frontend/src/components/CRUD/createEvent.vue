@@ -386,28 +386,3 @@ async function handleSubmit() {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 </style>
-
-<!-- Example usage:
-<template>
-  <div class="p-6">
-    <button @click="open = true" class="rounded bg-indigo-600 px-4 py-2 text-white">New Event</button>
-    <CreateEventModal :open="open" :onClose="() => open = false" :onCreate="handleCreate" :sections="sections" />
-  </div>
-</template>
-
-<script setup>
-import { ref } from 'vue';
-import CreateEventModal from './CreateEventModal.vue';
-
-const open = ref(false);
-const sections = ref([
-  { id: '1A', label: '1A / Grade 7' },
-  { id: '2B', label: '2B / Grade 8' },
-  { id: '3C', label: '3C / Grade 9' },
-]);
-
-async function handleCreate(evt) {
-  console.log('Creating event', evt);
-}
-</script>
--->
