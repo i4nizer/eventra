@@ -1,7 +1,7 @@
 <template>
   <div
     id="app"
-    class="relative font-poppins bg-gray-50 min-h-screen flex transition-all duration-300 ease"
+    class="relative font-poppins min-h-screen flex transition-all duration-300 ease"
   >
     <!-- Sidebar -->
     <transition name="sidebar-slide">
@@ -96,15 +96,8 @@ const mainStyle = computed(() => {
 #app {
   font-family: "Poppins", sans-serif;
   overflow-x: hidden;
-
-  /* default: use page background variable */
   background-color: var(--bg);
   color: var(--text);
-}
-
-/* when dark mode is enabled on <html>, use surface for the app background */
-.dark #app {
-  background-color: var(--surface);
 }
 
 /* Sidebar slide-in animation for mobile — smoother 300ms ease */
