@@ -51,7 +51,10 @@
             ></span>
 
             <i
-              :class="[ item.icon, 'text-lg transition-transform duration-200 group-hover:scale-110 nav-icon' ]"
+              :class="[
+                item.icon,
+                'text-lg transition-transform duration-200 group-hover:scale-110 nav-icon',
+              ]"
             ></i>
 
             <span
@@ -100,14 +103,6 @@ const sidebarItems = computed(() =>
       label: "Attendance Logs",
     },
     { to: "/reports", icon: "fa-solid fa-chart-bar", label: "Reports" },
-
-    { to: "/accounts", icon: "fa-solid fa-shield-halved", label: "Accounts" },
-
-    {
-      to: "/notifications",
-      icon: "fa-solid fa-bell",
-      label: "Notifications",
-    },
     { to: "/settings", icon: "fa-solid fa-cog", label: "Settings" },
   ].filter((item) => hasAccess(item.roles))
 );
@@ -137,15 +132,15 @@ const onItemClick = (item) => {
   background: transparent;
 }
 .nav-item:hover {
-  background: rgba(16,185,129,0.04);
+  background: rgba(16, 185, 129, 0.04);
 }
 
 /* active state */
 .nav-item-active {
-  background: rgba(16,185,129,0.08);
+  background: rgba(16, 185, 129, 0.08);
   color: var(--accent);
   font-weight: 600;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03) inset;
 }
 
 /* left active indicator */
@@ -154,9 +149,15 @@ const onItemClick = (item) => {
 }
 
 /* icon and text */
-.nav-icon { color: var(--accent); }
-.nav-title { color: var(--text); }
-.nav-label { color: var(--text); }
+.nav-icon {
+  color: var(--accent);
+}
+.nav-title {
+  color: var(--text);
+}
+.nav-label {
+  color: var(--text);
+}
 
 /* Custom Scrollbar */
 .nav-root::-webkit-scrollbar {
@@ -185,5 +186,7 @@ const onItemClick = (item) => {
 }
 
 /* keep transitions */
-aside { transition: all 300ms ease; }
+aside {
+  transition: all 300ms ease;
+}
 </style>
