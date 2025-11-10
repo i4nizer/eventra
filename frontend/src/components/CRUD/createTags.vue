@@ -16,46 +16,36 @@
         <form @submit.prevent="handleSubmit" class="space-y-4 text-gray-700">
           <!-- Tag ID -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1"
-              >Tag ID</label
-            >
+            <label class="block text-sm font-medium text-gray-600 mb-1">
+              Tag ID
+            </label>
             <input
               v-model="form.tagId"
               type="text"
               placeholder="e.g., TAG-004"
               required
-              class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
             />
-          </div>
-
-          <!-- Status -->
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1"
-              >Status</label
-            >
-            <select
-              v-model="form.status"
-              required
-              class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            >
-              <option disabled value="">Select status</option>
-              <option value="Equipped">Equipped</option>
-              <option value="Not Equipped">Not Equipped</option>
-            </select>
           </div>
 
           <!-- Assigned Student -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1"
-              >Assigned Student</label
-            >
-            <input
+            <label class="block text-sm font-medium text-gray-600 mb-1">
+              Assigned Student
+            </label>
+            <select
               v-model="form.assignedStudent"
-              type="text"
-              placeholder="e.g., John Doe or leave blank"
-              :disabled="form.status === 'Not Equipped'"
-              class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            />
+              class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
+            >
+              <option value="">Not assigned (unequipped)</option>
+              <option
+                v-for="student in students"
+                :key="student"
+                :value="student"
+              >
+                {{ student }}
+              </option>
+            </select>
           </div>
 
           <!-- Buttons -->
@@ -69,7 +59,7 @@
             </button>
             <button
               type="submit"
-              class="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition"
+              class="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition"
             >
               Save
             </button>
@@ -84,9 +74,10 @@
 import { ref } from "vue";
 
 const props = defineProps({
-  show: {
-    type: Boolean,
-    default: false,
+  show: { type: Boolean, default: false },
+  students: {
+    type: Array,
+    default: () => ["John Doe", "Jane Smith", "Michael Cruz", "Anna Lopez"],
   },
 });
 
@@ -94,14 +85,20 @@ const emit = defineEmits(["close", "save"]);
 
 const form = ref({
   tagId: "",
-  status: "",
   assignedStudent: "",
 });
 
 const handleSubmit = () => {
-  emit("save", { ...form.value });
+  const tagData = {
+    tagId: form.value.tagId,
+    assignedStudent: form.value.assignedStudent,
+    status: form.value.assignedStudent ? "Equipped" : "Not Equipped",
+  };
+
+  emit("save", tagData);
+
   // Clear form after saving
-  form.value = { tagId: "", status: "", assignedStudent: "" };
+  form.value = { tagId: "", assignedStudent: "" };
 };
 </script>
 

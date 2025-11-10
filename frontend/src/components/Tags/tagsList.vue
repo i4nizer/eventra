@@ -112,85 +112,19 @@
       </div>
     </div>
 
-    <!-- Create Tag Modal -->
-    <transition name="fade">
-      <div
-        v-if="showCreateModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      >
-        <div
-          class="bg-white rounded-2xl shadow-xl p-6 w-96 relative transform transition-all duration-300 scale-100"
-        >
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
-            Create New Tag
-          </h2>
-
-          <form @submit.prevent="addTag" class="space-y-4 text-gray-700">
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1"
-                >Tag ID</label
-              >
-              <input
-                v-model="form.tagId"
-                type="text"
-                placeholder="e.g., TAG-013"
-                required
-                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1"
-                >Status</label
-              >
-              <select
-                v-model="form.status"
-                required
-                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
-              >
-                <option disabled value="">Select status</option>
-                <option value="Equipped">Equipped</option>
-                <option value="Not Equipped">Not Equipped</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1"
-                >Assigned Student</label
-              >
-              <input
-                v-model="form.assignedStudent"
-                type="text"
-                placeholder="e.g., John Doe or leave blank"
-                :disabled="form.status === 'Not Equipped'"
-                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
-              />
-            </div>
-
-            <div class="flex justify-end mt-6 space-x-2">
-              <button
-                type="button"
-                class="bg-gray-300 text-gray-800 px-4 py-2 rounded-xl hover:bg-gray-400 transition"
-                @click="showCreateModal = false"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition"
-              >
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </transition>
+    <!-- Create Tag Modal Component -->
+    <CreateTagModal
+      :show="showCreateModal"
+      :students="studentList"
+      @close="showCreateModal = false"
+      @save="addTagFromModal"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
+import CreateTagModal from "@/components/CRUD/createTags.vue"; // 👈 Import your modal
 
 /* Inline Sort Icon */
 const SortIcon = {
@@ -213,22 +147,19 @@ const tags = ref([
   { id: "TAG-003", status: "Equipped", assignedStudent: "Jane Smith" },
 ]);
 
-const form = ref({
-  tagId: "",
-  status: "",
-  assignedStudent: "",
-});
+const studentList = ref([
+  "John Doe",
+  "Jane Smith",
+  "Chris Evans",
+  "Anna Lopez",
+]);
 
-function addTag() {
+function addTagFromModal(tag) {
   tags.value.push({
-    id: form.value.tagId,
-    status: form.value.status,
-    assignedStudent:
-      form.value.status === "Not Equipped"
-        ? ""
-        : form.value.assignedStudent || "—",
+    id: tag.tagId,
+    status: tag.status,
+    assignedStudent: tag.assignedStudent || "",
   });
-  form.value = { tagId: "", status: "", assignedStudent: "" };
   showCreateModal.value = false;
 }
 
@@ -243,11 +174,10 @@ function unassignTag(tag) {
 }
 
 function refreshTags() {
-  // Placeholder for backend refresh logic
   alert("Tag list refreshed!");
 }
 
-/* Filtering and sorting logic */
+/* Filtering, sorting, and pagination */
 const filtered = computed(() =>
   tags.value.filter(
     (t) =>
