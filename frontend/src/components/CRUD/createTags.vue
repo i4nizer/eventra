@@ -2,21 +2,19 @@
   <transition name="fade">
     <div
       v-if="show"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="modal-overlay"
     >
-      <div
-        class="bg-white rounded-2xl shadow-xl p-6 w-96 relative transform transition-all duration-300 scale-100"
-      >
+      <div class="modal-container">
         <!-- Header -->
-        <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+        <h2 class="modal-title">
           Create New Tag
         </h2>
 
         <!-- Create Tag Form -->
-        <form @submit.prevent="handleSubmit" class="space-y-4 text-gray-700">
+        <form @submit.prevent="handleSubmit" class="modal-form">
           <!-- Tag ID -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">
+            <label class="input-label">
               Tag ID
             </label>
             <input
@@ -24,18 +22,18 @@
               type="text"
               placeholder="e.g., TAG-004"
               required
-              class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
+              class="input-field"
             />
           </div>
 
           <!-- Assigned Student -->
           <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1">
+            <label class="input-label">
               Assigned Student
             </label>
             <select
               v-model="form.assignedStudent"
-              class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-green-400 focus:outline-none"
+              class="input-field"
             >
               <option value="">Not assigned (unequipped)</option>
               <option
@@ -49,17 +47,17 @@
           </div>
 
           <!-- Buttons -->
-          <div class="flex justify-end mt-6 space-x-2">
+          <div class="button-group">
             <button
               type="button"
-              class="bg-gray-300 text-gray-800 px-4 py-2 rounded-xl hover:bg-gray-400 transition"
+              class="btn-cancel"
               @click="$emit('close')"
             >
               Cancel
             </button>
             <button
               type="submit"
-              class="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition"
+              class="btn-submit"
             >
               Save
             </button>
@@ -102,11 +100,141 @@ const handleSubmit = () => {
 };
 </script>
 
-<style scoped>
+<style>
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+/* Modal Container */
+.modal-container {
+  background: var(--surface);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 1.5rem;
+  width: 24rem;
+  position: relative;
+  transform: scale(1);
+  transition: all 0.3s;
+  border: 1px solid var(--border);
+}
+
+/* Header */
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Form */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: var(--text);
+}
+
+/* Input Label */
+.input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+/* Input Field */
+.input-field {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.input-field::placeholder {
+  color: var(--muted);
+}
+
+/* Button Group */
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  gap: 0.5rem;
+}
+
+/* Cancel Button */
+.btn-cancel {
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-cancel:hover {
+  background: var(--surface2);
+}
+
+/* Submit Button */
+.btn-submit {
+  background: var(--accent);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--accent);
+  transition: all 0.2s;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-submit:hover {
+  opacity: 0.9;
+}
+
+/* Dark Mode Adjustments */
+.dark .modal-container {
+  background: var(--surface2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.dark .btn-submit {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.dark .btn-submit:hover {
+  background: var(--bg);
+  opacity: 1;
+}
+
+/* Transitions */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

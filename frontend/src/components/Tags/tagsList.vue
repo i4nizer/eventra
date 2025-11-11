@@ -457,4 +457,10 @@ table {
 :global(.dark) .tags-list-wrapper {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
+
+.dark .btn-add {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--accent);
+}
 </style>

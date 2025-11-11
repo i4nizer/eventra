@@ -590,13 +590,13 @@ watch([q, perPage], () => (page.value = 1));
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-:global(.dark) .create-student-btn {
+.dark .create-student-btn {
   color: var(--accent);
   background: var(--surface);
   border-color: var(--accent);
 }
 
-:global(.dark) .create-student-btn:hover {
+.dark .create-student-btn:hover {
   background: var(--surface2);
 }
 </style>
