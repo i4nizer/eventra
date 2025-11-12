@@ -1,6 +1,60 @@
 <template>
   <div class="Authentication">
-    <h1>This is the authentication page</h1>
+    <SignUpForm 
+      v-if="isSignUp"
+      @submit="onSignUp" 
+      @sign-in="isSignUp = false"
+    ></SignUpForm>
+    <SignInForm 
+      v-else
+      @submit="onSignIn" 
+      @sign-up="isSignUp = true"
+    ></SignInForm>
   </div>
 </template>
-<script setup></script>
+
+<script setup>
+import SignUpForm from '@/components/Auth/SignUpForm.vue';
+import SignInForm from '@/components/Auth/SignInForm.vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+//
+
+const router = useRouter()
+const isSignUp = ref(false)
+
+const onSignUp = async (name, email, password) => {
+  const res = await fetch("http://localhost:4000/auth/sign-up", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  })
+
+  if (!res.ok) return console.info(await res.text())
+  const user = await res.json()
+  console.info("User signed-up: ", user)
+}
+
+const onSignIn = async (email, password) => {
+  const res = await fetch("http://localhost:4000/auth/sign-in", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  })
+
+  if (!res.ok) return console.info(await res.text())
+  const user = await res.json()
+  console.info("User signed-in: ", user)
+
+  router.push("/dashboard")
+  /**
+   * Access cookie is attached to the browser marking user as signed-in.
+   * Do I need to manually manage signed-in state? No
+   * Am I detected signed-in wherever whenever I used fetch? Yes, cookie is attached to every request.
+   */
+}
+
+//
+
+</script>
