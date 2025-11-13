@@ -15,10 +15,7 @@
           ></i>
         </div>
 
-        <button
-          @click="openCreateModal"
-          class="create-student-btn"
-        >
+        <button @click="openCreateModal" class="create-student-btn">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -92,29 +89,28 @@
               </span>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-balance">
-                ₱ {{ s.balance }}
-              </span>
+              <span class="badge-balance"> ₱ {{ s.balance }} </span>
             </td>
 
+            <td class="p-3 align-middle"></td>
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
                 <button
-                  @click="$emit('edit', s)"
+                  @click="openEditModal(s)"
                   class="action-btn btn-edit"
                   title="Edit"
                 >
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
                 <button
-                  @click="$emit('view', s)"
+                  @click="openViewModal(s)"
                   class="action-btn btn-view"
                   title="View"
                 >
                   <i class="fa-solid fa-eye"></i>
                 </button>
                 <button
-                  @click="$emit('delete', s)"
+                  @click="openDeleteModal(s)"
                   class="action-btn btn-delete"
                   title="Delete"
                 >
@@ -141,11 +137,7 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button
-          class="pagination-btn"
-          :disabled="page === 1"
-          @click="page--"
-        >
+        <button class="pagination-btn" :disabled="page === 1" @click="page--">
           Prev
         </button>
         <div class="pagination-current">
@@ -169,11 +161,39 @@
       :sections="sections"
     />
   </div>
+
+  <!-- Edit Student Modal -->
+  <editStudent
+    :open="isEditModalOpen"
+    :student="selectedStudent"
+    :onClose="closeEditModal"
+    :onUpdate="handleUpdateStudent"
+    :sections="sections"
+    :availableTags="availableTags"
+  />
+
+  <!-- View Student Modal -->
+  <viewStudent
+    :open="isViewModalOpen"
+    :student="selectedStudent"
+    :onClose="closeViewModal"
+  />
+
+  <!-- Delete Confirmation Modal -->
+  <confirmDelete
+    :open="isDeleteModalOpen"
+    :student="selectedStudent"
+    :onClose="closeDeleteModal"
+    :onConfirm="handleConfirmDelete"
+  />
 </template>
 
 <script setup>
 import { ref, computed, watch } from "vue";
 import createStudent from "@/components/CRUD/createStudent.vue";
+import editStudent from "@/components/CRUD/updateStudent.vue";
+import viewStudent from "@/components/CRUD/readStudent.vue";
+import confirmDelete from "@/components/CRUD/deleteStudent.vue";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -191,39 +211,84 @@ const props = defineProps({
 
 const emit = defineEmits(["edit", "delete", "view", "refresh"]);
 
-// State
 const q = ref("");
 const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "name", dir: "asc" });
-const isCreateModalOpen = ref(false);
 
-// Modal functions
+// Modals
+const isCreateModalOpen = ref(false);
+const isEditModalOpen = ref(false);
+const isViewModalOpen = ref(false);
+const isDeleteModalOpen = ref(false);
+const selectedStudent = ref(null);
+
+// RFID Tags (for dropdown)
+const availableTags = ref([
+  "TAG-001",
+  "TAG-002",
+  "TAG-003",
+  "TAG-004",
+  "TAG-005",
+  "TAG-006",
+]);
+
+// =======================
+// Modal Functions
+// =======================
 function openCreateModal() {
   isCreateModalOpen.value = true;
 }
-
 function closeCreateModal() {
   isCreateModalOpen.value = false;
 }
 
 async function handleCreateStudent(studentData) {
-  // Implement your student creation logic here
-  console.log('Creating student:', studentData);
-  
-  // Example API call (uncomment and modify as needed):
-  // try {
-  //   await api.createStudent(studentData);
-  //   emit('refresh');
-  // } catch (error) {
-  //   throw new Error('Failed to create student');
-  // }
-  
-  // Emit refresh after creation
-  emit('refresh');
+  console.log("Creating student:", studentData);
+  emit("refresh");
+  closeCreateModal();
 }
 
-// Sorting function
+// ---- Edit ----
+function openEditModal(student) {
+  selectedStudent.value = student;
+  isEditModalOpen.value = true;
+}
+function closeEditModal() {
+  isEditModalOpen.value = false;
+  selectedStudent.value = null;
+}
+function handleUpdateStudent(updatedStudent) {
+  console.log("Updating student:", updatedStudent);
+  emit("refresh");
+  closeEditModal();
+}
+
+// ---- View ----
+function openViewModal(student) {
+  selectedStudent.value = student;
+  isViewModalOpen.value = true;
+}
+function closeViewModal() {
+  isViewModalOpen.value = false;
+  selectedStudent.value = null;
+}
+
+// ---- Delete ----
+function openDeleteModal(student) {
+  selectedStudent.value = student;
+  isDeleteModalOpen.value = true;
+}
+function closeDeleteModal() {
+  isDeleteModalOpen.value = false;
+  selectedStudent.value = null;
+}
+function handleConfirmDelete() {
+  console.log("Deleting student:", selectedStudent.value);
+  emit("refresh");
+  closeDeleteModal();
+}
+
 function sortBy(field) {
   if (sort.value.field === field) {
     sort.value.dir = sort.value.dir === "asc" ? "desc" : "asc";
@@ -233,7 +298,6 @@ function sortBy(field) {
   }
 }
 
-// Sample data
 const sample = [
   {
     id: 1,
@@ -283,17 +347,11 @@ const sample = [
     tag: "TAG-006",
     balance: "80.00",
   },
-  {
-    id: 7,
-    name: "Grace Park",
-    email: "grace@example.com",
-    section: "C1",
-    tag: "TAG-007",
-    balance: "20.00",
-  },
 ];
 
-// Computed properties
+// =======================
+// Computed Properties
+// =======================
 const dataSource = computed(() =>
   props.students && props.students.length ? props.students : sample
 );
@@ -335,7 +393,7 @@ const paged = computed(() =>
   sorted.value.slice(startIndex.value, startIndex.value + perPage.value)
 );
 
-// Watchers
+// Reset to page 1 when filters change
 watch([q, perPage], () => (page.value = 1));
 </script>
 

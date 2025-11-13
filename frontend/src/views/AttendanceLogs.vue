@@ -5,8 +5,8 @@
 </template>
 
 <script setup>
-import attendanceTable from "@/components/Attendance/attendanceTable.vue"
-import { ref } from "vue"
+import attendanceTable from "@/components/Attendance/attendanceTable.vue";
+import { ref } from "vue";
 
-const attendanceData = ref([])
+const attendanceData = ref([]);
 </script>
