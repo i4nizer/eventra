@@ -16,6 +16,7 @@
 <script setup>
 import SignUpForm from '@/components/Auth/SignUpForm.vue';
 import SignInForm from '@/components/Auth/SignInForm.vue';
+import api from '@/utils/api';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -25,11 +26,7 @@ const router = useRouter()
 const isSignUp = ref(false)
 
 const onSignUp = async (name, email, password) => {
-  const res = await fetch("http://localhost:4000/auth/sign-up", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password }),
-  })
+  const res = await api.post("/api/auth/sign-up", { name, email, password })
 
   if (!res.ok) return console.info(await res.text())
   const user = await res.json()
@@ -37,11 +34,7 @@ const onSignUp = async (name, email, password) => {
 }
 
 const onSignIn = async (email, password) => {
-  const res = await fetch("http://localhost:4000/auth/sign-in", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  })
+  const res = await api.post("/api/auth/sign-in", { email, password })
 
   if (!res.ok) return console.info(await res.text())
   const user = await res.json()
