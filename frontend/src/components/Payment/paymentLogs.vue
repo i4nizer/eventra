@@ -93,14 +93,14 @@
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
                 <button
-                  @click="$emit('view', p)"
+                  @click="handleView(p)"
                   class="action-btn btn-view"
                   title="View Receipt"
                 >
-                  <i class="fa-solid fa-receipt"></i>
+                  <i class="fa-solid fa-eye"></i>
                 </button>
                 <button
-                  @click="$emit('delete', p)"
+                  @click="handleDelete(p)"
                   class="action-btn btn-delete"
                   title="Delete"
                 >
@@ -132,14 +132,14 @@
             <span class="badge-amount">₱{{ p.value.toLocaleString() }}</span>
             <div class="card-actions">
               <button
-                @click="$emit('view', p)"
+                @click="handleView(p)"
                 class="action-btn btn-view"
                 title="View Receipt"
               >
                 <i class="fa-solid fa-receipt"></i>
               </button>
               <button
-                @click="$emit('delete', p)"
+                @click="handleDelete(p)"
                 class="action-btn btn-delete"
                 title="Delete"
               >
@@ -211,11 +211,28 @@
         </button>
       </div>
     </div>
+
+    <!-- Read Payment Modal -->
+    <ReadPayment
+      :open="isViewModalOpen"
+      :onClose="closeViewModal"
+      :payment="selectedPaymentForView"
+    />
+
+    <!-- Delete Payment Modal -->
+    <DeletePayment
+      :open="isDeleteModalOpen"
+      :onClose="closeDeleteModal"
+      :onConfirm="confirmDelete"
+      :payment="selectedPaymentForDelete"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import ReadPayment from "@/components/CRUD/readPayment.vue";
+import DeletePayment from "@/components/CRUD/deletePayment.vue";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -237,6 +254,14 @@ const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "createdAt", dir: "desc" });
 
+// View modal state
+const isViewModalOpen = ref(false);
+const selectedPaymentForView = ref(null);
+
+// Delete modal state
+const isDeleteModalOpen = ref(false);
+const selectedPaymentForDelete = ref(null);
+
 function sortBy(field) {
   if (sort.value.field === field) {
     sort.value.dir = sort.value.dir === "asc" ? "desc" : "asc";
@@ -244,6 +269,47 @@ function sortBy(field) {
     sort.value.field = field;
     sort.value.dir = field === "createdAt" ? "desc" : "asc";
   }
+}
+
+function handleView(payment) {
+  // Map the payment data to match the modal's expected format
+  selectedPaymentForView.value = {
+    name: payment.studentName,
+    violation: payment.violationType,
+    amount: `₱${payment.value.toLocaleString()}`,
+    remarks: payment.remarks || '-',
+    date: formatDate(payment.createdAt),
+  };
+  isViewModalOpen.value = true;
+  emit('view', payment);
+}
+
+function closeViewModal() {
+  isViewModalOpen.value = false;
+  selectedPaymentForView.value = null;
+}
+
+function handleDelete(payment) {
+  // Map the payment data to match the modal's expected format
+  selectedPaymentForDelete.value = {
+    name: payment.studentName,
+    tag: payment.studentId,
+    activity: payment.violationType,
+    date: formatDate(payment.createdAt),
+    originalData: payment, // Keep original data for the emit
+  };
+  isDeleteModalOpen.value = true;
+}
+
+function closeDeleteModal() {
+  isDeleteModalOpen.value = false;
+  selectedPaymentForDelete.value = null;
+}
+
+function confirmDelete() {
+  // Emit the delete event with the original payment data
+  emit('delete', selectedPaymentForDelete.value.originalData);
+  closeDeleteModal();
 }
 
 const sample = [
@@ -601,7 +667,7 @@ watch([q, perPage], () => (page.value = 1));
 }
 
 .btn-view {
-  color: var(--accent);
+  color: var(--muted);
 }
 
 .btn-view:hover {

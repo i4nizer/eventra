@@ -86,14 +86,14 @@
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
                 <button
-                  @click="$emit('view', a)"
+                  @click="handleView(a)"
                   class="action-btn btn-view"
                   title="View"
                 >
                   <i class="fa-solid fa-eye"></i>
                 </button>
                 <button
-                  @click="$emit('delete', a)"
+                  @click="handleDelete(a)"
                   class="action-btn btn-delete"
                   title="Delete"
                 >
@@ -123,14 +123,14 @@
           <div class="card-number">{{ startIndex + idx + 1 }}</div>
           <div class="card-actions">
             <button
-              @click="$emit('view', a)"
+              @click="handleView(a)"
               class="action-btn btn-view"
               title="View"
             >
               <i class="fa-solid fa-eye"></i>
             </button>
             <button
-              @click="$emit('delete', a)"
+              @click="handleDelete(a)"
               class="action-btn btn-delete"
               title="Delete"
             >
@@ -198,11 +198,28 @@
         </button>
       </div>
     </div>
+
+    <!-- Read Attendance Modal -->
+    <ReadAttendance
+      :open="isModalOpen"
+      :onClose="closeModal"
+      :attendance="selectedAttendance"
+    />
+
+    <!-- Delete Attendance Modal -->
+    <DeleteAttendance
+      :open="isDeleteModalOpen"
+      :onClose="closeDeleteModal"
+      :onConfirm="confirmDelete"
+      :attendance="selectedAttendanceForDelete"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import ReadAttendance from "@/components/CRUD/readAttendance.vue";
+import DeleteAttendance from "@/components/CRUD/deleteAttendance.vue";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -225,6 +242,14 @@ const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "createdAt", dir: "desc" });
 
+// Modal state
+const isModalOpen = ref(false);
+const selectedAttendance = ref(null);
+
+// Delete modal state
+const isDeleteModalOpen = ref(false);
+const selectedAttendanceForDelete = ref(null);
+
 function sortBy(field) {
   if (sort.value.field === field) {
     sort.value.dir = sort.value.dir === "asc" ? "desc" : "asc";
@@ -232,6 +257,46 @@ function sortBy(field) {
     sort.value.field = field;
     sort.value.dir = field === "createdAt" ? "desc" : "asc";
   }
+}
+
+function handleView(attendance) {
+  // Map the attendance data to match the modal's expected format
+  selectedAttendance.value = {
+    name: attendance.studentName,
+    tag: attendance.studentId,
+    activity: attendance.activityName,
+    date: formatDate(attendance.createdAt),
+  };
+  isModalOpen.value = true;
+  emit('view', attendance);
+}
+
+function closeModal() {
+  isModalOpen.value = false;
+  selectedAttendance.value = null;
+}
+
+function handleDelete(attendance) {
+  // Map the attendance data to match the modal's expected format
+  selectedAttendanceForDelete.value = {
+    name: attendance.studentName,
+    tag: attendance.studentId,
+    activity: attendance.activityName,
+    date: formatDate(attendance.createdAt),
+    originalData: attendance, // Keep original data for the emit
+  };
+  isDeleteModalOpen.value = true;
+}
+
+function closeDeleteModal() {
+  isDeleteModalOpen.value = false;
+  selectedAttendanceForDelete.value = null;
+}
+
+function confirmDelete() {
+  // Emit the delete event with the original attendance data
+  emit('delete', selectedAttendanceForDelete.value.originalData);
+  closeDeleteModal();
 }
 
 const sample = [
