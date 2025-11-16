@@ -1,7 +1,7 @@
 <template>
   <div class="events">
-    <div class="eventHeader mb-12">
-      <div class="flex items-center justify-between gap-4">
+    <div class="eventHeader">
+      <div class="header-content">
         <eventsCount />
         <button
           @click="openCreateModal"
@@ -19,7 +19,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          Create Event
+          <span class="btn-text">Create Event</span>
         </button>
       </div>
     </div>
@@ -78,14 +78,39 @@ async function handleCreateEvent(eventData) {
 }
 </script>
 
-<style>
+<style scoped>
+.events {
+  padding: 1rem;
+}
+
+.eventHeader {
+  margin-bottom: 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .header-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
 .create-event-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   border-radius: 0.5rem;
   background: var(--accent);
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: white;
@@ -93,6 +118,14 @@ async function handleCreateEvent(eventData) {
   transition: all 0.2s;
   border: 1px solid var(--accent);
   cursor: pointer;
+  white-space: nowrap;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .create-event-btn {
+    width: auto;
+  }
 }
 
 .create-event-btn:hover {
@@ -104,15 +137,66 @@ async function handleCreateEvent(eventData) {
   transform: translateY(1px);
 }
 
+.eventList {
+  width: 100%;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .events {
+    padding: 0.875rem;
+  }
+  
+  .eventHeader {
+    margin-bottom: 1.25rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .events {
+    padding: 0.75rem;
+  }
+  
+  .eventHeader {
+    margin-bottom: 1rem;
+  }
+
+  .create-event-btn {
+    padding: 0.5rem 0.875rem;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .events {
+    padding: 0.5rem;
+  }
+  
+  .eventHeader {
+    margin-bottom: 0.875rem;
+  }
+
+  .create-event-btn {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .create-event-btn svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
 /* Dark mode adjustments */
-.dark .create-event-btn {
+:global(.dark) .create-event-btn {
   color: var(--accent);
   background: var(--surface);
   border-color: var(--accent);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.dark .create-event-btn:hover {
+:global(.dark) .create-event-btn:hover {
   background: var(--surface2);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
 }

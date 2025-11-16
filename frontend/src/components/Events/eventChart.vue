@@ -1,12 +1,12 @@
 <template>
   <div class="chart surface p-4 rounded-lg shadow">
-    <div class="flex justify-between items-center mb-3 sort">
-      <h3 class="text-lg font-semibold">Events: Sign-Ups & Participants</h3>
+    <div class="chart-header">
+      <h3 class="chart-title">Events: Sign-Ups & Participants</h3>
 
       <!-- ✅ Category Filter -->
       <select
         v-model="selectedCategory"
-        class="border px-2 py-1 rounded text-sm"
+        class="category-select"
       >
         <option value="all">All Categories</option>
         <option v-for="cat in categoryList" :key="cat" :value="cat">
@@ -15,7 +15,9 @@
       </select>
     </div>
 
-    <Bar :data="chartData" :options="chartOptions" />
+    <div class="chart-container">
+      <Bar :data="chartData" :options="chartOptions" />
+    </div>
   </div>
 </template>
 
@@ -54,7 +56,7 @@ const props = defineProps({
 function getAccent() {
   try {
     const raw = getComputedStyle(document.documentElement).getPropertyValue("--accent")?.trim();
-    if (!raw) return "#10b981"; // fallback
+    if (!raw) return "#10b981";
     return raw;
   } catch {
     return "#10b981";
@@ -64,11 +66,9 @@ function getAccent() {
 function hexToRgba(hex, alpha = 1) {
   if (!hex) return `rgba(16,185,129,${alpha})`;
   const h = hex.trim();
-  // already rgba()/rgb()
   if (/^rgba?\(/i.test(h)) {
     return h.replace(/^rgb\(/i, "rgba(").replace(/\)$/, `, ${alpha})`);
   }
-  // named colors or other formats: return as-is (alpha won't be applied)
   if (!/^#/.test(h)) return h;
   let v = h.slice(1);
   if (v.length === 3) v = v.split("").map((c) => c + c).join("");
@@ -83,7 +83,6 @@ const accentRaw = getAccent();
 const registeredColor = accentRaw;
 const attendeesColor = hexToRgba(accentRaw, 0.78);
 
-// Category colors (kept as fallbacks for category-based coloring)
 const categoryColors = {
   special: { registered: registeredColor, attendees: attendeesColor },
   normal: { registered: registeredColor, attendees: attendeesColor },
@@ -92,20 +91,16 @@ const categoryColors = {
 
 const colorFor = (category) => categoryColors[category] ?? categoryColors.other;
 
-// Extract unique categories
 const categoryList = computed(() => [...new Set(props.events.map((e) => e.category))]);
 
-// Filter selection
 const selectedCategory = ref("all");
 
-// Computed: filter events based on selected category
 const filteredEvents = computed(() =>
   selectedCategory.value === "all"
     ? props.events
     : props.events.filter((e) => e.category === selectedCategory.value)
 );
 
-// Computed chart data updated based on filtered events
 const chartData = computed(() => {
   const labels = filteredEvents.value.map((e) => e.title);
   const registered = filteredEvents.value.map((e) => Number(e.registered ?? 0));
@@ -130,12 +125,10 @@ const chartData = computed(() => {
   };
 });
 
-// reactive dark-mode flag (keeps chart text updating when theme toggles)
 const isDark = ref(document.documentElement.classList.contains("dark"));
 let mo = null;
 
 onMounted(() => {
-  // Watch for class changes on <html> so chartTextColor updates when toggle is used
   mo = new MutationObserver(() => {
     isDark.value = document.documentElement.classList.contains("dark");
   });
@@ -146,7 +139,6 @@ onBeforeUnmount(() => {
   if (mo) mo.disconnect();
 });
 
-// compute text color: white when darkmode, otherwise use --muted resolved value
 function resolveMuted() {
   try {
     const raw = getComputedStyle(document.documentElement).getPropertyValue("--muted")?.trim();
@@ -158,18 +150,44 @@ function resolveMuted() {
 
 const chartTextColor = computed(() => (isDark.value ? "#ffffff" : resolveMuted()));
 
+// Detect mobile
+const isMobile = ref(window.innerWidth < 768);
+
+onMounted(() => {
+  const handleResize = () => {
+    isMobile.value = window.innerWidth < 768;
+  };
+  window.addEventListener('resize', handleResize);
+  
+  onBeforeUnmount(() => {
+    window.removeEventListener('resize', handleResize);
+  });
+});
+
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: { mode: "index", intersect: false },
   plugins: {
     legend: {
-      position: "top",
-      labels: { color: chartTextColor.value },
+      position: isMobile.value ? "bottom" : "top",
+      labels: { 
+        color: chartTextColor.value,
+        font: {
+          size: isMobile.value ? 10 : 12
+        },
+        padding: isMobile.value ? 8 : 10
+      },
     },
     tooltip: {
       titleColor: chartTextColor.value,
       bodyColor: chartTextColor.value,
+      titleFont: {
+        size: isMobile.value ? 11 : 13
+      },
+      bodyFont: {
+        size: isMobile.value ? 10 : 12
+      },
       callbacks: {
         title: (ctx) => ctx[0].label,
         label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}`,
@@ -184,53 +202,88 @@ const chartOptions = computed(() => ({
   },
   elements: {
     bar: {
-      maxBarThickness: 64,
-      barPercentage: 0.65,
-      categoryPercentage: 0.8,
+      maxBarThickness: isMobile.value ? 24 : 64,
+      barPercentage: isMobile.value ? 0.5 : 0.65,
+      categoryPercentage: isMobile.value ? 0.6 : 0.8,
     },
   },
   scales: {
     x: {
       ticks: {
-        maxRotation: 45,
-        minRotation: 0,
-        autoSkip: false,
-        autoSkipPadding: 8,
+        maxRotation: isMobile.value ? 90 : 45,
+        minRotation: isMobile.value ? 45 : 0,
+        autoSkip: true,
+        autoSkipPadding: isMobile.value ? 4 : 8,
         color: chartTextColor.value,
+        font: {
+          size: isMobile.value ? 9 : 11
+        }
       },
       grid: { display: false },
     },
     y: {
       beginAtZero: true,
-      ticks: { precision: 0, color: chartTextColor.value },
+      ticks: { 
+        precision: 0, 
+        color: chartTextColor.value,
+        font: {
+          size: isMobile.value ? 9 : 11
+        }
+      },
     },
   },
-  layout: { padding: 6 },
+  layout: { 
+    padding: isMobile.value ? 4 : 6 
+  },
 }));
 </script>
 
 <style scoped>
-.sort {
-  height: 10vh;
-}
-
 .chart {
-  height: 70vh;
+  height: 100%;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   position: relative;
 }
 
-/* make chart container follow theme surface */
 .surface {
   background: var(--surface2);
   color: var(--text);
 }
 
-/* ensure chart canvas fills container */
-.chart canvas,
-.chart svg {
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.category-select {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.chart-container {
+  height: calc(100% - 60px);
+  width: 100%;
+  position: relative;
+}
+
+.chart-container canvas,
+.chart-container svg {
   width: 100% !important;
   max-width: 100% !important;
   height: 100% !important;
@@ -238,10 +291,68 @@ const chartOptions = computed(() => ({
   box-sizing: border-box;
 }
 
-/* small select theming */
-select {
-  background: transparent;
-  color: var(--text);
-  border-color: var(--border);
+/* Tablet */
+@media (max-width: 1024px) {
+  .chart {
+    padding: 0.875rem;
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+  }
+  
+  .chart-container {
+    height: calc(100% - 55px);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .chart {
+    padding: 0.75rem;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .chart-title {
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+  
+  .category-select {
+    width: 100%;
+    max-width: 200px;
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+  }
+  
+  .chart-container {
+    height: calc(100% - 70px);
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .chart {
+    padding: 0.625rem;
+  }
+  
+  .chart-title {
+    font-size: 0.875rem;
+  }
+  
+  .category-select {
+    font-size: 0.75rem;
+    padding: 0.4375rem 0.5rem;
+  }
+  
+  .chart-container {
+    height: calc(100% - 65px);
+  }
 }
 </style>

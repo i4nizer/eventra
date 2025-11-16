@@ -2,8 +2,8 @@
   <div class="tags-list-wrapper">
     <!-- Header -->
     <div class="tags-header">
-      <div class="flex items-center gap-3 flex-wrap">
-        <div class="relative">
+      <div class="header-top">
+        <div class="relative search-wrapper">
           <input
             v-model="searchQuery"
             type="search"
@@ -14,14 +14,23 @@
             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 search-icon"
           ></i>
         </div>
+
+        <button @click="showCreateModal = true" class="btn-add">
+          <span class="add-icon">+</span>
+          <span class="btn-text">Add</span>
+        </button>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="header-bottom">
+        <select v-model="perPage" class="select-input">
+          <option v-for="n in [5, 10, 20, 50]" :key="n" :value="n">
+            {{ n }} / page
+          </option>
+        </select>
+
         <button @click="refreshTags" class="btn-refresh">
-          <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh
-        </button>
-        <button @click="showCreateModal = true" class="btn-add">
-          + Add Tag
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span class="btn-text">Refresh</span>
         </button>
       </div>
     </div>
@@ -124,7 +133,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import CreateTagModal from "@/components/CRUD/createTags.vue"; // 👈 Import your modal
+import CreateTagModal from "@/components/CRUD/createTags.vue";
 
 /* Inline Sort Icon */
 const SortIcon = {
@@ -239,23 +248,57 @@ function getStatusClass(status) {
 .tags-header {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
 
+.header-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.header-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .header-top {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+}
+
 @media (min-width: 768px) {
   .tags-header {
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-top {
+    flex: 1;
+  }
+
+  .header-bottom {
+    flex-shrink: 0;
   }
 }
 
 /* Search Input */
+.search-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
 .search-input {
+  width: 100%;
   padding-left: 2.5rem;
   padding-right: 0.75rem;
   padding-top: 0.5rem;
@@ -266,6 +309,7 @@ function getStatusClass(status) {
   color: var(--text);
   outline: none;
   transition: all 0.2s;
+  font-size: 0.875rem;
 }
 
 .search-input:focus {
@@ -278,26 +322,32 @@ function getStatusClass(status) {
 }
 
 .search-icon {
-  color: var(--muted);
+  color: var(--accent);
+}
+
+/* Select Input */
+.select-input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.select-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 /* Buttons */
-.btn-refresh {
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  font-weight: 500;
-}
-
-.btn-refresh:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
-}
-
 .btn-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: var(--accent);
   color: white;
@@ -306,11 +356,37 @@ function getStatusClass(status) {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
   font-weight: 500;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.btn-add .add-icon {
+  font-size: 1.125rem;
+  line-height: 1;
 }
 
 .btn-add:hover {
   opacity: 0.9;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  color: var(--accent);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.btn-refresh:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
 }
 
 /* Table */
@@ -405,22 +481,37 @@ table {
 
 /* Sort Icon */
 .sort-icon {
-  color: var(--muted);
+  color: var(--accent);
 }
 
 /* Footer */
 .tags-footer {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border-top: 1px solid var(--border);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0.75rem;
   background: var(--surface);
 }
 
+@media (min-width: 640px) {
+  .tags-footer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
 .pagination-info {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--muted);
+}
+
+@media (min-width: 640px) {
+  .pagination-info {
+    font-size: 0.875rem;
+  }
 }
 
 .pagination-btn {
@@ -431,6 +522,7 @@ table {
   color: var(--text);
   transition: all 0.15s;
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -451,6 +543,7 @@ table {
   background: var(--bg);
   color: var(--text);
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 /* Dark mode specific adjustments */
@@ -458,9 +551,45 @@ table {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.dark .btn-add {
+:global(.dark) .btn-add {
   color: var(--accent);
   background: var(--surface);
   border-color: var(--accent);
+}
+
+:global(.dark) .btn-add:hover {
+  background: var(--surface2);
+}
+
+/* Small Mobile Optimizations */
+@media (max-width: 480px) {
+  .tags-header {
+    padding: 0.75rem;
+  }
+
+  .search-input {
+    font-size: 0.8125rem;
+  }
+
+  .btn-add,
+  .btn-refresh,
+  .select-input {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .tags-footer {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .pagination-info {
+    font-size: 0.6875rem;
+  }
+
+  .pagination-btn,
+  .pagination-current {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.625rem;
+  }
 }
 </style>

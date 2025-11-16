@@ -2,8 +2,8 @@
   <div class="attendance-table-wrapper">
     <!-- Header -->
     <div class="table-header">
-      <div class="flex items-center gap-3">
-        <div class="relative">
+      <div class="header-top">
+        <div class="relative search-wrapper">
           <input
             v-model="q"
             type="search"
@@ -14,24 +14,25 @@
             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 search-icon"
           ></i>
         </div>
+      </div>
 
+      <div class="header-bottom">
         <select v-model="perPage" class="select-input">
           <option v-for="n in [5, 10, 20, 50]" :key="n" :value="n">
             {{ n }} / page
           </option>
         </select>
-      </div>
 
-      <div class="flex items-center gap-2">
         <button @click="$emit('refresh')" class="btn-refresh">
-          <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span class="btn-text">Refresh</span>
         </button>
         <slot name="controls"></slot>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto">
+    <!-- Desktop Table -->
+    <div class="desktop-table">
       <table class="w-full text-left text-sm">
         <thead class="table-head">
           <tr>
@@ -109,6 +110,65 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-cards">
+      <div
+        v-for="(a, idx) in paged"
+        :key="a.id || idx"
+        class="attendance-card"
+      >
+        <div class="card-header">
+          <div class="card-number">{{ startIndex + idx + 1 }}</div>
+          <div class="card-actions">
+            <button
+              @click="$emit('view', a)"
+              class="action-btn btn-view"
+              title="View"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button
+              @click="$emit('delete', a)"
+              class="action-btn btn-delete"
+              title="Delete"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="card-row">
+            <div class="card-label">Student Name</div>
+            <div class="card-value student-name">{{ a.studentName }}</div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Student ID</div>
+            <div class="card-value">
+              <span class="badge-id">{{ a.studentId }}</span>
+            </div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Activity</div>
+            <div class="card-value activity-text">{{ a.activityName }}</div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Date Logged</div>
+            <div class="card-value">
+              <span class="badge-date">{{ formatDate(a.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="paged.length === 0" class="empty-state-mobile">
+        No attendance records found.
+      </div>
     </div>
 
     <!-- Pagination -->
@@ -319,16 +379,51 @@ watch([q, perPage], () => (page.value = 1));
   background: var(--surface);
 }
 
+.header-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.header-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .header-top {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+}
+
 @media (min-width: 768px) {
   .table-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
+
+  .header-top {
+    flex: 1;
+  }
+
+  .header-bottom {
+    flex-shrink: 0;
+  }
 }
 
 /* Search Input */
+.search-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
 .search-input {
+  width: 100%;
   padding-left: 2.5rem;
   padding-right: 0.75rem;
   padding-top: 0.5rem;
@@ -339,6 +434,7 @@ watch([q, perPage], () => (page.value = 1));
   color: var(--text);
   outline: none;
   transition: all 0.2s;
+  font-size: 0.875rem;
 }
 
 .search-input:focus {
@@ -359,6 +455,7 @@ watch([q, perPage], () => (page.value = 1));
   color: var(--text);
   outline: none;
   transition: all 0.2s;
+  font-size: 0.875rem;
 }
 
 .select-input:focus {
@@ -368,6 +465,9 @@ watch([q, perPage], () => (page.value = 1));
 
 /* Buttons */
 .btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: var(--surface);
   color: var(--accent);
@@ -375,11 +475,24 @@ watch([q, perPage], () => (page.value = 1));
   border: 1px solid var(--border);
   transition: all 0.2s;
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .btn-refresh:hover {
   background: var(--surface2);
   border-color: var(--accent);
+}
+
+/* Desktop Table */
+.desktop-table {
+  display: none;
+  overflow-x: auto;
+}
+
+@media (min-width: 768px) {
+  .desktop-table {
+    display: block;
+  }
 }
 
 /* Table */
@@ -438,6 +551,7 @@ watch([q, perPage], () => (page.value = 1));
   border-radius: 0.375rem;
   transition: all 0.15s;
   border: 1px solid transparent;
+  font-size: 0.875rem;
 }
 
 .btn-view {
@@ -458,9 +572,91 @@ watch([q, perPage], () => (page.value = 1));
   border-color: #ef4444;
 }
 
+/* Mobile Cards */
+.mobile-cards {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .mobile-cards {
+    display: none;
+  }
+}
+
+.attendance-card {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  transition: background 0.15s;
+}
+
+.attendance-card:hover {
+  background: var(--surface);
+}
+
+.attendance-card:last-child {
+  border-bottom: none;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-number {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.card-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  flex-shrink: 0;
+  min-width: 90px;
+}
+
+.card-value {
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
+}
+
 /* Empty State */
 .empty-state {
   color: var(--muted);
+}
+
+.empty-state-mobile {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.875rem;
 }
 
 /* Sort Icon */
@@ -470,17 +666,32 @@ watch([q, perPage], () => (page.value = 1));
 
 /* Footer */
 .table-footer {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border-top: 1px solid var(--border);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0.75rem;
   background: var(--surface);
 }
 
+@media (min-width: 640px) {
+  .table-footer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
 .pagination-info {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--muted);
+}
+
+@media (min-width: 640px) {
+  .pagination-info {
+    font-size: 0.875rem;
+  }
 }
 
 .pagination-btn {
@@ -491,6 +702,7 @@ watch([q, perPage], () => (page.value = 1));
   color: var(--text);
   transition: all 0.15s;
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -511,10 +723,73 @@ watch([q, perPage], () => (page.value = 1));
   background: var(--bg);
   color: var(--text);
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 /* Dark mode specific adjustments */
 :global(.dark) .attendance-table-wrapper {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Small Mobile Optimizations */
+@media (max-width: 480px) {
+  .table-header {
+    padding: 0.75rem;
+  }
+
+  .search-input {
+    font-size: 0.8125rem;
+  }
+
+  .btn-refresh,
+  .select-input {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .attendance-card {
+    padding: 0.875rem;
+  }
+
+  .card-header {
+    margin-bottom: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  .card-number {
+    font-size: 0.9375rem;
+  }
+
+  .card-row {
+    gap: 0.75rem;
+  }
+
+  .card-label {
+    font-size: 0.6875rem;
+    min-width: 80px;
+  }
+
+  .student-name {
+    font-size: 0.875rem;
+  }
+
+  .action-btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .table-footer {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .pagination-info {
+    font-size: 0.6875rem;
+  }
+
+  .pagination-btn,
+  .pagination-current {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.625rem;
+  }
 }
 </style>

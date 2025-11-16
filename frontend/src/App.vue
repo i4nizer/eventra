@@ -3,6 +3,23 @@
     id="app"
     class="relative font-poppins min-h-screen flex transition-all duration-300 ease"
   >
+    <!-- Mobile Menu Button -->
+    <button
+      v-if="showNav && isMobile"
+      @click="toggleMobileSidebar"
+      class="fixed top-4 left-4 z-50 p-3 rounded-lg shadow-lg transition-all duration-200 hover:scale-105"
+      style="background: var(--surface2); border: 1px solid var(--border);"
+      aria-label="Toggle menu"
+    >
+      <i
+        :class="[
+          isSidebarOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars',
+          'text-xl'
+        ]"
+        style="color: var(--accent);"
+      ></i>
+    </button>
+
     <!-- Sidebar -->
     <transition name="sidebar-slide">
       <Nav
@@ -42,16 +59,14 @@ const showNav = computed(
 
 // States
 const isCollapsed = ref(false);
-const isSidebarOpen = ref(true);
+const isSidebarOpen = ref(false); // Start closed on mobile
 const isMobile = ref(false);
 
 // Watch for screen width to toggle between desktop and mobile layout
 const handleResize = () => {
   isMobile.value = window.innerWidth < 1024; // < lg breakpoint
-  if (isMobile.value) {
-    isSidebarOpen.value = false;
-  } else {
-    isSidebarOpen.value = true;
+  if (!isMobile.value) {
+    isSidebarOpen.value = true; // Always open on desktop
   }
 };
 
@@ -61,14 +76,16 @@ onMounted(() => {
 });
 onUnmounted(() => window.removeEventListener("resize", handleResize));
 
-// Handle collapse toggle emitted from Nav
-const onToggleSidebar = (collapsed) => {
-  isCollapsed.value = collapsed;
-
-  // For mobile: toggling acts as open/close
+// Toggle mobile sidebar
+const toggleMobileSidebar = () => {
   if (isMobile.value) {
     isSidebarOpen.value = !isSidebarOpen.value;
   }
+};
+
+// Handle collapse toggle emitted from Nav
+const onToggleSidebar = (collapsed) => {
+  isCollapsed.value = collapsed;
 };
 
 const closeSidebar = () => {
@@ -80,7 +97,7 @@ const mainStyle = computed(() => {
   if (!showNav.value) return { marginLeft: "0" };
 
   // MOBILE: sidebar overlays content, no margin
-  if (isMobile.value) return { marginLeft: "0" };
+  if (isMobile.value) return { marginLeft: "0", paddingTop: "4rem" };
 
   // DESKTOP: adjust margin-left based on collapsed width
   return {
@@ -100,7 +117,7 @@ const mainStyle = computed(() => {
   color: var(--text);
 }
 
-/* Sidebar slide-in animation for mobile — smoother 300ms ease */
+/* Sidebar slide-in animation for mobile – smoother 300ms ease */
 .sidebar-slide-enter-active,
 .sidebar-slide-leave-active {
   transition: transform 300ms ease, opacity 300ms ease;
