@@ -1,5 +1,5 @@
 <template>
-  <div class="student-table-wrapper">
+  <div class="table-wrapper">
     <!-- Header -->
     <div class="table-header">
       <div class="header-top">
@@ -15,7 +15,7 @@
           ></i>
         </div>
 
-        <button @click="openCreateModal" class="create-student-btn">
+        <button @click="openCreateModal" class="btn-add">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -466,38 +466,6 @@ watch([q, perPage], () => (page.value = 1));
 </script>
 
 <style scoped>
-/* Container */
-.student-table-wrapper {
-  background: var(--bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-/* Header */
-.table-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.header-top {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.header-bottom {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 @media (min-width: 640px) {
   .header-top {
     flex-direction: row;
@@ -520,94 +488,6 @@ watch([q, perPage], () => (page.value = 1));
   .header-bottom {
     flex-shrink: 0;
   }
-}
-
-/* Search Input */
-.search-wrapper {
-  flex: 1;
-  min-width: 0;
-}
-
-.search-input {
-  width: 100%;
-  padding-left: 2.5rem;
-  padding-right: 0.75rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-}
-
-.search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.search-icon {
-  color: var(--accent);
-}
-
-/* Select Input */
-.select-input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-}
-
-.select-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* Buttons */
-.create-student-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--accent);
-  color: white;
-  border-radius: 0.375rem;
-  border: 1px solid var(--accent);
-  transition: all 0.2s;
-  font-weight: 500;
-  cursor: pointer;
-  font-size: 0.875rem;
-  white-space: nowrap;
-}
-
-.create-student-btn:hover {
-  opacity: 0.9;
-}
-
-.btn-refresh {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.btn-refresh:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
 }
 
 /* Desktop Table */
@@ -866,18 +746,8 @@ watch([q, perPage], () => (page.value = 1));
 }
 
 /* Dark mode specific adjustments */
-:global(.dark) .student-table-wrapper {
+:global(.dark) .table-wrapper {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.dark .create-student-btn {
-  color: var(--accent);
-  background: var(--surface);
-  border-color: var(--accent);
-}
-
-.dark .create-student-btn:hover {
-  background: var(--surface2);
 }
 
 /* Small Mobile Optimizations */
@@ -890,7 +760,7 @@ watch([q, perPage], () => (page.value = 1));
     font-size: 0.8125rem;
   }
 
-  .create-student-btn,
+  .btn-add,
   .btn-refresh,
   .select-input {
     font-size: 0.8125rem;

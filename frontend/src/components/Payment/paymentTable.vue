@@ -33,7 +33,7 @@
 
     <!-- Pay Button Section -->
     <div class="pay-button-section">
-      <button @click="openAddPaymentModal" class="btn-pay">
+      <button @click="openAddPaymentModal" class="btn-add">
         <i class="fa-solid fa-credit-card"></i>
         <span>Pay</span>
       </button>
@@ -636,26 +636,6 @@ watch([q, perPage], () => (page.value = 1));
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-/* Buttons */
-.btn-refresh {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.btn-refresh:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
-}
-
 /* Pay Button Section */
 .pay-button-section {
   padding: 1rem;
@@ -663,37 +643,6 @@ watch([q, perPage], () => (page.value = 1));
   background: var(--surface);
   display: flex;
   justify-content: center;
-}
-
-.btn-pay {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--accent);
-  color: white;
-  border-radius: 0.5rem;
-  border: none;
-  transition: all 0.2s;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-  cursor: pointer;
-}
-
-.btn-pay:hover {
-  background: #0ea574;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-}
-
-.btn-pay:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-}
-
-.btn-pay i {
-  font-size: 1rem;
 }
 
 /* Desktop Table */
@@ -989,7 +938,7 @@ watch([q, perPage], () => (page.value = 1));
     padding: 0.75rem;
   }
 
-  .btn-pay {
+  .btn-add {
     padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
   }

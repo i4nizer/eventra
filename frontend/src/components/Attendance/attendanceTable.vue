@@ -527,27 +527,6 @@ watch([q, perPage], () => (page.value = 1));
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
-
-/* Buttons */
-.btn-refresh {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.btn-refresh:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
-}
-
 /* Desktop Table */
 .desktop-table {
   display: none;

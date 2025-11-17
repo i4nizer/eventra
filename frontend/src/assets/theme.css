@@ -7,19 +7,19 @@
   --muted: #6b7280;
   --border: rgba(15,23,42,0.08);
   --primary: #2563eb;
-  --accent: #10b981; /* example highlight */
+  --accent: #32cc7d; /* example highlight */
 }
 
 /* dark theme overrides */
 .dark {
-  --bg: #0b1220;
-  --surface: #122333;
-  --surface2: #182b3c;
+  --bg: #0f0f0f;
+  --surface: #141414;
+  --surface2: #141414;
   --text: #e6eef8;
   --muted: #9aa6bf;
   --border: rgba(255,255,255,0.06);
   --primary: #60a5fa;
-  --accent: #34d399;
+  --accent: #25d67b;
 }
 
 /* apply variables globally */
@@ -58,4 +58,203 @@ html, body, #app {
 
 .dark .nav-root {
   scrollbar-color: var(--accent) rgba(255, 255, 255, 0.02);
+}
+
+/*card styles*/
+.stat-root {
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  max-width: 24rem;
+}
+
+.text-muted { color: var(--muted); }
+.stat-count { color: var(--text); }
+
+.skeleton { background: var(--border); }
+i { line-height: 1; }
+
+/* Select Input */
+.select-input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.select-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Search Input */
+.search-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-input {
+  width: 100%;
+  padding-left: 2.5rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/*Table Styling**/
+.table-wrapper {
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+/* Container */
+.table-wrapper {
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+/* Header */
+.table-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.header-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.header-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/*  Button styles */
+.btn-submit, .btn-add {
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+
+.btn-submit:hover, .btn-add:hover {
+  opacity: 0.9;
+}
+
+.btn-cancel {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  color: var(--accent);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.btn-refresh:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+
+/**Icon Styles**/
+.input-field[type="time"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1); 
+}
+
+.icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 8px;
+  background: rgba(16,185,129,0.08);
+  color: var(--accent);
+}
+
+.search-icon {
+  color: var(--accent);
+}
+
+/**Darkmode Icon Styles**/
+.dark .input-field[type="time"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+}
+
+/* Dark mode Button styles */
+.dark .btn-submit, .dark .btn-add { 
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark .btn-submit:hover, .dark .btn-add:hover {
+  opacity: 0.9;
 }

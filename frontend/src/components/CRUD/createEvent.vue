@@ -349,24 +349,6 @@ async function handleSubmit() {
   cursor: not-allowed;
 }
 
-.btn-submit {
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  background: var(--accent);
-  border: 1px solid var(--accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.15s;
-  cursor: pointer;
-}
-
-.btn-submit:hover:not(:disabled) {
-  opacity: 0.9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 .btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -377,12 +359,5 @@ async function handleSubmit() {
   color: var(--accent);
   background: var(--surface);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.dark .btn-submit {
-  color: var(--accent);
-  background: var(--surface);
-  border-color: var(--accent);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 </style>

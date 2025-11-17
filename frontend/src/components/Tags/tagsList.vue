@@ -1,7 +1,7 @@
 <template>
-  <div class="tags-list-wrapper">
+  <div class="table-wrapper">
     <!-- Header -->
-    <div class="tags-header">
+    <div class="table-header">
       <div class="header-top">
         <div class="relative search-wrapper">
           <input
@@ -235,37 +235,6 @@ function getStatusClass(status) {
 </script>
 
 <style scoped>
-/* Container */
-.tags-list-wrapper {
-  background: var(--bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-/* Header */
-.tags-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.header-top {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.header-bottom {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
 
 @media (min-width: 640px) {
   .header-top {
@@ -276,7 +245,7 @@ function getStatusClass(status) {
 }
 
 @media (min-width: 768px) {
-  .tags-header {
+  .table-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -289,40 +258,6 @@ function getStatusClass(status) {
   .header-bottom {
     flex-shrink: 0;
   }
-}
-
-/* Search Input */
-.search-wrapper {
-  flex: 1;
-  min-width: 0;
-}
-
-.search-input {
-  width: 100%;
-  padding-left: 2.5rem;
-  padding-right: 0.75rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-}
-
-.search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.search-input::placeholder {
-  color: var(--muted);
-}
-
-.search-icon {
-  color: var(--accent);
 }
 
 /* Select Input */
@@ -340,53 +275,6 @@ function getStatusClass(status) {
 .select-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* Buttons */
-.btn-add {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--accent);
-  color: white;
-  border-radius: 0.375rem;
-  border: 1px solid var(--accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
-  font-weight: 500;
-  font-size: 0.875rem;
-  white-space: nowrap;
-}
-
-.btn-add .add-icon {
-  font-size: 1.125rem;
-  line-height: 1;
-}
-
-.btn-add:hover {
-  opacity: 0.9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-refresh {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.btn-refresh:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
 }
 
 /* Table */
@@ -547,23 +435,13 @@ table {
 }
 
 /* Dark mode specific adjustments */
-:global(.dark) .tags-list-wrapper {
+:global(.dark) .table-wrapper {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-:global(.dark) .btn-add {
-  color: var(--accent);
-  background: var(--surface);
-  border-color: var(--accent);
-}
-
-:global(.dark) .btn-add:hover {
-  background: var(--surface2);
 }
 
 /* Small Mobile Optimizations */
 @media (max-width: 480px) {
-  .tags-header {
+  .table-header {
     padding: 0.75rem;
   }
 

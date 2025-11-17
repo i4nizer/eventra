@@ -493,33 +493,7 @@ async function handleSubmit() {
   gap: 0.75rem;
 }
 
-.btn-cancel {
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text);
-  background: transparent;
-  border: 1px solid var(--border);
-  cursor: pointer;
-}
 
-.btn-cancel:hover:not(:disabled) {
-  background: var(--surface);
-}
 
-.btn-submit {
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  background: var(--accent);
-  border: 1px solid var(--accent);
-  cursor: pointer;
-}
 
-.btn-submit:hover:not(:disabled) {
-  opacity: 0.9;
-}
 </style>

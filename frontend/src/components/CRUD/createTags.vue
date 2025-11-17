@@ -196,38 +196,12 @@ const handleSubmit = () => {
   background: var(--surface2);
 }
 
-/* Submit Button */
-.btn-submit {
-  background: var(--accent);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--accent);
-  transition: all 0.2s;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.btn-submit:hover {
-  opacity: 0.9;
-}
-
 /* Dark Mode Adjustments */
 .dark .modal-container {
   background: var(--surface2);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.dark .btn-submit {
-  color: var(--accent);
-  background: var(--surface);
-  border-color: var(--accent);
-}
-
-.dark .btn-submit:hover {
-  background: var(--bg);
-  opacity: 1;
-}
 
 /* Transitions */
 .fade-enter-active,
