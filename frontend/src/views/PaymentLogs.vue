@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import attendanceTable from "@/components/Payment/paymentLogs.vue"
+import attendanceTable from "@/components/Payment/paymentTable.vue"
 import { ref } from "vue"
 
 const paymentData = ref([])

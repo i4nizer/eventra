@@ -31,6 +31,14 @@
       </div>
     </div>
 
+    <!-- Pay Button Section -->
+    <div class="pay-button-section">
+      <button @click="openAddPaymentModal" class="btn-pay">
+        <i class="fa-solid fa-credit-card"></i>
+        <span>Pay</span>
+      </button>
+    </div>
+
     <!-- Desktop Table -->
     <div class="desktop-table">
       <table class="w-full text-left text-sm">
@@ -212,6 +220,22 @@
       </div>
     </div>
 
+    <!-- Add Payment Modal (Step 1: Scan Barcode) -->
+    <AddPayment
+      :open="isAddPaymentModalOpen"
+      :onClose="closeAddPaymentModal"
+      :onNext="handleStudentScanned"
+    />
+
+    <!-- Add Payment Amount Modal (Step 2: Enter Amount) -->
+    <AddPaymentAmount
+      :open="isAddPaymentAmountModalOpen"
+      :studentInfo="scannedStudent"
+      :onClose="closeAddPaymentAmountModal"
+      :onBack="handleBackToScan"
+      :onPay="handlePaymentSubmit"
+    />
+
     <!-- Read Payment Modal -->
     <ReadPayment
       :open="isViewModalOpen"
@@ -231,6 +255,8 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import AddPayment from "@/components/CRUD/addPayment.vue";
+import AddPaymentAmount from "@/components/CRUD/addPaymentAmount.vue";
 import ReadPayment from "@/components/CRUD/readPayment.vue";
 import DeletePayment from "@/components/CRUD/deletePayment.vue";
 
@@ -247,12 +273,19 @@ const props = defineProps({
   defaultPerPage: { type: Number, default: 10 },
 });
 
-const emit = defineEmits(["delete", "view", "refresh"]);
+const emit = defineEmits(["delete", "view", "refresh", "pay", "paymentSubmit"]);
 
 const q = ref("");
 const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "createdAt", dir: "desc" });
+
+// Add Payment modal state (Step 1)
+const isAddPaymentModalOpen = ref(false);
+const scannedStudent = ref(null);
+
+// Add Payment Amount modal state (Step 2)
+const isAddPaymentAmountModalOpen = ref(false);
 
 // View modal state
 const isViewModalOpen = ref(false);
@@ -261,6 +294,52 @@ const selectedPaymentForView = ref(null);
 // Delete modal state
 const isDeleteModalOpen = ref(false);
 const selectedPaymentForDelete = ref(null);
+
+function openAddPaymentModal() {
+  isAddPaymentModalOpen.value = true;
+  emit('pay');
+}
+
+function closeAddPaymentModal() {
+  isAddPaymentModalOpen.value = false;
+}
+
+function handleStudentScanned(studentInfo) {
+  // Store the scanned student info
+  scannedStudent.value = studentInfo;
+  
+  // Close the barcode scan modal
+  closeAddPaymentModal();
+  
+  // Open the payment amount modal
+  isAddPaymentAmountModalOpen.value = true;
+  
+  console.log('Student scanned:', studentInfo);
+}
+
+function closeAddPaymentAmountModal() {
+  isAddPaymentAmountModalOpen.value = false;
+  scannedStudent.value = null;
+}
+
+function handleBackToScan() {
+  // Close amount modal and reopen scan modal
+  closeAddPaymentAmountModal();
+  isAddPaymentModalOpen.value = true;
+}
+
+function handlePaymentSubmit(paymentData) {
+  // Emit the payment data to parent component
+  emit('paymentSubmit', paymentData);
+  
+  console.log('Payment submitted:', paymentData);
+  
+  // Close the amount modal
+  closeAddPaymentAmountModal();
+  
+  // You can add success notification here
+  // toast.success('Payment recorded successfully!');
+}
 
 function sortBy(field) {
   if (sort.value.field === field) {
@@ -272,7 +351,6 @@ function sortBy(field) {
 }
 
 function handleView(payment) {
-  // Map the payment data to match the modal's expected format
   selectedPaymentForView.value = {
     name: payment.studentName,
     violation: payment.violationType,
@@ -290,13 +368,12 @@ function closeViewModal() {
 }
 
 function handleDelete(payment) {
-  // Map the payment data to match the modal's expected format
   selectedPaymentForDelete.value = {
     name: payment.studentName,
     tag: payment.studentId,
     activity: payment.violationType,
     date: formatDate(payment.createdAt),
-    originalData: payment, // Keep original data for the emit
+    originalData: payment,
   };
   isDeleteModalOpen.value = true;
 }
@@ -307,7 +384,6 @@ function closeDeleteModal() {
 }
 
 function confirmDelete() {
-  // Emit the delete event with the original payment data
   emit('delete', selectedPaymentForDelete.value.originalData);
   closeDeleteModal();
 }
@@ -580,6 +656,46 @@ watch([q, perPage], () => (page.value = 1));
   border-color: var(--accent);
 }
 
+/* Pay Button Section */
+.pay-button-section {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  justify-content: center;
+}
+
+.btn-pay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  transition: all 0.2s;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  cursor: pointer;
+}
+
+.btn-pay:hover {
+  background: #0ea574;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-pay:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.btn-pay i {
+  font-size: 1rem;
+}
+
 /* Desktop Table */
 .desktop-table {
   display: none;
@@ -664,10 +780,12 @@ watch([q, perPage], () => (page.value = 1));
   transition: all 0.15s;
   border: 1px solid transparent;
   font-size: 0.875rem;
+  cursor: pointer;
 }
 
 .btn-view {
   color: var(--muted);
+  background: transparent;
 }
 
 .btn-view:hover {
@@ -677,6 +795,7 @@ watch([q, perPage], () => (page.value = 1));
 
 .btn-delete {
   color: #ef4444;
+  background: transparent;
 }
 
 .btn-delete:hover {
@@ -821,6 +940,7 @@ watch([q, perPage], () => (page.value = 1));
   transition: all 0.15s;
   font-weight: 500;
   font-size: 0.875rem;
+  cursor: pointer;
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -863,6 +983,15 @@ watch([q, perPage], () => (page.value = 1));
   .select-input {
     font-size: 0.8125rem;
     padding: 0.4rem 0.6rem;
+  }
+
+  .pay-button-section {
+    padding: 0.75rem;
+  }
+
+  .btn-pay {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
   }
 
   .payment-card {
