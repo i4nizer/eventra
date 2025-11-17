@@ -1,28 +1,20 @@
 <template>
   <transition name="fade">
-    <div
-      v-if="open"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div class="bg-white rounded-2xl shadow-xl p-6 w-96 text-center">
-        <h2 class="text-lg font-semibold mb-3 text-gray-800">Delete Payment Log</h2>
-        <p class="text-sm text-gray-600">
-          Are you sure you want to delete
-          <strong>{{ payment?.name }}</strong
-          >?
-        </p>
+    <div v-if="open" class="modal-backdrop-simple">
+      <div class="modal-simple">
+        <h2 class="modal-title-simple modal-title-center">Delete Payment</h2>
+        <div class="modal-body-simple">
+          <p class="text-sm" style="color: var(--muted); text-align: center;">
+            Are you sure you want to delete
+            <strong>{{ payment?.name }}</strong>?
+          </p>
+        </div>
 
-        <div class="flex justify-end gap-2 pt-6">
-          <button
-            @click="onClose"
-            class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-xl"
-          >
+        <div class="modal-footer-inline modal-footer-center" style="gap: 0.5rem;">
+          <button @click="onClose" class="btn-modal btn-modal-cancel">
             Cancel
           </button>
-          <button
-            @click="onConfirm"
-            class="px-4 py-2 text-sm text-white bg-red-500 rounded-xl"
-          >
+          <button @click="onConfirm" class="btn-modal btn-modal-danger">
             Delete
           </button>
         </div>

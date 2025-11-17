@@ -1,31 +1,35 @@
 <template>
-  <transition name="fade">
-    <div
-      v-if="open"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div class="bg-white rounded-2xl shadow-xl p-6 w-96">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Edit Student</h2>
+  <div v-if="open" class="modal-backdrop-simple">
+    <div class="modal-backdrop" @click="onClose"></div>
 
-        <form @submit.prevent="handleUpdate" class="space-y-4">
+    <form @submit.prevent="handleSubmit" class="modal-form scrollable">
+      <header class="modal-header-inline">
+        <div>
+          <h3 class="modal-title">Create Student</h3>
+          <p class="modal-subtitle">Add a new student to the system.</p>
+        </div>
+        <button type="button" @click="onClose" class="close-btn">
+          <!-- SVG icon -->
+        </button>
+      </header>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label class="input-label"
               >Full Name</label
             >
             <input
               v-model="name"
               type="text"
-              class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400"
+              class="input-field"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label class="input-label"
               >RFID Tag</label
             >
             <select
               v-model="rfid"
-              class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400"
+              class="input-field"
             >
               <option value="">Select RFID tag</option>
               <option v-for="tag in availableTags" :key="tag" :value="tag">
@@ -35,39 +39,29 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
+            <label class="input-label"
               >Section</label
             >
             <select
               v-model="section"
-              class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400"
+              class="input-field"
             >
               <option value="">Select section</option>
               <option v-for="s in sections" :key="s" :value="s">{{ s }}</option>
             </select>
           </div>
-
-          <div class="flex justify-end gap-2 pt-4">
-            <button
-              type="button"
-              @click="onClose"
-              class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-xl"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="px-4 py-2 text-sm text-white bg-green-500 rounded-xl"
-            >
-              Update
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </transition>
+      
+      <footer class="modal-footer-inline">
+        <button type="button" @click="onClose" class="btn-modal btn-modal-cancel" :disabled="submitting">
+          Cancel
+        </button>
+        <button type="submit" class="btn-submit" :disabled="submitting">
+          {{ submitting ? "Creating..." : "Create Student" }}
+        </button>
+      </footer>
+    </form>
+  </div>
 </template>
-
 <script setup>
 import { ref, watch } from "vue";
 const props = defineProps({

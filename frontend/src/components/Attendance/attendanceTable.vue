@@ -263,7 +263,7 @@ function handleView(attendance) {
   // Map the attendance data to match the modal's expected format
   selectedAttendance.value = {
     name: attendance.studentName,
-    tag: attendance.studentId,
+    studentId: attendance.studentId,
     activity: attendance.activityName,
     date: formatDate(attendance.createdAt),
   };
@@ -280,7 +280,7 @@ function handleDelete(attendance) {
   // Map the attendance data to match the modal's expected format
   selectedAttendanceForDelete.value = {
     name: attendance.studentName,
-    tag: attendance.studentId,
+    studentId: attendance.studentId,
     activity: attendance.activityName,
     date: formatDate(attendance.createdAt),
     originalData: attendance, // Keep original data for the emit

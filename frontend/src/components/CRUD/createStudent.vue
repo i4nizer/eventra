@@ -1,28 +1,14 @@
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4"
-  >
-    <div class="modal-backdrop" @click="onClose" aria-hidden="true"></div>
+  <div v-if="open" class="modal-backdrop-simple">
+    <div class="modal-backdrop" @click="onClose"></div>
 
-    <form
-      @submit.prevent="handleSubmit"
-      class="modal-form"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Create student"
-    >
-      <header class="modal-header">
+    <form @submit.prevent="handleSubmit" class="modal-form scrollable">
+      <header class="modal-header-inline">
         <div>
           <h3 class="modal-title">Create Student</h3>
           <p class="modal-subtitle">Add a new student to the system.</p>
         </div>
-        <button
-          type="button"
-          @click="onClose"
-          class="close-btn"
-          aria-label="Close modal"
-        >
+        <button type="button" @click="onClose" class="close-btn">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -38,7 +24,8 @@
         </button>
       </header>
 
-      <div class="space-y-4">
+      <!-- Form content -->
+       <div class="space-y-4">
         <div>
           <label class="input-label">Student ID</label>
           <input
@@ -172,17 +159,11 @@
           {{ errors.submit }}
         </p>
       </div>
-
-      <footer class="modal-footer">
-        <button
-          type="button"
-          @click="onClose"
-          class="btn-cancel"
-          :disabled="submitting"
-        >
+      
+      <footer class="modal-footer-inline">
+        <button type="button" @click="onClose" class="btn-modal btn-modal-cancel" :disabled="submitting">
           Cancel
         </button>
-
         <button type="submit" class="btn-submit" :disabled="submitting">
           {{ submitting ? "Creating..." : "Create Student" }}
         </button>
@@ -492,8 +473,4 @@ async function handleSubmit() {
   justify-content: flex-end;
   gap: 0.75rem;
 }
-
-
-
-
 </style>
