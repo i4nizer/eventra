@@ -1,5 +1,5 @@
 <template>
-  <div class="payment-table-wrapper">
+  <div class="table-wrapper">
     <!-- Header -->
     <div class="table-header">
       <div class="header-top">
@@ -80,12 +80,12 @@
               <div class="student-id">ID: {{ p.studentId }}</div>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-violation">
+              <span class="badge badge-violation">
                 {{ p.violationType }}
               </span>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-amount">
+              <span class="badge badge-amount">
                 ₱{{ p.value.toLocaleString() }}
               </span>
             </td>
@@ -93,7 +93,7 @@
               {{ p.remarks || '-' }}
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-date">
+              <span class="badge badge-date">
                 {{ formatDate(p.createdAt) }}
               </span>
             </td>
@@ -137,7 +137,7 @@
         <div class="card-header">
           <div class="card-number">{{ startIndex + idx + 1 }}</div>
           <div class="card-header-right">
-            <span class="badge-amount">₱{{ p.value.toLocaleString() }}</span>
+            <span class="badge badge-amount">₱{{ p.value.toLocaleString() }}</span>
             <div class="card-actions">
               <button
                 @click="handleView(p)"
@@ -169,7 +169,7 @@
           <div class="card-row">
             <div class="card-label">Violation</div>
             <div class="card-value">
-              <span class="badge-violation">{{ p.violationType }}</span>
+              <span class="badge badge-violation">{{ p.violationType }}</span>
             </div>
           </div>
 
@@ -181,7 +181,7 @@
           <div class="card-row">
             <div class="card-label">Payment Date</div>
             <div class="card-value">
-              <span class="badge-date">{{ formatDate(p.createdAt) }}</span>
+              <span class="badgebadge-date">{{ formatDate(p.createdAt) }}</span>
             </div>
           </div>
         </div>
@@ -533,38 +533,6 @@ watch([q, perPage], () => (page.value = 1));
 </script>
 
 <style scoped>
-/* Container */
-.payment-table-wrapper {
-  background: var(--bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-/* Header */
-.table-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.header-top {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.header-bottom {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 @media (min-width: 640px) {
   .header-top {
     flex-direction: row;
@@ -589,53 +557,6 @@ watch([q, perPage], () => (page.value = 1));
   }
 }
 
-/* Search Input */
-.search-wrapper {
-  flex: 1;
-  min-width: 0;
-}
-
-.search-input {
-  width: 100%;
-  padding-left: 2.5rem;
-  padding-right: 0.75rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-}
-
-.search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.search-icon {
-  color: var(--accent);
-}
-
-/* Select Input */
-.select-input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-}
-
-.select-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
 /* Pay Button Section */
 .pay-button-section {
   padding: 1rem;
@@ -657,265 +578,11 @@ watch([q, perPage], () => (page.value = 1));
   }
 }
 
-/* Table */
-.table-head {
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
-}
-
-.table-row {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-
-.table-row:hover {
-  background: var(--surface);
-}
-
-.row-number,
-.remarks-text {
-  color: var(--text);
-}
-
-.student-name {
-  font-weight: 500;
-  color: var(--text);
-}
-
-.student-id {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-/* Badges */
-.badge-violation {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.badge-amount {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.badge-date {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-}
-
-/* Action Buttons */
-.action-btn {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  transition: all 0.15s;
-  border: 1px solid transparent;
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.btn-view {
-  color: var(--muted);
-  background: transparent;
-}
-
-.btn-view:hover {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: var(--accent);
-}
-
-.btn-delete {
-  color: #ef4444;
-  background: transparent;
-}
-
-.btn-delete:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-}
-
-/* Mobile Cards */
-.mobile-cards {
-  display: block;
-}
-
-@media (min-width: 768px) {
-  .mobile-cards {
-    display: none;
-  }
-}
-
-.payment-card {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  transition: background 0.15s;
-}
-
-.payment-card:hover {
-  background: var(--surface);
-}
-
-.payment-card:last-child {
-  border-bottom: none;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.card-number {
-  font-weight: 600;
-  color: var(--text);
-  font-size: 1rem;
-}
-
+/* Card */
 .card-header-right {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-}
-
-.card-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.card-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.card-label {
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  flex-shrink: 0;
-  min-width: 90px;
-}
-
-.card-value {
-  text-align: right;
-  flex: 1;
-  word-break: break-word;
-}
-
-/* Empty State */
-.empty-state {
-  color: var(--muted);
-}
-
-.empty-state-mobile {
-  padding: 2rem 1rem;
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-
-/* Sort Icon */
-.sort-icon {
-  color: var(--accent);
-}
-
-/* Footer */
-.table-footer {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: var(--surface);
-}
-
-@media (min-width: 640px) {
-  .table-footer {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-.pagination-info {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-@media (min-width: 640px) {
-  .pagination-info {
-    font-size: 0.875rem;
-  }
-}
-
-.pagination-btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  transition: all 0.15s;
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-current {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-/* Dark mode specific adjustments */
-:global(.dark) .payment-table-wrapper {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* Small Mobile Optimizations */

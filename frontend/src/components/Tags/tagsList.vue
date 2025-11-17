@@ -235,7 +235,6 @@ function getStatusClass(status) {
 </script>
 
 <style scoped>
-
 @media (min-width: 640px) {
   .header-top {
     flex-direction: row;
@@ -258,49 +257,6 @@ function getStatusClass(status) {
   .header-bottom {
     flex-shrink: 0;
   }
-}
-
-/* Select Input */
-.select-input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-}
-
-.select-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* Table */
-table {
-  border-spacing: 0;
-}
-
-.table-head {
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-}
-
-.table-row {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-
-.table-row:hover {
-  background: var(--surface);
-}
-
-.tag-id {
-  font-weight: 500;
-  color: var(--text);
 }
 
 /* Status Badges */
@@ -365,78 +321,6 @@ table {
 /* Empty State */
 .empty-state {
   color: var(--muted);
-}
-
-/* Sort Icon */
-.sort-icon {
-  color: var(--accent);
-}
-
-/* Footer */
-.tags-footer {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: var(--surface);
-}
-
-@media (min-width: 640px) {
-  .tags-footer {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-.pagination-info {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-@media (min-width: 640px) {
-  .pagination-info {
-    font-size: 0.875rem;
-  }
-}
-
-.pagination-btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  transition: all 0.15s;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-current {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-/* Dark mode specific adjustments */
-:global(.dark) .table-wrapper {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* Small Mobile Optimizations */

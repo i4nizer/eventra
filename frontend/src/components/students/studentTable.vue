@@ -85,12 +85,12 @@
             </td>
             <td class="p-3 align-middle section-text">{{ s.section }}</td>
             <td class="p-3 align-middle">
-              <span class="badge-tag">
+              <span class="badge badge-tag">
                 {{ s.tag }}
               </span>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-balance"> ₱ {{ s.balance }} </span>
+              <span class="badge badge-balance"> ₱ {{ s.balance }} </span>
             </td>
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
@@ -179,14 +179,14 @@
           <div class="card-row">
             <div class="card-label">RFID Tag</div>
             <div class="card-value">
-              <span class="badge-tag">{{ s.tag }}</span>
+              <span class="badge badge-tag">{{ s.tag }}</span>
             </div>
           </div>
 
           <div class="card-row">
             <div class="card-label">Balance</div>
             <div class="card-value">
-              <span class="badge-balance">₱ {{ s.balance }}</span>
+              <span class="badge badge-balance">₱ {{ s.balance }}</span>
             </div>
           </div>
         </div>
@@ -500,254 +500,6 @@ watch([q, perPage], () => (page.value = 1));
   .desktop-table {
     display: block;
   }
-}
-
-/* Table */
-.table-head {
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
-}
-
-.table-row {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-
-.table-row:hover {
-  background: var(--surface);
-}
-
-.row-number,
-.section-text {
-  color: var(--text);
-}
-
-.student-name {
-  font-weight: 500;
-  color: var(--text);
-}
-
-.student-email {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-/* Badges */
-.badge-tag {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: var(--surface);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-}
-
-.badge-balance {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-}
-
-/* Action Buttons */
-.action-btn {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  transition: all 0.15s;
-  border: 1px solid transparent;
-  font-size: 0.875rem;
-}
-
-.btn-edit {
-  color: var(--accent);
-}
-
-.btn-edit:hover {
-  background: var(--surface);
-  border-color: var(--accent);
-}
-
-.btn-view {
-  color: var(--muted);
-}
-
-.btn-view:hover {
-  background: var(--surface);
-  color: var(--text);
-}
-
-.btn-delete {
-  color: #ef4444;
-}
-
-.btn-delete:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-}
-
-/* Mobile Cards */
-.mobile-cards {
-  display: block;
-}
-
-@media (min-width: 768px) {
-  .mobile-cards {
-    display: none;
-  }
-}
-
-.student-card {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  transition: background 0.15s;
-}
-
-.student-card:hover {
-  background: var(--surface);
-}
-
-.student-card:last-child {
-  border-bottom: none;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.card-number {
-  font-weight: 600;
-  color: var(--text);
-  font-size: 1rem;
-}
-
-.card-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.card-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.card-label {
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  flex-shrink: 0;
-  min-width: 70px;
-}
-
-.card-value {
-  text-align: right;
-  flex: 1;
-}
-
-/* Empty State */
-.empty-state {
-  color: var(--muted);
-}
-
-.empty-state-mobile {
-  padding: 2rem 1rem;
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-
-/* Sort Icon */
-.sort-icon {
-  color: var(--accent);
-}
-
-/* Footer */
-.table-footer {
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: var(--surface);
-}
-
-@media (min-width: 640px) {
-  .table-footer {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-.pagination-info {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-@media (min-width: 640px) {
-  .pagination-info {
-    font-size: 0.875rem;
-  }
-}
-
-.pagination-btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  transition: all 0.15s;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-current {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-/* Dark mode specific adjustments */
-:global(.dark) .table-wrapper {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* Small Mobile Optimizations */
