@@ -102,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
   open: {
@@ -126,20 +126,20 @@ const barcodeInput = ref(null);
 
 // Sample student database (replace with actual API call)
 const studentDatabase = {
-  '2021001': { id: '2021001', name: 'Juan Dela Cruz' },
-  '2021045': { id: '2021045', name: 'Maria Santos' },
-  '2020123': { id: '2020123', name: 'Jose Reyes' },
-  '2019087': { id: '2019087', name: 'Ana Lim' },
-  '2021002': { id: '2021002', name: 'Pedro Garcia' },
-  '2021078': { id: '2021078', name: 'Sofia Reyes' },
-  '2020056': { id: '2020056', name: 'Miguel Torres' }
+  '2022-0377': { id: '2022-0377', name: 'Ariston Bading' },
+  '2021-0045': { id: '2021-0045', name: 'Maria Santos' },
+  '2020-0123': { id: '2020-0123', name: 'Jose Reyes' },
+  '2019-0087': { id: '2019-0087', name: 'Ana Lim' },
+  '2021-0002': { id: '2021-0002', name: 'Pedro Garcia' },
+  '2021-0078': { id: '2021-0078', name: 'Sofia Reyes' },
+  '2020-0056': { id: '2020-0056', name: 'Miguel Torres' }
 };
 
 function validateBarcode() {
   const trimmed = barcode.value.trim();
   
-  // Basic validation: must be 7 digits
-  const isValidFormat = /^\d{7}$/.test(trimmed);
+  // Validation format: YYYY-NNNN (e.g., 2022-0377)
+  const isValidFormat = /^\d{4}-\d{4}$/.test(trimmed);
   
   if (isValidFormat) {
     // Check if student exists in database
@@ -174,13 +174,44 @@ function handleClose() {
   }, 300);
 }
 
+// Focus management for barcode scanner
+function ensureFocus() {
+  if (props.open && barcodeInput.value) {
+    barcodeInput.value.focus();
+  }
+}
+
+// Handle clicks anywhere in modal to refocus input
+function handleModalClick(event) {
+  if (props.open && !event.target.closest('.btn')) {
+    ensureFocus();
+  }
+}
+
 // Auto-focus input when modal opens
 watch(() => props.open, (newVal) => {
   if (newVal) {
     nextTick(() => {
-      barcodeInput.value?.focus();
+      ensureFocus();
+      // Set up a recurring focus check for barcode scanners
+      const focusInterval = setInterval(() => {
+        if (!props.open) {
+          clearInterval(focusInterval);
+          return;
+        }
+        ensureFocus();
+      }, 100);
     });
   }
+});
+
+// Keep focus on input even if user clicks elsewhere in modal
+onMounted(() => {
+  document.addEventListener('click', handleModalClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleModalClick);
 });
 </script>
 
