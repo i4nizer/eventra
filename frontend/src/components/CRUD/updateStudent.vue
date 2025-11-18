@@ -5,11 +5,22 @@
     <form @submit.prevent="handleSubmit" class="modal-form scrollable">
       <header class="modal-header-inline">
         <div>
-          <h3 class="modal-title">Create Student</h3>
-          <p class="modal-subtitle">Add a new student to the system.</p>
+          <h3 class="modal-title">Edit Student</h3>
+          <p class="modal-subtitle">Update the student's information.</p>
         </div>
         <button type="button" @click="onClose" class="close-btn">
-          <!-- SVG icon -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
         </button>
       </header>
           <div>
@@ -52,7 +63,7 @@
           </div>
       
       <footer class="modal-footer-inline">
-        <button type="button" @click="onClose" class="btn-modal btn-modal-cancel" :disabled="submitting">
+        <button type="button" @click="onClose" class="btn-cancel" :disabled="submitting">
           Cancel
         </button>
         <button type="submit" class="btn-submit" :disabled="submitting">

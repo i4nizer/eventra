@@ -11,10 +11,10 @@
         </div>
 
         <div class="modal-footer-inline modal-footer-center" style="gap: 0.5rem;">
-          <button @click="onClose" class="btn-modal btn-modal-cancel">
+          <button @click="onClose" class="btn-close">
             Cancel
           </button>
-          <button @click="onConfirm" class="btn-modal btn-modal-danger">
+          <button @click="onConfirm" class="btn-cancel">
             Delete
           </button>
         </div>

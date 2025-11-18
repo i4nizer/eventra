@@ -5,7 +5,11 @@ import router from "./router";
 import "@fortawesome/fontawesome-free/css/all.css";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/600.css";
-import "@/assets/theme.css";
+import "@/assets/styles/theme.css";
+import "@/assets/styles/button.css";
+import "@/assets/styles/modal.css";
+import "@/assets/styles/table.css";
+import "@/assets/styles/card.css";
 
 createApp(App).use(router).mount("#app");
 

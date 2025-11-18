@@ -1,155 +1,162 @@
 <template>
   <transition name="fade">
-    <div
-      v-if="event"
-      class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4"
-    >
-      <div
-        class="bg-white rounded-2xl shadow-xl w-full max-w-2xl transform transition-all duration-300 scale-100 overflow-hidden"
-      >
-        <!-- Header -->
-        <div class="bg-[#27c08d] p-5 text-center rounded-t-2xl">
-          <h2 class="text-2xl font-bold text-white">
-            {{ isEditing ? "Edit Event" : event.name }}
-          </h2>
-        </div>
+    <div v-if="event" class="modal-backdrop-simple">
+      <div class="modal-backdrop" @click="handleCancel"></div>
 
-        <!-- Body -->
-        <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-gray-700">
+      <div class="modal-form scrollable">
+        <header class="modal-header-inline">
+          <div>
+            <h3 class="modal-title">
+              {{ isEditing ? "Edit Event" : event.name }}
+            </h3>
+            <p v-if="!isEditing" class="modal-subtitle">Event details and information</p>
+          </div>
+          <button type="button" @click="handleCancel" class="close-btn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </header>
+
+        <!-- Form content -->
+        <div class="space-y-4">
           <!-- Editable Form -->
-          <div v-if="isEditing" class="space-y-4">
-            <div class="flex flex-col">
-              <label class="text-sm font-medium text-gray-600"
-                >Event Name</label
-              >
+          <div v-if="isEditing">
+            <div>
+              <label class="input-label">Event Name</label>
               <input
                 v-model="editableEvent.name"
                 type="text"
-                class="mt-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#27c08d]"
+                class="input-field"
+                placeholder="Enter event name"
               />
             </div>
 
-            <div class="flex flex-col md:flex-row gap-4">
-              <div class="flex-1 flex flex-col">
-                <label class="text-sm font-medium text-gray-600"
-                  >Event Date</label
-                >
-                <input
-                  v-model="editableEvent.eventDate"
-                  type="date"
-                  class="mt-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#27c08d]"
-                />
-              </div>
-              <div class="flex-1 flex flex-col">
-                <label class="text-sm font-medium text-gray-600"
-                  >Start Time</label
-                >
-                <input
-                  v-model="editableEvent.startTime"
-                  type="time"
-                  class="mt-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#27c08d]"
-                />
-              </div>
-              <div class="flex-1 flex flex-col">
-                <label class="text-sm font-medium text-gray-600"
-                  >End Time</label
-                >
-                <input
-                  v-model="editableEvent.endTime"
-                  type="time"
-                  class="mt-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#27c08d]"
-                />
-              </div>
+            <div style="margin-top: 1rem;">
+              <label class="input-label">Event Date</label>
+              <input
+                v-model="editableEvent.eventDate"
+                type="date"
+                class="input-field"
+              />
             </div>
 
-            <div class="flex flex-col md:flex-row gap-4">
-              <div class="flex-1 flex flex-col">
-                <label class="text-sm font-medium text-gray-600">Section</label>
-                <input
-                  v-model="editableEvent.section"
-                  type="text"
-                  class="mt-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#27c08d]"
-                />
-              </div>
-              <div class="flex-1 flex flex-col">
-                <label class="text-sm font-medium text-gray-600"
-                  >Fines (₱)</label
-                >
-                <input
-                  v-model.number="editableEvent.fines"
-                  type="number"
-                  class="mt-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#27c08d]"
-                />
-              </div>
+            <div style="margin-top: 1rem;">
+              <label class="input-label">Start Time</label>
+              <input
+                v-model="editableEvent.startTime"
+                type="time"
+                class="input-field"
+              />
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <label class="input-label">End Time</label>
+              <input
+                v-model="editableEvent.endTime"
+                type="time"
+                class="input-field"
+              />
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <label class="input-label">Section</label>
+              <input
+                v-model="editableEvent.section"
+                type="text"
+                class="input-field"
+                placeholder="Enter section"
+              />
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <label class="input-label">Fines (₱)</label>
+              <input
+                v-model.number="editableEvent.fines"
+                type="number"
+                class="input-field"
+                placeholder="0"
+              />
             </div>
           </div>
 
           <!-- Display Mode -->
-          <div v-else class="space-y-3 text-gray-700">
-            <p class="flex items-center gap-2">
-              📅
-              <span class="font-medium"
-                >{{ event.startTime }} — {{ event.endTime }}</span
-              >
-            </p>
-            <p class="flex items-center gap-2">
-              📆 <span class="font-medium">{{ event.eventDate }}</span>
-            </p>
-            <p class="flex items-center gap-2">
-              🎓 <span class="font-medium">{{ event.section }}</span>
-            </p>
-            <p class="flex items-center gap-2 text-[#27c08d] font-semibold">
-              💰 ₱{{ event.fines.toLocaleString() }}
-            </p>
-            <p class="text-gray-400 text-sm">
-              🗓️ Created: {{ event.createdAt }}
-            </p>
+          <div v-else class="modal-content">
+            <div class="info-banner">
+              <div class="info-row">
+                <i class="fas fa-clock" style="color: var(--accent)"></i>
+                <span class="info-label">Time:</span>
+                <span class="info-value"
+                  >{{ event.startTime }} – {{ event.endTime }}</span
+                >
+              </div>
+              <div class="info-row">
+                <i class="fas fa-calendar" style="color: var(--accent)"></i>
+                <span class="info-label">Date:</span>
+                <span class="info-value">{{ event.eventDate }}</span>
+              </div>
+              <div class="info-row">
+                <i class="fas fa-graduation-cap" style="color: var(--accent)"></i>
+                <span class="info-label">Section:</span>
+                <span class="info-value">{{ event.section }}</span>
+              </div>
+              <div class="info-row">
+                <i class="fas fa-money-bill-wave" style="color: var(--accent)"></i>
+                <span class="info-label">Fines:</span>
+                <span class="badge-amount">₱{{ event.fines.toLocaleString() }}</span>
+              </div>
+              <div class="info-row">
+                <i class="fas fa-calendar-plus" style="color: var(--muted)"></i>
+                <span class="info-label">Created:</span>
+                <span class="info-value text-muted">{{ event.createdAt }}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Buttons -->
-        <div
-          class="flex flex-wrap justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50"
-        >
-          <button
-            class="bg-gray-200 text-gray-800 px-5 py-2 rounded-xl hover:bg-gray-300 transition font-medium"
-            @click="handleCancel"
-          >
-            {{ isEditing ? "Cancel Edit" : "Close" }}
+        <footer class="modal-footer-inline">
+          <button type="button" @click="handleCancel" :class="isEditing ? 'btn-cancel' : 'btn-close'">
+            {{ isEditing ? "Cancel" : "Close" }}
           </button>
 
           <button
             v-if="!isEditing"
-            class="bg-indigo-600 text-white px-5 py-2 rounded-xl hover:bg-indigo-700 transition font-medium"
+            type="button"
+            class="btn-submit"
             @click="startEditing"
-          >
-            Edit
+          > Edit
           </button>
 
-          <button
-            v-else
-            class="bg-[#27c08d] text-white px-5 py-2 rounded-xl hover:bg-[#1fa77a] transition font-medium"
-            @click="saveChanges"
-          >
-            Save
+          <button v-if="isEditing" type="button" class="btn-submit" @click="saveChanges">
+            <i class="fas fa-save"></i> Save
           </button>
 
           <button
             v-if="!isEditing"
-            class="bg-red-500 text-white px-5 py-2 rounded-xl hover:bg-red-600 transition font-medium"
+            type="button"
+            class="btn-cancel"
             @click="$emit('delete', event.id)"
-          >
-            Delete
+          >Delete
           </button>
 
           <button
             v-if="!isEditing"
-            class="bg-[#27c08d] text-white px-5 py-2 rounded-xl hover:bg-[#1fa77a] transition font-medium"
+            type="button"
+            class="btn-add"
             @click="openAttendance"
           >
-            Start Attendance
+             Start
           </button>
-        </div>
+        </footer>
 
         <!-- Attendance Modal -->
         <AttendanceModal
@@ -207,20 +214,32 @@ const updateAttendance = (students) => {
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.space-y-4 > * + * {
+  margin-top: 1rem;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
 }
-::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+
+/* Info row spacing */
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-row i {
+  width: 1.25rem;
+  text-align: center;
+}
+
+/* Action button enhancements */
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
 }
 </style>

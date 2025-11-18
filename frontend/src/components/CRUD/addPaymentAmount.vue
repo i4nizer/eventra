@@ -1,45 +1,62 @@
 <template>
   <Teleport to="body">
-    <Transition name="modal">
-      <div
-        v-if="open"
-        class="modal-overlay"
-        @click.self="handleClose"
-      >
-        <div class="modal-container">
-          <div class="modal-header">
-            <h2 class="modal-title">
-              <i class="fa-solid fa-peso-sign"></i>
-              Enter Payment Amount
-            </h2>
-            <button
-              @click="handleClose"
-              class="close-button"
-              title="Close"
-            >
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
+    <Transition name="fade">
+      <div v-if="open" class="modal-backdrop-simple">
+        <div class="modal-backdrop" @click="handleClose"></div>
 
-          <div class="modal-body">
-            <!-- Student Info Display -->
-            <div v-if="studentInfo" class="student-info-banner">
-              <div class="info-row">
-                <span class="info-label">Student:</span>
-                <span class="info-value">{{ studentInfo.name }}</span>
+        <div class="modal-form scrollable">
+          <header class="modal-header-inline">
+            <div>
+              <h3 class="modal-title with-icon">
+                <i class="fa-solid fa-peso-sign"></i>
+                Enter Payment Amount
+              </h3>
+              <p class="modal-subtitle">Enter the payment amount to process</p>
+            </div>
+            <button type="button" @click="handleClose" class="close-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </header>
+
+          <!-- Form content -->
+          <div class="space-y-4">
+            <!-- Student Info -->
+            <div v-if="studentInfo" class="student-info-section">
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="info-content">
+                  <div class="info-label">Student Name</div>
+                  <div class="info-value">{{ studentInfo.name }}</div>
+                </div>
               </div>
-              <div class="info-row">
-                <span class="info-label">ID:</span>
-                <span class="info-value">{{ studentInfo.id }}</span>
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fa-solid fa-id-card"></i>
+                </div>
+                <div class="info-content">
+                  <div class="info-label">Student ID</div>
+                  <div class="info-value">{{ studentInfo.id }}</div>
+                </div>
               </div>
             </div>
 
             <!-- Amount Input -->
-            <div class="amount-input-wrapper">
-              <label for="amount" class="input-label">
-                Payment Amount
-              </label>
-              <div class="input-container">
+            <div>
+              <label class="input-label">Payment Amount</label>
+              <div class="amount-input-container">
                 <span class="currency-symbol">₱</span>
                 <input
                   id="amount"
@@ -47,58 +64,49 @@
                   v-model="amount"
                   type="number"
                   placeholder="0.00"
-                  class="amount-input"
+                  class="input-field amount-input"
                   @input="validateAmount"
                   @keyup.enter="handlePay"
                   min="0"
                   step="0.01"
                   autofocus
                 />
-              </div>
-              
-              <div v-if="amount && !isValidAmount" class="error-message">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                Please enter a valid amount greater than 0.
+                <i
+                  v-if="isValidAmount"
+                  class="fa-solid fa-circle-check validation-icon valid"
+                ></i>
               </div>
 
-              <!-- Quick Amount Buttons -->
-              <div class="quick-amounts">
-                <button
-                  v-for="quickAmount in [50, 100, 150, 200, 500]"
-                  :key="quickAmount"
-                  @click="setAmount(quickAmount)"
-                  class="quick-amount-btn"
-                  :class="{ active: amount == quickAmount }"
-                >
-                  ₱{{ quickAmount }}
-                </button>
-              </div>
+              <p v-if="amount && !isValidAmount" class="error-message">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                Please enter a valid amount greater than 0.
+              </p>
 
               <!-- Amount Preview -->
               <div v-if="isValidAmount" class="amount-preview">
-                <div class="preview-label">Total Amount:</div>
+                <div class="preview-label">Total Amount</div>
                 <div class="preview-amount">₱{{ formatAmount(amount) }}</div>
               </div>
             </div>
           </div>
 
-          <div class="modal-footer">
-            <button
-              @click="handleBack"
-              class="btn btn-back"
-            >
+          <footer class="modal-footer-inline">
+            <button type="button" @click="handleBack" class="btn-close">
               <i class="fa-solid fa-arrow-left"></i>
               Back
             </button>
-            <button
-              @click="handlePay"
-              class="btn btn-pay"
-              :disabled="!isValidAmount"
-            >
-              <i class="fa-solid fa-check"></i>
-              Pay
-            </button>
-          </div>
+            <Transition name="button-slide">
+              <button
+                v-if="isValidAmount"
+                type="button"
+                @click="handlePay"
+                class="btn-submit"
+              >
+                <i class="fa-solid fa-check"></i>
+                Pay
+              </button>
+            </Transition>
+          </footer>
         </div>
       </div>
     </Transition>
@@ -106,7 +114,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 
 const props = defineProps({
   open: {
@@ -138,11 +146,6 @@ const amountInput = ref(null);
 function validateAmount() {
   const numAmount = parseFloat(amount.value);
   isValidAmount.value = !isNaN(numAmount) && numAmount > 0;
-}
-
-function setAmount(value) {
-  amount.value = value.toString();
-  validateAmount();
 }
 
 function formatAmount(value) {
@@ -188,128 +191,26 @@ watch(() => props.open, (newVal) => {
 </script>
 
 <style scoped>
-/* Modal Overlay */
-.modal-overlay {
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 1rem;
+  inset: 0;
+  z-index: 5;
 }
 
-/* Modal Container */
-.modal-container {
-  background: var(--bg);
-  border-radius: 1rem;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-/* Modal Header */
-.modal-header {
+/* Student Info Section */
+.student-info-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text);
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.75rem;
+  animation: slideDown 0.3s ease;
 }
 
-.modal-title i {
-  color: var(--accent);
-  font-size: 1.5rem;
-}
-
-.close-button {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  transition: all 0.2s;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-
-.close-button:hover {
-  background: var(--surface2);
-  color: var(--text);
-}
-
-/* Modal Body */
-.modal-body {
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Student Info Banner */
-.student-info-banner {
-  padding: 1rem;
-  background: var(--surface);
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.info-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.info-label {
-  font-size: 0.875rem;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.info-value {
-  font-size: 0.875rem;
-  color: var(--text);
-  font-weight: 600;
-}
-
-/* Amount Input */
-.amount-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.input-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-
-.input-container {
+/* Amount Input Container */
+.amount-input-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -317,34 +218,29 @@ watch(() => props.open, (newVal) => {
 
 .currency-symbol {
   position: absolute;
-  left: 1rem;
+  left: 0.75rem;
   color: var(--accent);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   pointer-events: none;
 }
 
 .amount-input {
-  width: 100%;
-  padding: 1rem 1rem 1rem 2.5rem;
-  border-radius: 0.5rem;
-  border: 2px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 1.5rem;
+  padding-left: 2.5rem !important;
+  font-size: 1.25rem;
   font-weight: 600;
-  outline: none;
-  transition: all 0.2s;
+  letter-spacing: 0.025em;
 }
 
-.amount-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+.validation-icon {
+  position: absolute;
+  right: 0.75rem;
+  font-size: 1.5rem;
+  animation: scaleIn 0.3s ease;
 }
 
-.amount-input::placeholder {
-  color: var(--muted);
-  opacity: 0.5;
+.validation-icon.valid {
+  color: var(--accent);
 }
 
 /* Remove spinner buttons for number input */
@@ -358,55 +254,9 @@ watch(() => props.open, (newVal) => {
   -moz-appearance: textfield;
 }
 
-/* Error Message */
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  animation: slideDown 0.3s ease;
-}
-
-/* Quick Amount Buttons */
-.quick-amounts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.quick-amount-btn {
-  flex: 1;
-  min-width: calc(33.333% - 0.5rem);
-  padding: 0.75rem;
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.quick-amount-btn:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.quick-amount-btn.active {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
 /* Amount Preview */
 .amount-preview {
+  margin-top: 1rem;
   padding: 1.25rem;
   background: rgba(16, 185, 129, 0.1);
   border: 2px solid var(--accent);
@@ -416,8 +266,10 @@ watch(() => props.open, (newVal) => {
 }
 
 .preview-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
@@ -426,6 +278,18 @@ watch(() => props.open, (newVal) => {
   font-size: 2rem;
   color: var(--accent);
   font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes slideDown {
@@ -439,143 +303,42 @@ watch(() => props.open, (newVal) => {
   }
 }
 
-/* Modal Footer */
-.modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 1.5rem;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
+/* Button Transition */
+.button-slide-enter-active,
+.button-slide-leave-active {
+  transition: all 0.3s ease;
 }
 
-/* Buttons */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  transition: all 0.2s;
+.button-slide-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.button-slide-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.btn-submit,
+.btn-close {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border: none;
-  cursor: pointer;
-  flex: 1;
-  justify-content: center;
-}
-
-.btn-back {
-  background: var(--surface2);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-back:hover {
-  background: var(--bg);
-  border-color: var(--muted);
-}
-
-.btn-pay {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-}
-
-.btn-pay:hover:not(:disabled) {
-  background: #0ea574;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-}
-
-.btn-pay:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-pay:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Transitions */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-active .modal-container,
-.modal-leave-active .modal-container {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-from .modal-container,
-.modal-leave-to .modal-container {
-  transform: scale(0.95) translateY(-20px);
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-  .modal-container {
-    margin: 0;
-    border-radius: 0.75rem;
-  }
-
-  .modal-header {
-    padding: 1.25rem;
-  }
-
-  .modal-title {
-    font-size: 1.125rem;
-  }
-
-  .modal-body {
-    padding: 1.5rem 1.25rem;
-  }
-
   .amount-input {
-    padding: 0.875rem 0.875rem 0.875rem 2.25rem;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
+    padding-left: 2.25rem !important;
   }
 
   .currency-symbol {
-    font-size: 1.25rem;
-    left: 0.875rem;
-  }
-
-  .quick-amount-btn {
-    min-width: calc(50% - 0.25rem);
-    padding: 0.625rem;
-    font-size: 0.8125rem;
+    font-size: 1.125rem;
   }
 
   .preview-amount {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
   }
-
-  .modal-footer {
-    padding: 1.25rem;
-    flex-direction: column;
-  }
-
-  .btn {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.875rem;
-    width: 100%;
-  }
-}
-
-/* Dark mode specific adjustments */
-:global(.dark) .modal-overlay {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-:global(.dark) .modal-container {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
 }
 </style>

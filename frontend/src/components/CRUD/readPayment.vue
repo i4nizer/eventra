@@ -13,7 +13,7 @@
         </div>
 
         <div class="modal-footer-inline modal-footer-center">
-          <button @click="onClose" class="btn-modal btn-modal-cancel">
+          <button @click="onClose" class="btn-close">
             Close
           </button>
         </div>

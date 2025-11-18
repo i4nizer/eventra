@@ -161,7 +161,7 @@
       </div>
       
       <footer class="modal-footer-inline">
-        <button type="button" @click="onClose" class="btn-modal btn-modal-cancel" :disabled="submitting">
+        <button type="button" @click="onClose" class="btn-cancel" :disabled="submitting">
           Cancel
         </button>
         <button type="submit" class="btn-submit" :disabled="submitting">
@@ -292,105 +292,6 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal-form {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 36rem;
-  border-radius: 1rem;
-  background: var(--bg);
-  padding: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border);
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.modal-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.modal-subtitle {
-  font-size: 0.875rem;
-  color: var(--muted);
-  margin-top: 0.25rem;
-}
-
-.close-btn {
-  margin: -0.5rem;
-  border-radius: 0.375rem;
-  padding: 0.5rem;
-  color: var(--muted);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.close-btn:hover {
-  background: var(--surface);
-  color: var(--text);
-}
-
-.input-label {
-  margin-bottom: 0.25rem;
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.input-field {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-  transition: all 0.15s;
-}
-
-.input-field::placeholder {
-  color: var(--muted);
-}
-
-.input-field:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.input-error {
-  border-color: #ef4444 !important;
-}
-
-.error-message {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: #ef4444;
-}
-
-.error-message-submit {
-  font-size: 0.875rem;
-  color: #ef4444;
-}
-
 .file-upload-box {
   position: relative;
   width: 100%;
@@ -466,11 +367,4 @@ async function handleSubmit() {
   text-decoration: underline;
 }
 
-.modal-footer {
-  margin-top: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
 </style>

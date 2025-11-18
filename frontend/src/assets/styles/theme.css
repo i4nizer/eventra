@@ -1,0 +1,137 @@
+:root{
+  /* light theme (default) */
+  --bg: #ffffff;
+  --surface: #f7f7f8;
+  --surface2: #f7f7f8;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --gray: #e5e7eb;
+  --border: rgba(15,23,42,0.08);
+  --primary: #2563eb;
+  --accent: #32cc7d;
+  --danger: #ef4444;
+}
+
+/* dark theme overrides */
+.dark {
+  --bg: #0f0f0f;
+  --surface: #141414;
+  --surface2: #141414;
+  --text: #e6eef8;
+  --muted: #9aa6bf;
+  --mute: #9ca3af;
+  --border: rgba(255,255,255,0.06);
+  --primary: #60a5fa;
+  --accent: #25d67b;
+  --danger: #ef4444;
+}
+
+/* apply variables globally */
+html, body, #app {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100%;
+}
+
+/* helper surface class for cards/panels */
+.surface {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+
+/* quick utility for muted text */
+.text-muted {
+  color: var(--muted);
+}
+
+/* Dark mode scrollbar for nav */
+.dark .nav-root::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dark .nav-root::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.dark .nav-root::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.2);
+}
+
+.dark .nav-root {
+  scrollbar-color: var(--accent) rgba(255, 255, 255, 0.02);
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Vue Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Vue Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+
+

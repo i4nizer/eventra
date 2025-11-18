@@ -1,40 +1,48 @@
 <template>
   <Teleport to="body">
-    <Transition name="modal">
-      <div
-        v-if="open"
-        class="modal-overlay"
-        @click.self="handleClose"
-      >
-        <div class="modal-container">
-          <div class="modal-header">
-            <h2 class="modal-title">
-              <i class="fa-solid fa-barcode"></i>
-              Scan Student Barcode
-            </h2>
-            <button
-              @click="handleClose"
-              class="close-button"
-              title="Close"
-            >
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
+    <Transition name="fade">
+      <div v-if="open" class="modal-backdrop-simple">
+        <div class="modal-backdrop" @click="handleClose"></div>
 
-          <div class="modal-body">
-            <div class="barcode-input-wrapper">
-              <label for="barcode" class="input-label">
-                Student Barcode / ID
-              </label>
-              <div class="input-container">
-                <i class="fa-solid fa-barcode input-icon"></i>
+        <div class="modal-form scrollable">
+          <header class="modal-header-inline">
+            <div>
+              <h3 class="modal-title with-icon">
+                <i class="fa-solid fa-barcode"></i>
+                Scan Student Barcode
+              </h3>
+              <p class="modal-subtitle">Scan or enter student barcode to continue</p>
+            </div>
+            <button type="button" @click="handleClose" class="close-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </header>
+
+          <!-- Form content -->
+          <div class="space-y-4">
+            <div>
+              <label class="input-label">Student Barcode / ID</label>
+              <div class="barcode-input-container">
+                <i class="fa-solid fa-barcode barcode-icon"></i>
                 <input
                   id="barcode"
                   ref="barcodeInput"
                   v-model="barcode"
                   type="text"
                   placeholder="Scan or enter student barcode..."
-                  class="barcode-input"
+                  class="input-field barcode-input"
+                  :class="{ 'input-error': barcode && !isValid }"
                   @input="validateBarcode"
                   @keyup.enter="handleNext"
                   autofocus
@@ -48,53 +56,52 @@
                   class="fa-solid fa-circle-xmark validation-icon invalid"
                 ></i>
               </div>
-              
-              <div v-if="barcode && !isValid" class="error-message">
+
+              <p v-if="barcode && !isValid" class="error-message">
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 Invalid barcode format. Please scan a valid student barcode.
-              </div>
-              
-              <div v-if="isValid && studentInfo" class="student-info">
-                <div class="info-card">
-                  <div class="info-icon">
-                    <i class="fa-solid fa-user"></i>
-                  </div>
-                  <div class="info-content">
-                    <div class="info-label">Student Name</div>
-                    <div class="info-value">{{ studentInfo.name }}</div>
-                  </div>
+              </p>
+            </div>
+
+            <!-- Student Info -->
+            <div v-if="isValid && studentInfo" class="student-info-section">
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fa-solid fa-user"></i>
                 </div>
-                <div class="info-card">
-                  <div class="info-icon">
-                    <i class="fa-solid fa-id-card"></i>
-                  </div>
-                  <div class="info-content">
-                    <div class="info-label">Student ID</div>
-                    <div class="info-value">{{ studentInfo.id }}</div>
-                  </div>
+                <div class="info-content">
+                  <div class="info-label">Student Name</div>
+                  <div class="info-value">{{ studentInfo.name }}</div>
+                </div>
+              </div>
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fa-solid fa-id-card"></i>
+                </div>
+                <div class="info-content">
+                  <div class="info-label">Student ID</div>
+                  <div class="info-value">{{ studentInfo.id }}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="modal-footer">
-            <button
-              @click="handleClose"
-              class="btn btn-cancel"
-            >
+          <footer class="modal-footer-inline">
+            <button type="button" @click="handleClose" class="btn-cancel">
               Cancel
             </button>
             <Transition name="button-slide">
               <button
                 v-if="isValid"
+                type="button"
                 @click="handleNext"
-                class="btn btn-next"
+                class="btn-submit"
               >
                 Next
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
             </Transition>
-          </div>
+          </footer>
         </div>
       </div>
     </Transition>
@@ -216,133 +223,40 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Modal Overlay */
-.modal-overlay {
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 1rem;
+  inset: 0;
+  z-index: 5;
 }
 
-/* Modal Container */
-.modal-container {
-  background: var(--bg);
-  border-radius: 1rem;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-/* Modal Header */
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.modal-title i {
-  color: var(--accent);
-  font-size: 1.5rem;
-}
-
-.close-button {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  transition: all 0.2s;
-  border: none;
-  background: transparent;
-}
-
-.close-button:hover {
-  background: var(--surface2);
-  color: var(--text);
-}
-
-/* Modal Body */
-.modal-body {
-  padding: 2rem 1.5rem;
-}
-
-.barcode-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.input-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-
-.input-container {
+/* Barcode Input Container */
+.barcode-input-container {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.barcode-icon {
   position: absolute;
-  left: 1rem;
+  left: 0.75rem;
   color: var(--accent);
   font-size: 1.25rem;
   pointer-events: none;
 }
 
 .barcode-input {
-  width: 100%;
-  padding: 1rem 1rem 1rem 3rem;
-  border-radius: 0.5rem;
-  border: 2px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 1rem;
-  font-weight: 500;
-  outline: none;
-  transition: all 0.2s;
+  padding-left: 3rem !important;
   letter-spacing: 0.05em;
-}
-
-.barcode-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-}
-
-.barcode-input.error {
-  border-color: #ef4444;
+  font-weight: 500;
 }
 
 .validation-icon {
   position: absolute;
-  right: 1rem;
+  right: 0.75rem;
   font-size: 1.5rem;
   animation: scaleIn 0.3s ease;
 }
@@ -366,48 +280,12 @@ onUnmounted(() => {
   }
 }
 
-/* Error Message */
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  animation: slideDown 0.3s ease;
-}
-
-/* Student Info */
-.student-info {
+/* Student Info Section */
+.student-info-section {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   animation: slideDown 0.3s ease;
-}
-
-.info-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--surface);
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-}
-
-.info-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--accent);
-  border-radius: 0.5rem;
-  font-size: 1.25rem;
 }
 
 .info-content {
@@ -429,89 +307,7 @@ onUnmounted(() => {
   margin-top: 0.25rem;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Modal Footer */
-.modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1.5rem;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-}
-
-/* Buttons */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-cancel {
-  background: var(--surface2);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.btn-cancel:hover {
-  background: var(--bg);
-}
-
-.btn-next {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
-}
-
-.btn-next:hover {
-  background: #0ea574;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-}
-
-.btn-next:active {
-  transform: translateY(0);
-}
-
-/* Transitions */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-active .modal-container,
-.modal-leave-active .modal-container {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-from .modal-container,
-.modal-leave-to .modal-container {
-  transform: scale(0.95) translateY(-20px);
-}
-
+/* Button Transition */
 .button-slide-enter-active,
 .button-slide-leave-active {
   transition: all 0.3s ease;
@@ -527,61 +323,9 @@ onUnmounted(() => {
   transform: translateX(-20px);
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .modal-container {
-    margin: 0;
-    border-radius: 0.75rem;
-  }
-
-  .modal-header {
-    padding: 1.25rem;
-  }
-
-  .modal-title {
-    font-size: 1.125rem;
-  }
-
-  .modal-body {
-    padding: 1.5rem 1.25rem;
-  }
-
-  .barcode-input {
-    padding: 0.875rem 0.875rem 0.875rem 2.75rem;
-    font-size: 0.9375rem;
-  }
-
-  .input-icon {
-    font-size: 1.125rem;
-    left: 0.875rem;
-  }
-
-  .modal-footer {
-    padding: 1.25rem;
-  }
-
-  .btn {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.875rem;
-  }
-
-  .info-card {
-    padding: 0.875rem;
-  }
-
-  .info-icon {
-    width: 2.25rem;
-    height: 2.25rem;
-    font-size: 1.125rem;
-  }
-}
-
-/* Dark mode specific adjustments */
-:global(.dark) .modal-overlay {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-:global(.dark) .modal-container {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+.btn-submit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

@@ -1,17 +1,28 @@
 <template>
-  <transition name="fade">
-    <div
-      v-if="show"
-      class="modal-overlay"
-    >
-      <div class="modal-container">
-        <!-- Header -->
-        <h2 class="modal-title">
-          Create New Tag
-        </h2>
-
-        <!-- Create Tag Form -->
+  <div v-if="show" class="modal-backdrop-simple">
+    <div class="modal-backdrop" @click="onClose"></div>
+     <!-- Create Tag Form -->
         <form @submit.prevent="handleSubmit" class="modal-form">
+            <header class="modal-header-inline">
+                <div>
+                  <h3 class="modal-title">Create Tags</h3>
+                  <p class="modal-subtitle">Add a new tag to the system.</p>
+                </div>
+                <button type="button" @click="onClose" class="close-btn">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </header>
           <!-- Tag ID -->
           <div>
             <label class="input-label">
@@ -46,32 +57,24 @@
             </select>
           </div>
 
-          <!-- Buttons -->
-          <div class="button-group">
-            <button
-              type="button"
-              class="btn-cancel"
-              @click="$emit('close')"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="btn-submit"
-            >
-              Save
-            </button>
-          </div>
+      <footer class="modal-footer-inline">
+        <button type="button" @click="onClose" class="btn-cancel" :disabled="submitting">
+          Cancel
+        </button>
+        <button type="submit" class="btn-submit" :disabled="submitting">
+          {{ submitting ? "Creating..." : "Create Student" }}
+        </button>
+      </footer>
         </form>
-      </div>
     </div>
-  </transition>
 </template>
 
 <script setup>
 import { ref } from "vue";
 
 const props = defineProps({
+  onClose: Function,
+  onCreate: Function,
   show: { type: Boolean, default: false },
   students: {
     type: Array,
@@ -101,116 +104,4 @@ const handleSubmit = () => {
 </script>
 
 <style>
-/* Modal Overlay */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-/* Modal Container */
-.modal-container {
-  background: var(--surface);
-  border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  padding: 1.5rem;
-  width: 24rem;
-  position: relative;
-  transform: scale(1);
-  transition: all 0.3s;
-  border: 1px solid var(--border);
-}
-
-/* Header */
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-/* Form */
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  color: var(--text);
-}
-
-/* Input Label */
-.input-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 0.25rem;
-}
-
-/* Input Field */
-.input-field {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-}
-
-.input-field:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.input-field::placeholder {
-  color: var(--muted);
-}
-
-/* Button Group */
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  gap: 0.5rem;
-}
-
-/* Cancel Button */
-.btn-cancel {
-  background: var(--surface);
-  color: var(--text);
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.btn-cancel:hover {
-  background: var(--surface2);
-}
-
-/* Dark Mode Adjustments */
-.dark .modal-container {
-  background: var(--surface2);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-
-/* Transitions */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
+</style>  
