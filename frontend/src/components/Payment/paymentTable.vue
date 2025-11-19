@@ -181,7 +181,7 @@
           <div class="card-row">
             <div class="card-label">Payment Date</div>
             <div class="card-value">
-              <span class="badgebadge-date">{{ formatDate(p.createdAt) }}</span>
+              <span class="badge badge-date">{{ formatDate(p.createdAt) }}</span>
             </div>
           </div>
         </div>
@@ -236,6 +236,13 @@
       :onPay="handlePaymentSubmit"
     />
 
+    <!-- Show Balance Modal (Step 3: Show Updated Balance) -->
+    <ShowBalance
+      :open="isBalanceModalOpen"
+      :studentData="balanceData"
+      :onClose="closeBalanceModal"
+    />
+
     <!-- Read Payment Modal -->
     <ReadPayment
       :open="isViewModalOpen"
@@ -257,6 +264,7 @@
 import { ref, computed, watch } from "vue";
 import AddPayment from "@/components/CRUD/addPayment.vue";
 import AddPaymentAmount from "@/components/CRUD/addPaymentAmount.vue";
+import ShowBalance from "@/components/CRUD/showBalance.vue";
 import ReadPayment from "@/components/CRUD/readPayment.vue";
 import DeletePayment from "@/components/CRUD/deletePayment.vue";
 
@@ -286,6 +294,13 @@ const scannedStudent = ref(null);
 
 // Add Payment Amount modal state (Step 2)
 const isAddPaymentAmountModalOpen = ref(false);
+
+// Balance modal state (Step 3)
+const isBalanceModalOpen = ref(false);
+const balanceData = ref({
+  name: '',
+  balance: 0
+});
 
 // View modal state
 const isViewModalOpen = ref(false);
@@ -337,8 +352,38 @@ function handlePaymentSubmit(paymentData) {
   // Close the amount modal
   closeAddPaymentAmountModal();
   
-  // You can add success notification here
-  // toast.success('Payment recorded successfully!');
+  // Calculate the updated balance (this should ideally come from your backend)
+  // For now, we'll use a placeholder calculation
+  const newBalance = calculateNewBalance(paymentData);
+  
+  // Set balance data for the modal
+  balanceData.value = {
+    name: paymentData.studentInfo.name,
+    balance: newBalance
+  };
+  
+  // Open the balance modal
+  isBalanceModalOpen.value = true;
+}
+
+function calculateNewBalance(paymentData) {
+  // Balance represents what the student still needs to pay
+  // When they make a payment, we subtract it from their outstanding balance
+  // Example: If student owes ₱500 and pays ₱100, new balance owed is ₱400
+  
+  const outstandingBalance = paymentData.studentInfo.balance || 0;
+  const newBalance = outstandingBalance - paymentData.amount;
+  
+  // Return the new outstanding balance (can be 0 or negative if overpaid)
+  return Math.max(0, newBalance); // Prevent negative balance display
+}
+
+function closeBalanceModal() {
+  isBalanceModalOpen.value = false;
+  balanceData.value = {
+    name: '',
+    balance: 0
+  };
 }
 
 function sortBy(field) {
