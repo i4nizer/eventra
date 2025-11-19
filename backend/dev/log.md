@@ -22,3 +22,6 @@
  - Created violation schema, model, boot, controller, route, and api test.
  - Created payment schema, model, boot, controller, route, and api test.
  - Created student balance checking endpoint and api test.
+
+##### 11/19/2025
+ - Added custom get all student route.

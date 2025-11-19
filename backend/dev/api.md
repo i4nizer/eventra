@@ -19,6 +19,7 @@
 | ↳/:secid                                      | get     |                                          |                                       | *section object*                      |
 | ↳/:secid                                      | patch   | name?, year?                             | *update section*                      | *section object*                      |
 | ↳/:secid                                      | delete  |                                          | *delete section*                      |                                       |
+| ↳/student                                     | get     |                                          | *pagination applied*                  | *array of student object*             |
 | /section/:secid/student                       |         |                                          |                                       |                                       |
 | ↳/                                            | get     |                                          | *pagination applied*                  | *array of student object*             |
 | ↳/                                            | post    | sid, rfid, name, email, photo            | *create student*                      | *student object*                      |
