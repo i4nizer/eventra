@@ -332,8 +332,9 @@ function closeEditModal() {
   isEditModalOpen.value = false;
   selectedStudent.value = null;
 }
-function handleUpdateStudent(updatedStudent) {
-  console.log("Updating student:", updatedStudent);
+async function handleUpdateStudent(updatedStudent) {
+  await api.patch(`/section/${updatedStudent.sectionId}/student`, updatedStudent)
+    .catch(console.error)
   emit("refresh");
   closeEditModal();
 }
