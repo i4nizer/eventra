@@ -66,8 +66,8 @@
         <button type="button" @click="onClose" class="btn-cancel" :disabled="submitting">
           Cancel
         </button>
-        <button type="submit" class="btn-submit" :disabled="submitting">
-          {{ submitting ? "Creating..." : "Create Student" }}
+        <button type="submit" class="btn-submit" :disabled="submitting" @click="handleUpdate">
+          {{ submitting ? "Updating..." : "Update Student" }}
         </button>
       </footer>
     </form>
