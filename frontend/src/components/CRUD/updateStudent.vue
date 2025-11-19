@@ -58,7 +58,7 @@
               class="input-field"
             >
               <option value="">Select section</option>
-              <option v-for="s in sections" :key="s" :value="s">{{ s }}</option>
+              <option v-for="s in sections" :key="s.id" :value="s.id">{{ s.name }}</option>
             </select>
           </div>
       
@@ -103,7 +103,7 @@ function handleUpdate() {
   props.onUpdate({
     ...props.student,
     name: name.value,
-    tag: rfid.value,
+    rfid: rfid.value,
     section: section.value,
   });
 }
