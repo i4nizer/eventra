@@ -333,7 +333,7 @@ function closeEditModal() {
   selectedStudent.value = null;
 }
 async function handleUpdateStudent(updatedStudent) {
-  await api.patch(`/section/${updatedStudent.sectionId}/student`, updatedStudent)
+  await api.patch(`/section/${updatedStudent.sectionId}/student/${updatedStudent?.id}`, updatedStudent)
     .catch(console.error)
   emit("refresh");
   closeEditModal();
@@ -358,8 +358,10 @@ function closeDeleteModal() {
   isDeleteModalOpen.value = false;
   selectedStudent.value = null;
 }
-function handleConfirmDelete() {
-  console.log("Deleting student:", selectedStudent.value);
+async function handleConfirmDelete() {
+  const { id, sectionId } = selectedStudent.value
+  await api.delete(`/section/${sectionId}/student/${id}`)
+    .catch(console.error)
   emit("refresh");
   closeDeleteModal();
 }
