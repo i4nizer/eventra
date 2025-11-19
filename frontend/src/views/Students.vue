@@ -8,6 +8,7 @@
         :students="students" 
         :sections="sections" 
         :balances="[...balances.entries()]"
+        @refresh="getData"
       />
     </div>
   </div>
