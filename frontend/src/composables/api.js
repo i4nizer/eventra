@@ -16,9 +16,10 @@ export const useApi = (prefix = `${window.location.protocol}//${window.location.
     }
 
     const signIn = async (email, password) => {
-        const { token } = await api.post("/auth/sign-in", { email, password })
+        const res = await api.post("/auth/sign-in", { email, password })
+        const { token } = res.data
         api = axios.create({ baseURL: prefix, withCredentials: false, headers: { Authorization: `Bearer ${token}` } })
-        return { token }
+        return res
     }
 
     const signOut = async () => {
