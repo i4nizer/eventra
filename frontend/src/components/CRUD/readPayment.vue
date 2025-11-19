@@ -5,11 +5,11 @@
         <h2 class="modal-title-simple modal-title-center">View Student</h2>
         
         <div class="modal-content">
-          <p><strong>Name:</strong> {{ student?.name }}</p>
-          <p><strong>Email:</strong> {{ student?.email }}</p>
-          <p><strong>Section:</strong> {{ student?.section }}</p>
-          <p><strong>RFID Tag:</strong> {{ student?.tag }}</p>
-          <p><strong>Balance:</strong> ₱{{ student?.balance }}</p>
+          <p><strong>Name:</strong> {{ payment?.name }}</p>
+          <p><strong>Violation:</strong> {{ payment?.violation }}</p>
+          <p><strong>Amount:</strong> {{ payment?.amount }}</p>
+          <p><strong>Remarks:</strong> {{ payment?.remarks }}</p>
+          <p><strong>Date:</strong> {{ payment?.date }}</p>
         </div>
 
         <div class="modal-footer-inline modal-footer-center">
@@ -26,6 +26,6 @@
 const props = defineProps({
   open: Boolean,
   onClose: Function,
-  student: Object,
+  payment: Object,
 });
 </script>

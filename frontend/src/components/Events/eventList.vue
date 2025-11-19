@@ -28,14 +28,115 @@
         <div class="event-card-content">
           <div>
             <h3 class="event-title">{{ event.name }}</h3>
-            <p class="event-time">
-              📅 {{ event.startTime }} — {{ event.endTime }}
+            <!-- Event Date -->
+            <p class="event-date flex items-center gap-1">
+              Event Date:
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              {{ event.eventDate }}
             </p>
-            <p class="event-section">🎓 {{ event.section }}</p>
-            <p class="event-fines">
-              💰 Fines: ₱{{ event.fines.toLocaleString() }}
+            <!-- Time -->
+            <p class="event-time flex items-center gap-1">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {{ event.startTime }} — {{ event.endTime }}
+            </p>
+
+            <!-- Section -->
+            <p class="event-section flex items-center gap-1">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 14l9-5-9-5-9 5 9 5z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 14l6.16-3.422a12.083 12.083 0 01.34 6.825L12 14z"
+                />
+              </svg>
+              {{ event.section }}
+            </p>
+
+            <!-- Fines -->
+            <p class="event-fines flex items-center gap-1">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8c-3 0-5 2-5 5s2 5 5 5 5-2 5-5-2-5-5-5z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 2v4m0 12v4M4 12H8m8 0h4"
+                />
+              </svg>
+              ₱{{ event.fines.toLocaleString() }}
+            </p>
+
+            <!-- Created At -->
+            <p class="event-created flex items-center gap-1">
+              Event Created:
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              {{ event.createdAt }}
             </p>
           </div>
+
           <button class="view-btn">View Details →</button>
         </div>
       </div>
@@ -69,6 +170,8 @@ const events = ref([
     endTime: "10:00 AM",
     section: "BSIT 1A",
     fines: 0,
+    eventDate: "2025-MM-DD",
+    createdAt: "2025-MM-DD",
   },
   {
     id: 2,
@@ -77,6 +180,8 @@ const events = ref([
     endTime: "4:00 PM",
     section: "BSCS 2B",
     fines: 150,
+    eventDate: "2025-MM-DD",
+    createdAt: "2025-MM-DD",
   },
   {
     id: 3,
@@ -85,6 +190,8 @@ const events = ref([
     endTime: "3:00 PM",
     section: "BSIT 3C",
     fines: 50,
+    eventDate: "2025-MM-DD",
+    createdAt: "2025-MM-DD",
   },
   {
     id: 4,
@@ -93,6 +200,8 @@ const events = ref([
     endTime: "12:00 PM",
     section: "BSIT 4A",
     fines: 100,
+    eventDate: "2025-MM-DD",
+    createdAt: "2025-MM-DD",
   },
 ]);
 

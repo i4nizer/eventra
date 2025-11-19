@@ -1,9 +1,9 @@
 <template>
-  <div class="attendance-table-wrapper">
+  <div class="table-wrapper">
     <!-- Header -->
     <div class="table-header">
-      <div class="flex items-center gap-3">
-        <div class="relative">
+      <div class="header-top">
+        <div class="relative search-wrapper">
           <input
             v-model="q"
             type="search"
@@ -14,24 +14,25 @@
             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 search-icon"
           ></i>
         </div>
+      </div>
 
+      <div class="header-bottom">
         <select v-model="perPage" class="select-input">
           <option v-for="n in [5, 10, 20, 50]" :key="n" :value="n">
             {{ n }} / page
           </option>
         </select>
-      </div>
 
-      <div class="flex items-center gap-2">
         <button @click="$emit('refresh')" class="btn-refresh">
-          <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span class="btn-text">Refresh</span>
         </button>
         <slot name="controls"></slot>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto">
+    <!-- Desktop Table -->
+    <div class="desktop-table">
       <table class="w-full text-left text-sm">
         <thead class="table-head">
           <tr>
@@ -69,7 +70,7 @@
               <div class="student-name">{{ a.studentName }}</div>
             </td>
             <td class="p-3 align-middle section-text">
-              <span class="badge-id">
+              <span class="badge badge-id">
                 {{ a.studentId }}
               </span>
             </td>
@@ -77,7 +78,7 @@
               {{ a.activityName }}
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-date">
+              <span class="badge badge-date">
                 {{ formatDate(a.createdAt) }}
               </span>
             </td>
@@ -85,14 +86,14 @@
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
                 <button
-                  @click="$emit('view', a)"
+                  @click="handleView(a)"
                   class="action-btn btn-view"
                   title="View"
                 >
                   <i class="fa-solid fa-eye"></i>
                 </button>
                 <button
-                  @click="$emit('delete', a)"
+                  @click="handleDelete(a)"
                   class="action-btn btn-delete"
                   title="Delete"
                 >
@@ -109,6 +110,65 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-cards">
+      <div
+        v-for="(a, idx) in paged"
+        :key="a.id || idx"
+        class="attendance-card"
+      >
+        <div class="card-header">
+          <div class="card-number">{{ startIndex + idx + 1 }}</div>
+          <div class="card-actions">
+            <button
+              @click="handleView(a)"
+              class="action-btn btn-view"
+              title="View"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button
+              @click="handleDelete(a)"
+              class="action-btn btn-delete"
+              title="Delete"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="card-row">
+            <div class="card-label">Student Name</div>
+            <div class="card-value student-name">{{ a.studentName }}</div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Student ID</div>
+            <div class="card-value">
+              <span class="badgebadge-id">{{ a.studentId }}</span>
+            </div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Activity</div>
+            <div class="card-value activity-text">{{ a.activityName }}</div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Date Logged</div>
+            <div class="card-value">
+              <span class="badgebadge-date">{{ formatDate(a.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="paged.length === 0" class="empty-state-mobile">
+        No attendance records found.
+      </div>
     </div>
 
     <!-- Pagination -->
@@ -138,11 +198,28 @@
         </button>
       </div>
     </div>
+
+    <!-- Read Attendance Modal -->
+    <ReadAttendance
+      :open="isModalOpen"
+      :onClose="closeModal"
+      :attendance="selectedAttendance"
+    />
+
+    <!-- Delete Attendance Modal -->
+    <DeleteAttendance
+      :open="isDeleteModalOpen"
+      :onClose="closeDeleteModal"
+      :onConfirm="confirmDelete"
+      :attendance="selectedAttendanceForDelete"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import ReadAttendance from "@/components/CRUD/readAttendance.vue";
+import DeleteAttendance from "@/components/CRUD/deleteAttendance.vue";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -165,6 +242,14 @@ const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "createdAt", dir: "desc" });
 
+// Modal state
+const isModalOpen = ref(false);
+const selectedAttendance = ref(null);
+
+// Delete modal state
+const isDeleteModalOpen = ref(false);
+const selectedAttendanceForDelete = ref(null);
+
 function sortBy(field) {
   if (sort.value.field === field) {
     sort.value.dir = sort.value.dir === "asc" ? "desc" : "asc";
@@ -172,6 +257,46 @@ function sortBy(field) {
     sort.value.field = field;
     sort.value.dir = field === "createdAt" ? "desc" : "asc";
   }
+}
+
+function handleView(attendance) {
+  // Map the attendance data to match the modal's expected format
+  selectedAttendance.value = {
+    name: attendance.studentName,
+    studentId: attendance.studentId,
+    activity: attendance.activityName,
+    date: formatDate(attendance.createdAt),
+  };
+  isModalOpen.value = true;
+  emit('view', attendance);
+}
+
+function closeModal() {
+  isModalOpen.value = false;
+  selectedAttendance.value = null;
+}
+
+function handleDelete(attendance) {
+  // Map the attendance data to match the modal's expected format
+  selectedAttendanceForDelete.value = {
+    name: attendance.studentName,
+    studentId: attendance.studentId,
+    activity: attendance.activityName,
+    date: formatDate(attendance.createdAt),
+    originalData: attendance, // Keep original data for the emit
+  };
+  isDeleteModalOpen.value = true;
+}
+
+function closeDeleteModal() {
+  isDeleteModalOpen.value = false;
+  selectedAttendanceForDelete.value = null;
+}
+
+function confirmDelete() {
+  // Emit the delete event with the original attendance data
+  emit('delete', selectedAttendanceForDelete.value.originalData);
+  closeDeleteModal();
 }
 
 const sample = [
@@ -300,23 +425,12 @@ watch([q, perPage], () => (page.value = 1));
 </script>
 
 <style scoped>
-/* Container */
-.attendance-table-wrapper {
-  background: var(--bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-/* Header */
-.table-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+@media (min-width: 640px) {
+  .header-top {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -325,196 +439,87 @@ watch([q, perPage], () => (page.value = 1));
     align-items: center;
     justify-content: space-between;
   }
+
+  .header-top {
+    flex: 1;
+  }
+
+  .header-bottom {
+    flex-shrink: 0;
+  }
 }
 
-/* Search Input */
-.search-input {
-  padding-left: 2.5rem;
-  padding-right: 0.75rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
+/* Desktop Table */
+.desktop-table {
+  display: none;
+  overflow-x: auto;
 }
 
-.search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+@media (min-width: 768px) {
+  .desktop-table {
+    display: block;
+  }
 }
 
-.search-icon {
-  color: var(--accent);
-}
+/* Small Mobile Optimizations */
+@media (max-width: 480px) {
+  .table-header {
+    padding: 0.75rem;
+  }
 
-/* Select Input */
-.select-input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-}
+  .search-input {
+    font-size: 0.8125rem;
+  }
 
-.select-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
+  .btn-refresh,
+  .select-input {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.6rem;
+  }
 
-/* Buttons */
-.btn-refresh {
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  font-weight: 500;
-}
+  .attendance-card {
+    padding: 0.875rem;
+  }
 
-.btn-refresh:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
-}
+  .card-header {
+    margin-bottom: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
 
-/* Table */
-.table-head {
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
-}
+  .card-number {
+    font-size: 0.9375rem;
+  }
 
-.table-row {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
+  .card-row {
+    gap: 0.75rem;
+  }
 
-.table-row:hover {
-  background: var(--surface);
-}
+  .card-label {
+    font-size: 0.6875rem;
+    min-width: 80px;
+  }
 
-.row-number,
-.section-text,
-.activity-text {
-  color: var(--text);
-}
+  .student-name {
+    font-size: 0.875rem;
+  }
 
-.student-name {
-  font-weight: 500;
-  color: var(--text);
-}
+  .action-btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+  }
 
-/* Badges */
-.badge-id {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: var(--surface);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-}
+  .table-footer {
+    padding: 0.625rem 0.75rem;
+  }
 
-.badge-date {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-}
+  .pagination-info {
+    font-size: 0.6875rem;
+  }
 
-/* Action Buttons */
-.action-btn {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  transition: all 0.15s;
-  border: 1px solid transparent;
-}
-
-.btn-view {
-  color: var(--muted);
-}
-
-.btn-view:hover {
-  background: var(--surface);
-  color: var(--text);
-}
-
-.btn-delete {
-  color: #ef4444;
-}
-
-.btn-delete:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-}
-
-/* Empty State */
-.empty-state {
-  color: var(--muted);
-}
-
-/* Sort Icon */
-.sort-icon {
-  color: var(--accent);
-}
-
-/* Footer */
-.table-footer {
-  padding: 0.75rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--surface);
-}
-
-.pagination-info {
-  font-size: 0.875rem;
-  color: var(--muted);
-}
-
-.pagination-btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  transition: all 0.15s;
-  font-weight: 500;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-current {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-weight: 500;
-}
-
-/* Dark mode specific adjustments */
-:global(.dark) .attendance-table-wrapper {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  .pagination-btn,
+  .pagination-current {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.625rem;
+  }
 }
 </style>

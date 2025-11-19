@@ -1,9 +1,9 @@
 <template>
-  <div class="payment-table-wrapper">
+  <div class="table-wrapper">
     <!-- Header -->
     <div class="table-header">
-      <div class="flex items-center gap-3">
-        <div class="relative">
+      <div class="header-top">
+        <div class="relative search-wrapper">
           <input
             v-model="q"
             type="search"
@@ -14,24 +14,33 @@
             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 search-icon"
           ></i>
         </div>
+      </div>
 
+      <div class="header-bottom">
         <select v-model="perPage" class="select-input">
           <option v-for="n in [5, 10, 20, 50]" :key="n" :value="n">
             {{ n }} / page
           </option>
         </select>
-      </div>
 
-      <div class="flex items-center gap-2">
         <button @click="$emit('refresh')" class="btn-refresh">
-          <i class="fa-solid fa-arrows-rotate mr-2"></i> Refresh
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span class="btn-text">Refresh</span>
         </button>
         <slot name="controls"></slot>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto">
+    <!-- Pay Button Section -->
+    <div class="pay-button-section">
+      <button @click="openAddPaymentModal" class="btn-add">
+        <i class="fa-solid fa-credit-card"></i>
+        <span>Pay</span>
+      </button>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="desktop-table">
       <table class="w-full text-left text-sm">
         <thead class="table-head">
           <tr>
@@ -71,12 +80,12 @@
               <div class="student-id">ID: {{ p.studentId }}</div>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-violation">
+              <span class="badge badge-violation">
                 {{ p.violationType }}
               </span>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-amount">
+              <span class="badge badge-amount">
                 ₱{{ p.value.toLocaleString() }}
               </span>
             </td>
@@ -84,7 +93,7 @@
               {{ p.remarks || '-' }}
             </td>
             <td class="p-3 align-middle">
-              <span class="badge-date">
+              <span class="badge badge-date">
                 {{ formatDate(p.createdAt) }}
               </span>
             </td>
@@ -92,14 +101,14 @@
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
                 <button
-                  @click="$emit('view', p)"
+                  @click="handleView(p)"
                   class="action-btn btn-view"
                   title="View Receipt"
                 >
-                  <i class="fa-solid fa-receipt"></i>
+                  <i class="fa-solid fa-eye"></i>
                 </button>
                 <button
-                  @click="$emit('delete', p)"
+                  @click="handleDelete(p)"
                   class="action-btn btn-delete"
                   title="Delete"
                 >
@@ -116,6 +125,71 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-cards">
+      <div
+        v-for="(p, idx) in paged"
+        :key="p.id || idx"
+        class="payment-card"
+      >
+        <div class="card-header">
+          <div class="card-number">{{ startIndex + idx + 1 }}</div>
+          <div class="card-header-right">
+            <span class="badge badge-amount">₱{{ p.value.toLocaleString() }}</span>
+            <div class="card-actions">
+              <button
+                @click="handleView(p)"
+                class="action-btn btn-view"
+                title="View Receipt"
+              >
+                <i class="fa-solid fa-receipt"></i>
+              </button>
+              <button
+                @click="handleDelete(p)"
+                class="action-btn btn-delete"
+                title="Delete"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="card-row">
+            <div class="card-label">Student</div>
+            <div class="card-value">
+              <div class="student-name">{{ p.studentName }}</div>
+              <div class="student-id">ID: {{ p.studentId }}</div>
+            </div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Violation</div>
+            <div class="card-value">
+              <span class="badge badge-violation">{{ p.violationType }}</span>
+            </div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Remarks</div>
+            <div class="card-value remarks-text">{{ p.remarks || '-' }}</div>
+          </div>
+
+          <div class="card-row">
+            <div class="card-label">Payment Date</div>
+            <div class="card-value">
+              <span class="badgebadge-date">{{ formatDate(p.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="paged.length === 0" class="empty-state-mobile">
+        No payment records found.
+      </div>
     </div>
 
     <!-- Pagination -->
@@ -145,11 +219,46 @@
         </button>
       </div>
     </div>
+
+    <!-- Add Payment Modal (Step 1: Scan Barcode) -->
+    <AddPayment
+      :open="isAddPaymentModalOpen"
+      :onClose="closeAddPaymentModal"
+      :onNext="handleStudentScanned"
+    />
+
+    <!-- Add Payment Amount Modal (Step 2: Enter Amount) -->
+    <AddPaymentAmount
+      :open="isAddPaymentAmountModalOpen"
+      :studentInfo="scannedStudent"
+      :onClose="closeAddPaymentAmountModal"
+      :onBack="handleBackToScan"
+      :onPay="handlePaymentSubmit"
+    />
+
+    <!-- Read Payment Modal -->
+    <ReadPayment
+      :open="isViewModalOpen"
+      :onClose="closeViewModal"
+      :payment="selectedPaymentForView"
+    />
+
+    <!-- Delete Payment Modal -->
+    <DeletePayment
+      :open="isDeleteModalOpen"
+      :onClose="closeDeleteModal"
+      :onConfirm="confirmDelete"
+      :payment="selectedPaymentForDelete"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from "vue";
+import AddPayment from "@/components/CRUD/addPayment.vue";
+import AddPaymentAmount from "@/components/CRUD/addPaymentAmount.vue";
+import ReadPayment from "@/components/CRUD/readPayment.vue";
+import DeletePayment from "@/components/CRUD/deletePayment.vue";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -164,12 +273,73 @@ const props = defineProps({
   defaultPerPage: { type: Number, default: 10 },
 });
 
-const emit = defineEmits(["delete", "view", "refresh"]);
+const emit = defineEmits(["delete", "view", "refresh", "pay", "paymentSubmit"]);
 
 const q = ref("");
 const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "createdAt", dir: "desc" });
+
+// Add Payment modal state (Step 1)
+const isAddPaymentModalOpen = ref(false);
+const scannedStudent = ref(null);
+
+// Add Payment Amount modal state (Step 2)
+const isAddPaymentAmountModalOpen = ref(false);
+
+// View modal state
+const isViewModalOpen = ref(false);
+const selectedPaymentForView = ref(null);
+
+// Delete modal state
+const isDeleteModalOpen = ref(false);
+const selectedPaymentForDelete = ref(null);
+
+function openAddPaymentModal() {
+  isAddPaymentModalOpen.value = true;
+  emit('pay');
+}
+
+function closeAddPaymentModal() {
+  isAddPaymentModalOpen.value = false;
+}
+
+function handleStudentScanned(studentInfo) {
+  // Store the scanned student info
+  scannedStudent.value = studentInfo;
+  
+  // Close the barcode scan modal
+  closeAddPaymentModal();
+  
+  // Open the payment amount modal
+  isAddPaymentAmountModalOpen.value = true;
+  
+  console.log('Student scanned:', studentInfo);
+}
+
+function closeAddPaymentAmountModal() {
+  isAddPaymentAmountModalOpen.value = false;
+  scannedStudent.value = null;
+}
+
+function handleBackToScan() {
+  // Close amount modal and reopen scan modal
+  closeAddPaymentAmountModal();
+  isAddPaymentModalOpen.value = true;
+}
+
+function handlePaymentSubmit(paymentData) {
+  // Emit the payment data to parent component
+  emit('paymentSubmit', paymentData);
+  
+  console.log('Payment submitted:', paymentData);
+  
+  // Close the amount modal
+  closeAddPaymentAmountModal();
+  
+  // You can add success notification here
+  // toast.success('Payment recorded successfully!');
+}
 
 function sortBy(field) {
   if (sort.value.field === field) {
@@ -178,6 +348,44 @@ function sortBy(field) {
     sort.value.field = field;
     sort.value.dir = field === "createdAt" ? "desc" : "asc";
   }
+}
+
+function handleView(payment) {
+  selectedPaymentForView.value = {
+    name: payment.studentName,
+    violation: payment.violationType,
+    amount: `₱${payment.value.toLocaleString()}`,
+    remarks: payment.remarks || '-',
+    date: formatDate(payment.createdAt),
+  };
+  isViewModalOpen.value = true;
+  emit('view', payment);
+}
+
+function closeViewModal() {
+  isViewModalOpen.value = false;
+  selectedPaymentForView.value = null;
+}
+
+function handleDelete(payment) {
+  selectedPaymentForDelete.value = {
+    name: payment.studentName,
+    tag: payment.studentId,
+    activity: payment.violationType,
+    date: formatDate(payment.createdAt),
+    originalData: payment,
+  };
+  isDeleteModalOpen.value = true;
+}
+
+function closeDeleteModal() {
+  isDeleteModalOpen.value = false;
+  selectedPaymentForDelete.value = null;
+}
+
+function confirmDelete() {
+  emit('delete', selectedPaymentForDelete.value.originalData);
+  closeDeleteModal();
 }
 
 const sample = [
@@ -325,23 +533,12 @@ watch([q, perPage], () => (page.value = 1));
 </script>
 
 <style scoped>
-/* Container */
-.payment-table-wrapper {
-  background: var(--bg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-/* Header */
-.table-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+@media (min-width: 640px) {
+  .header-top {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -350,211 +547,116 @@ watch([q, perPage], () => (page.value = 1));
     align-items: center;
     justify-content: space-between;
   }
+
+  .header-top {
+    flex: 1;
+  }
+
+  .header-bottom {
+    flex-shrink: 0;
+  }
 }
 
-/* Search Input */
-.search-input {
-  padding-left: 2.5rem;
-  padding-right: 0.75rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-}
-
-.search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.search-icon {
-  color: var(--accent);
-}
-
-/* Select Input */
-.select-input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-}
-
-.select-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* Buttons */
-.btn-refresh {
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-  font-weight: 500;
-}
-
-.btn-refresh:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
-}
-
-/* Table */
-.table-head {
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
-}
-
-.table-row {
+/* Pay Button Section */
+.pay-button-section {
+  padding: 1rem;
   border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-
-.table-row:hover {
   background: var(--surface);
+  display: flex;
+  justify-content: center;
 }
 
-.row-number,
-.remarks-text {
-  color: var(--text);
+/* Desktop Table */
+.desktop-table {
+  display: none;
+  overflow-x: auto;
 }
 
-.student-name {
-  font-weight: 500;
-  color: var(--text);
+@media (min-width: 768px) {
+  .desktop-table {
+    display: block;
+  }
 }
 
-.student-id {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-/* Badges */
-.badge-violation {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.badge-amount {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.badge-date {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-}
-
-/* Action Buttons */
-.action-btn {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  transition: all 0.15s;
-  border: 1px solid transparent;
-}
-
-.btn-view {
-  color: var(--accent);
-}
-
-.btn-view:hover {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: var(--accent);
-}
-
-.btn-delete {
-  color: #ef4444;
-}
-
-.btn-delete:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-}
-
-/* Empty State */
-.empty-state {
-  color: var(--muted);
-}
-
-/* Sort Icon */
-.sort-icon {
-  color: var(--accent);
-}
-
-/* Footer */
-.table-footer {
-  padding: 0.75rem;
-  border-top: 1px solid var(--border);
+/* Card */
+.card-header-right {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: var(--surface);
+  gap: 0.75rem;
 }
 
-.pagination-info {
-  font-size: 0.875rem;
-  color: var(--muted);
-}
+/* Small Mobile Optimizations */
+@media (max-width: 480px) {
+  .table-header {
+    padding: 0.75rem;
+  }
 
-.pagination-btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  transition: all 0.15s;
-  font-weight: 500;
-}
+  .search-input {
+    font-size: 0.8125rem;
+  }
 
-.pagination-btn:hover:not(:disabled) {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
+  .btn-refresh,
+  .select-input {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.6rem;
+  }
 
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+  .pay-button-section {
+    padding: 0.75rem;
+  }
 
-.pagination-current {
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-weight: 500;
-}
+  .btn-add {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
 
-/* Dark mode specific adjustments */
-:global(.dark) .payment-table-wrapper {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  .payment-card {
+    padding: 0.875rem;
+  }
+
+  .card-header {
+    margin-bottom: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  .card-number {
+    font-size: 0.9375rem;
+  }
+
+  .card-header-right {
+    gap: 0.5rem;
+  }
+
+  .card-row {
+    gap: 0.75rem;
+  }
+
+  .card-label {
+    font-size: 0.6875rem;
+    min-width: 80px;
+  }
+
+  .student-name {
+    font-size: 0.875rem;
+  }
+
+  .action-btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .table-footer {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .pagination-info {
+    font-size: 0.6875rem;
+  }
+
+  .pagination-btn,
+  .pagination-current {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.625rem;
+  }
 }
 </style>

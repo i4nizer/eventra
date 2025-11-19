@@ -1,34 +1,14 @@
 <template>
-  <div
-    v-if="open"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4"
-  >
-    <div
-      class="modal-backdrop"
-      @click="onClose"
-      aria-hidden="true"
-    ></div>
+  <div v-if="open" class="modal-backdrop-simple">
+    <div class="modal-backdrop" @click="onClose"></div>
 
-    <form
-      @submit.prevent="handleSubmit"
-      class="modal-form"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Create event"
-    >
-      <header class="modal-header">
+    <form @submit.prevent="handleSubmit" class="modal-form scrollable">
+      <header class="modal-header-inline">
         <div>
           <h3 class="modal-title">Create Event</h3>
-          <p class="modal-subtitle">
-            Add a new event with time and section/year level.
-          </p>
+          <p class="modal-subtitle">Add a new event to the system.</p>
         </div>
-        <button
-          type="button"
-          @click="onClose"
-          class="close-btn"
-          aria-label="Close modal"
-        >
+        <button type="button" @click="onClose" class="close-btn">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -44,7 +24,8 @@
         </button>
       </header>
 
-      <div class="space-y-4">
+      <!-- Form content -->
+        <div class="space-y-4">
         <div>
           <label class="input-label">Event name</label>
           <input
@@ -126,22 +107,12 @@
           {{ errors.submit }}
         </p>
       </div>
-
-      <footer class="modal-footer">
-        <button
-          type="button"
-          @click="onClose"
-          class="btn-cancel"
-          :disabled="submitting"
-        >
+      
+      <footer class="modal-footer-inline">
+        <button type="button" @click="onClose" class="btn-cancel" :disabled="submitting">
           Cancel
         </button>
-
-        <button
-          type="submit"
-          class="btn-submit"
-          :disabled="submitting"
-        >
+        <button type="submit" class="btn-submit" :disabled="submitting">
           {{ submitting ? "Creating..." : "Create Event" }}
         </button>
       </footer>
@@ -216,173 +187,4 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-/* Modal Backdrop */
-.modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-/* Modal Form */
-.modal-form {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 36rem;
-  border-radius: 1rem;
-  background: var(--bg);
-  padding: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border);
-}
-
-/* Header */
-.modal-header {
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.modal-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.modal-subtitle {
-  font-size: 0.875rem;
-  color: var(--muted);
-  margin-top: 0.25rem;
-}
-
-.close-btn {
-  margin: -0.5rem;
-  border-radius: 0.375rem;
-  padding: 0.5rem;
-  color: var(--muted);
-  transition: all 0.15s;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.close-btn:hover {
-  background: var(--surface);
-  color: var(--text);
-}
-
-/* Input Fields */
-.input-label {
-  margin-bottom: 0.25rem;
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.input-field {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-  transition: all 0.15s;
-}
-
-.input-field::placeholder {
-  color: var(--muted);
-}
-
-.input-field:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.input-error {
-  border-color: #ef4444 !important;
-}
-
-.error-message {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: #ef4444;
-}
-
-.error-message-submit {
-  font-size: 0.875rem;
-  color: #ef4444;
-}
-
-/* Footer */
-.modal-footer {
-  margin-top: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.btn-cancel {
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text);
-  background: transparent;
-  border: 1px solid var(--border);
-  transition: all 0.15s;
-  cursor: pointer;
-}
-
-.btn-cancel:hover:not(:disabled) {
-  background: var(--surface);
-}
-
-.btn-cancel:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-submit {
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  background: var(--accent);
-  border: 1px solid var(--accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.15s;
-  cursor: pointer;
-}
-
-.btn-submit:hover:not(:disabled) {
-  opacity: 0.9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Dark mode adjustments */
-:global(.dark) .modal-form {
-  color: var(--accent);
-  background: var(--surface);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.dark .btn-submit {
-  color: var(--accent);
-  background: var(--surface);
-  border-color: var(--accent);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
 </style>

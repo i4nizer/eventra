@@ -1,11 +1,11 @@
 <template>
   <div class="events">
-    <div class="eventHeader mb-12">
-      <div class="flex items-center justify-between gap-4">
+    <div class="eventHeader">
+      <div class="header-content">
         <eventsCount />
         <button
           @click="openCreateModal"
-          class="create-event-btn"
+          class="btn-add"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -19,7 +19,7 @@
               clip-rule="evenodd"
             />
           </svg>
-          Create Event
+          <span class="btn-text">Create Event</span>
         </button>
       </div>
     </div>
@@ -78,42 +78,95 @@ async function handleCreateEvent(eventData) {
 }
 </script>
 
-<style>
-.create-event-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 0.5rem;
-  background: var(--accent);
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
-  border: 1px solid var(--accent);
-  cursor: pointer;
+<style scoped>
+.events {
+  padding: 1rem;
 }
 
-.create-event-btn:hover {
+.eventHeader {
+  margin-bottom: 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .header-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+
+@media (min-width: 640px) {
+  .btn-add {
+    width: auto;
+  }
+}
+
+.btn-add:hover {
   opacity: 0.9;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.create-event-btn:active {
+.btn-add:active {
   transform: translateY(1px);
 }
 
-/* Dark mode adjustments */
-.dark .create-event-btn {
-  color: var(--accent);
-  background: var(--surface);
-  border-color: var(--accent);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+.eventList {
+  width: 100%;
 }
 
-.dark .create-event-btn:hover {
-  background: var(--surface2);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+/* Tablet */
+@media (max-width: 1024px) {
+  .events {
+    padding: 0.875rem;
+  }
+  
+  .eventHeader {
+    margin-bottom: 1.25rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .events {
+    padding: 0.75rem;
+  }
+  
+  .eventHeader {
+    margin-bottom: 1rem;
+  }
+
+  .btn-add {
+    padding: 0.5rem 0.875rem;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .events {
+    padding: 0.5rem;
+  }
+  
+  .eventHeader {
+    margin-bottom: 0.875rem;
+  }
+
+  .btn-add {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .btn-add svg {
+    width: 1rem;
+    height: 1rem;
+  }
 }
 </style>
