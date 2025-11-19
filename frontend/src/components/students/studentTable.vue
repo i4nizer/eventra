@@ -262,6 +262,7 @@ import createStudent from "@/components/CRUD/createStudent.vue";
 import editStudent from "@/components/CRUD/updateStudent.vue";
 import viewStudent from "@/components/CRUD/readStudent.vue";
 import confirmDelete from "@/components/CRUD/deleteStudent.vue";
+import { useApi } from "@/composables/api";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -311,8 +312,13 @@ function closeCreateModal() {
   isCreateModalOpen.value = false;
 }
 
+const { api } = useApi()
+
 async function handleCreateStudent(studentData) {
-  console.log("Creating student:", studentData);
+  const form = new FormData()
+  Object.keys(studentData).forEach((k) => form.append(k, studentData[k]))
+  await api.post(`/section/${studentData.sectionId}/student`, form)
+    .catch(console.error)
   emit("refresh");
   closeCreateModal();
 }
