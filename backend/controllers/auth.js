@@ -33,23 +33,10 @@ const signIn = async (req, res) => {
         { expiresIn: env.jwtAccessLife / 1000 }
     )
     
-    res.cookie("access", access, {
-        httpOnly: true,
-        secure: false,
-        sameSite: false,
-        maxAge: env.jwtAccessLife,
-    })
-    
-    res.json({ ...user.dataValues, password: "" })
+    res.json({ token: access })
 }
 
 const signOut = async (req, res) => {
-    res.clearCookie("access", {
-        httpOnly: true,
-        secure: false,
-        sameSite: false,
-    })
-
     res.json({})
 }
 
