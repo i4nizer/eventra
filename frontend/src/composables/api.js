@@ -7,6 +7,8 @@ let api = axios.create({
     withCredentials: false,
 })
 
+let token = ""
+
 //
 
 export const useApi = (prefix = `${window.location.protocol}//${window.location.hostname}:4000`) => {
@@ -17,16 +19,17 @@ export const useApi = (prefix = `${window.location.protocol}//${window.location.
 
     const signIn = async (email, password) => {
         const res = await api.post("/auth/sign-in", { email, password })
-        const { token } = res.data
-        api = axios.create({ baseURL: prefix, withCredentials: false, headers: { Authorization: `Bearer ${token}` } })
+        api = axios.create({ baseURL: prefix, withCredentials: false, headers: { Authorization: `Bearer ${res.data.token}` } })
+        token = res.data.token
         return res
     }
 
     const signOut = async () => {
         const res = await api.post("/auth/sign-out")
         api = axios.create({ baseURL: prefix, withCredentials: false })
+        token = ""
         return res
     }
 
-    return { api, signUp, signIn, signOut }
+    return { api, token, signUp, signIn, signOut }
 }
