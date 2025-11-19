@@ -1,27 +1,34 @@
 GET http://localhost:4000/attendance
+Authorization: Bearer <token>
 
 ###
 
 GET http://localhost:4000/attendance/1
+Authorization: Bearer <token>
 
 ###
 
 GET http://localhost:4000/attendance/student/1
+Authorization: Bearer <token>
 
 ###
 
 GET http://localhost:4000/attendance/activity-entry/1
+Authorization: Bearer <token>
 
 ###
 
 GET http://localhost:4000/attendance/student/1/activity-entry/1
+Authorization: Bearer <token>
 
 ###
 
 POST http://localhost:4000/attendance/student/1/activity-entry/1
+Authorization: Bearer <token>
 
 ###
 
 GET http://localhost:4000/attendance/1/student/1/activity-entry/1
+Authorization: Bearer <token>
 
 ###

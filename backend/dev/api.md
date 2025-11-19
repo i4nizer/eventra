@@ -11,8 +11,8 @@
 | --------------------------------------------- | ------- | ---------------------------------------- | ------------------------------------- | ------------------------------------- |
 | /auth                                         |         |                                          |                                       |                                       |
 | ↳/sign-up                                     | post    | name, email, password                    |                                       | *user object without password*        |
-| ↳/sign-in                                     | post    | email, password                          | *set access cookie*                   | *user object without password*        |
-| ↳/sign-out                                    | post    |                                          | *delete access cookie*                |                                       |
+| ↳/sign-in                                     | post    | email, password                          |                                       | *auth token*                          |
+| ↳/sign-out                                    | post    |                                          | *remove auth header*                  |                                       |
 | /section                                      |         |                                          |                                       |                                       |
 | ↳/                                            | get     |                                          | *pagination applied*                  | *array of section object*             |
 | ↳/                                            | post    | name, year                               | *create section*                      | *section object*                      |

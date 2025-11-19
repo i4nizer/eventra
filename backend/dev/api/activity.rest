@@ -1,8 +1,10 @@
 GET http://localhost:4000/activity
+Authorization: Bearer <token>
 
 ###
 
 POST http://localhost:4000/activity
+Authorization: Bearer <token>
 Content-Type: application/json
 
 {
@@ -15,10 +17,12 @@ Content-Type: application/json
 ###
 
 GET http://localhost:4000/activity/1
+Authorization: Bearer <token>
 
 ###
 
 PATCH http://localhost:4000/activity/1
+Authorization: Bearer <token>
 Content-Type: application/json
 
 {
@@ -31,3 +35,4 @@ Content-Type: application/json
 ###
 
 DELETE  http://localhost:4000/activity/1
+Authorization: Bearer <token>
