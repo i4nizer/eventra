@@ -4,10 +4,7 @@
       <h3 class="chart-title">Events: Sign-Ups & Participants</h3>
 
       <!-- ✅ Category Filter -->
-      <select
-        v-model="selectedCategory"
-        class="category-select"
-      >
+      <select v-model="selectedCategory" class="category-select">
         <option value="all">All Categories</option>
         <option v-for="cat in categoryList" :key="cat" :value="cat">
           {{ cat.charAt(0).toUpperCase() + cat.slice(1) }}
@@ -40,14 +37,62 @@ const props = defineProps({
   events: {
     type: Array,
     default: () => [
-      { id: 1, title: "Orientation", registered: 150, attendees: 120, category: "special" },
-      { id: 2, title: "Daily Attendance 2025-10-01", registered: 200, attendees: 190, category: "normal" },
-      { id: 3, title: "Alumni Meet", registered: 250, attendees: 200, category: "special" },
-      { id: 4, title: "TechFest", registered: 300, attendees: 250, category: "special" },
-      { id: 5, title: "Coding Bootcamp", registered: 120, attendees: 100, category: "normal" },
-      { id: 6, title: "Hackathon", registered: 180, attendees: 150, category: "special" },
-      { id: 7, title: "Internship Orientation", registered: 220, attendees: 200, category: "normal" },
-      { id: 8, title: "IT Summit", registered: 350, attendees: 300, category: "special" },
+      {
+        id: 1,
+        title: "Orientation",
+        registered: 150,
+        attendees: 120,
+        category: "special",
+      },
+      {
+        id: 2,
+        title: "Daily Attendance 2025-10-01",
+        registered: 200,
+        attendees: 190,
+        category: "normal",
+      },
+      {
+        id: 3,
+        title: "Alumni Meet",
+        registered: 250,
+        attendees: 200,
+        category: "special",
+      },
+      {
+        id: 4,
+        title: "TechFest",
+        registered: 300,
+        attendees: 250,
+        category: "special",
+      },
+      {
+        id: 5,
+        title: "Coding Bootcamp",
+        registered: 120,
+        attendees: 100,
+        category: "normal",
+      },
+      {
+        id: 6,
+        title: "Hackathon",
+        registered: 180,
+        attendees: 150,
+        category: "special",
+      },
+      {
+        id: 7,
+        title: "Internship Orientation",
+        registered: 220,
+        attendees: 200,
+        category: "normal",
+      },
+      {
+        id: 8,
+        title: "IT Summit",
+        registered: 350,
+        attendees: 300,
+        category: "special",
+      },
     ],
   },
 });
@@ -55,7 +100,9 @@ const props = defineProps({
 // Resolve --accent CSS variable to a usable color string
 function getAccent() {
   try {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue("--accent")?.trim();
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent")
+      ?.trim();
     if (!raw) return "#10b981";
     return raw;
   } catch {
@@ -71,7 +118,11 @@ function hexToRgba(hex, alpha = 1) {
   }
   if (!/^#/.test(h)) return h;
   let v = h.slice(1);
-  if (v.length === 3) v = v.split("").map((c) => c + c).join("");
+  if (v.length === 3)
+    v = v
+      .split("")
+      .map((c) => c + c)
+      .join("");
   const num = parseInt(v, 16);
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
@@ -91,7 +142,9 @@ const categoryColors = {
 
 const colorFor = (category) => categoryColors[category] ?? categoryColors.other;
 
-const categoryList = computed(() => [...new Set(props.events.map((e) => e.category))]);
+const categoryList = computed(() => [
+  ...new Set(props.events.map((e) => e.category)),
+]);
 
 const selectedCategory = ref("all");
 
@@ -132,7 +185,10 @@ onMounted(() => {
   mo = new MutationObserver(() => {
     isDark.value = document.documentElement.classList.contains("dark");
   });
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  mo.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
 });
 
 onBeforeUnmount(() => {
@@ -141,14 +197,18 @@ onBeforeUnmount(() => {
 
 function resolveMuted() {
   try {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue("--muted")?.trim();
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue("--muted")
+      ?.trim();
     return raw || "#6b7280";
   } catch {
     return "#6b7280";
   }
 }
 
-const chartTextColor = computed(() => (isDark.value ? "#ffffff" : resolveMuted()));
+const chartTextColor = computed(() =>
+  isDark.value ? "#ffffff" : resolveMuted()
+);
 
 // Detect mobile
 const isMobile = ref(window.innerWidth < 768);
@@ -157,10 +217,10 @@ onMounted(() => {
   const handleResize = () => {
     isMobile.value = window.innerWidth < 768;
   };
-  window.addEventListener('resize', handleResize);
-  
+  window.addEventListener("resize", handleResize);
+
   onBeforeUnmount(() => {
-    window.removeEventListener('resize', handleResize);
+    window.removeEventListener("resize", handleResize);
   });
 });
 
@@ -171,22 +231,22 @@ const chartOptions = computed(() => ({
   plugins: {
     legend: {
       position: isMobile.value ? "bottom" : "top",
-      labels: { 
+      labels: {
         color: chartTextColor.value,
         font: {
-          size: isMobile.value ? 10 : 12
+          size: isMobile.value ? 10 : 12,
         },
-        padding: isMobile.value ? 8 : 10
+        padding: isMobile.value ? 8 : 10,
       },
     },
     tooltip: {
       titleColor: chartTextColor.value,
       bodyColor: chartTextColor.value,
       titleFont: {
-        size: isMobile.value ? 11 : 13
+        size: isMobile.value ? 11 : 13,
       },
       bodyFont: {
-        size: isMobile.value ? 10 : 12
+        size: isMobile.value ? 10 : 12,
       },
       callbacks: {
         title: (ctx) => ctx[0].label,
@@ -194,8 +254,13 @@ const chartOptions = computed(() => ({
         afterBody: (ctx) => {
           const idx = ctx[0].dataIndex;
           const ev = filteredEvents.value[idx];
-          const pct = ev && ev.registered ? Math.round(((ev.attendees ?? 0) / ev.registered) * 100) : 0;
-          return `Present %: ${pct}%   •   Category: ${ev?.category ?? "other"}`;
+          const pct =
+            ev && ev.registered
+              ? Math.round(((ev.attendees ?? 0) / ev.registered) * 100)
+              : 0;
+          return `Present %: ${pct}%   •   Category: ${
+            ev?.category ?? "other"
+          }`;
         },
       },
     },
@@ -216,24 +281,24 @@ const chartOptions = computed(() => ({
         autoSkipPadding: isMobile.value ? 4 : 8,
         color: chartTextColor.value,
         font: {
-          size: isMobile.value ? 9 : 11
-        }
+          size: isMobile.value ? 9 : 11,
+        },
       },
       grid: { display: false },
     },
     y: {
       beginAtZero: true,
-      ticks: { 
-        precision: 0, 
+      ticks: {
+        precision: 0,
         color: chartTextColor.value,
         font: {
-          size: isMobile.value ? 9 : 11
-        }
+          size: isMobile.value ? 9 : 11,
+        },
       },
     },
   },
-  layout: { 
-    padding: isMobile.value ? 4 : 6 
+  layout: {
+    padding: isMobile.value ? 4 : 6,
   },
 }));
 </script>
@@ -296,11 +361,11 @@ const chartOptions = computed(() => ({
   .chart {
     padding: 0.875rem;
   }
-  
+
   .chart-title {
     font-size: 1rem;
   }
-  
+
   .chart-container {
     height: calc(100% - 55px);
   }
@@ -311,26 +376,26 @@ const chartOptions = computed(() => ({
   .chart {
     padding: 0.75rem;
   }
-  
+
   .chart-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.625rem;
     margin-bottom: 0.5rem;
   }
-  
+
   .chart-title {
     font-size: 0.9375rem;
     line-height: 1.3;
   }
-  
+
   .category-select {
     width: 100%;
     max-width: 200px;
     padding: 0.5rem;
     font-size: 0.8125rem;
   }
-  
+
   .chart-container {
     height: calc(100% - 70px);
   }
@@ -341,16 +406,16 @@ const chartOptions = computed(() => ({
   .chart {
     padding: 0.625rem;
   }
-  
+
   .chart-title {
     font-size: 0.875rem;
   }
-  
+
   .category-select {
     font-size: 0.75rem;
     padding: 0.4375rem 0.5rem;
   }
-  
+
   .chart-container {
     height: calc(100% - 65px);
   }

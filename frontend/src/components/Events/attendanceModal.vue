@@ -32,7 +32,10 @@
           <!-- Scanning Status -->
           <div class="info-banner">
             <div class="info-row">
-              <i class="fas fa-sync-alt fa-spin" style="color: var(--accent)"></i>
+              <i
+                class="fas fa-sync-alt fa-spin"
+                style="color: var(--accent)"
+              ></i>
               <span class="info-label">Scanning:</span>
               <span class="info-value"
                 >{{ scannedCount }}/{{ localStudents.length }} students</span

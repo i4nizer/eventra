@@ -10,6 +10,9 @@
     <div class="charts">
       <eventChart />
     </div>
+    <div class="events">
+      <upcomingEvents />
+    </div>
     <!-- <div class="tables">
       <studentTable />
     </div> -->
@@ -23,12 +26,17 @@ import tagCount from "@/components/Tags/tagCount.vue";
 import accountsCount from "@/components/Accounts/accountsCount.vue";
 import eventsCount from "@/components/Events/eventsCount.vue";
 import eventChart from "@/components/Events/eventChart.vue";
+import upcomingEvents from "@/components/Events/upcomingEvents.vue";
 // import studentTable from "@/components/students/studentTable.vue";
 </script>
 
 <style scoped>
 .home {
   padding: 0.5rem;
+}
+
+.events {
+  margin-top: 10vh;
 }
 
 .stats {
@@ -40,7 +48,7 @@ import eventChart from "@/components/Events/eventChart.vue";
 
 .charts {
   margin-top: 1.5rem;
-  height: 40vh;
+  height: 50vh;
   min-height: 300px;
 }
 
@@ -50,7 +58,7 @@ import eventChart from "@/components/Events/eventChart.vue";
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 0.875rem;
   }
-  
+
   .charts {
     height: 45vh;
     min-height: 350px;
@@ -62,12 +70,12 @@ import eventChart from "@/components/Events/eventChart.vue";
   .home {
     padding: 0.75rem;
   }
-  
+
   .stats {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
-  
+
   .charts {
     margin-top: 1rem;
     height: 350px;
@@ -80,11 +88,11 @@ import eventChart from "@/components/Events/eventChart.vue";
   .home {
     padding: 0.5rem;
   }
-  
+
   .stats {
     gap: 0.625rem;
   }
-  
+
   .charts {
     height: 55vh;
     min-height: 350px;
