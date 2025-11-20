@@ -29,10 +29,13 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  count: { type: Number, default: 20 },
-  title: { type: String, default: "Students With RFID" },
-  subtitle: { type: String, default: "Students equipped with RFID tags" },
-  icon: { type: String, default: "fa-solid fa-user-check" },
+  count: { type: Number, default: 0 },
+  title: { type: String, default: "Assigned Tags" },
+  subtitle: {
+    type: String,
+    default: "Number of RFID tags assigned to students",
+  },
+  icon: { type: String, default: "fa-solid fa-id-badge" },
   loading: { type: Boolean, default: false },
 });
 

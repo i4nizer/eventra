@@ -25,7 +25,7 @@
       </header>
 
       <!-- Form content -->
-       <div class="space-y-4">
+      <div class="space-y-4">
         <div>
           <label class="input-label">Student ID</label>
           <input
@@ -159,9 +159,14 @@
           {{ errors.submit }}
         </p>
       </div>
-      
+
       <footer class="modal-footer-inline">
-        <button type="button" @click="onClose" class="btn-cancel" :disabled="submitting">
+        <button
+          type="button"
+          @click="onClose"
+          class="btn-cancel"
+          :disabled="submitting"
+        >
           Cancel
         </button>
         <button type="submit" class="btn-submit" :disabled="submitting">
@@ -180,7 +185,7 @@ const props = defineProps({
   onClose: Function,
   onCreate: Function,
   sections: { type: Array, default: () => [] },
-  availableTags: { type: Array, default: () => [] }, // ✅ added
+  availableTags: { type: Array, default: () => [] },
 });
 
 const sid = ref("");
@@ -366,5 +371,4 @@ async function handleSubmit() {
 .btn-remove-photo:hover {
   text-decoration: underline;
 }
-
 </style>

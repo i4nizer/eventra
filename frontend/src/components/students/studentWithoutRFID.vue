@@ -29,10 +29,10 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  count: { type: Number, default: 20 },
-  title: { type: String, default: "Students" },
-  subtitle: { type: String, default: "Total number of registered students" },
-  icon: { type: String, default: "fa-solid fa-user-graduate" },
+  count: { type: Number, default: 10 },
+  title: { type: String, default: "Students Without RFID" },
+  subtitle: { type: String, default: "Students who do not have an RFID tag" },
+  icon: { type: String, default: "fa-solid fa-user-xmark" },
   loading: { type: Boolean, default: false },
 });
 
