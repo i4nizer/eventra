@@ -83,14 +83,18 @@
               <div class="student-name">{{ s.name }}</div>
               <div class="student-email">{{ s.email }}</div>
             </td>
-            <td class="p-3 align-middle section-text">{{ sections.get(s.id)?.name }}</td>
+            <td class="p-3 align-middle section-text">
+              {{ sections.get(s.id)?.name }}
+            </td>
             <td class="p-3 align-middle">
               <span class="badge badge-tag">
                 {{ s.rfid }}
               </span>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge badge-balance"> ₱ {{ balances.get(s.id) || 0 }} </span>
+              <span class="badge badge-balance">
+                ₱ {{ balances.get(s.id) || 0 }}
+              </span>
             </td>
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
@@ -186,7 +190,9 @@
           <div class="card-row">
             <div class="card-label">Balance</div>
             <div class="card-value">
-              <span class="badge badge-balance">₱ {{ balances?.get(s.id) || 0 }}</span>
+              <span class="badge badge-balance"
+                >₱ {{ balances?.get(s.id) || 0 }}</span
+              >
             </div>
           </div>
         </div>
@@ -294,10 +300,18 @@ const isDeleteModalOpen = ref(false);
 const selectedStudent = ref(null);
 
 // Balance Map
-const balances = computed(() => new Map(props.balances || []))
+const balances = computed(() => new Map(props.balances || []));
 
 // Section Map
-const sections = computed(() => new Map(props.students.map((s) => [s.id, props.sections.find((e) => e.id == s.sectionId)])))
+const sections = computed(
+  () =>
+    new Map(
+      props.students.map((s) => [
+        s.id,
+        props.sections.find((e) => e.id == s.sectionId),
+      ])
+    )
+);
 
 // RFID Tags (for dropdown)
 const availableTags = computed(() => props.students?.map((s) => s.rfid) || []);
@@ -312,13 +326,14 @@ function closeCreateModal() {
   isCreateModalOpen.value = false;
 }
 
-const { api } = useApi()
+const { api } = useApi();
 
 async function handleCreateStudent(studentData) {
-  const form = new FormData()
-  Object.keys(studentData).forEach((k) => form.append(k, studentData[k]))
-  await api.post(`/section/${studentData.sectionId}/student`, form)
-    .catch(console.error)
+  const form = new FormData();
+  Object.keys(studentData).forEach((k) => form.append(k, studentData[k]));
+  await api
+    .post(`/section/${studentData.sectionId}/student`, form)
+    .catch(console.error);
   emit("refresh");
   closeCreateModal();
 }
@@ -333,8 +348,12 @@ function closeEditModal() {
   selectedStudent.value = null;
 }
 async function handleUpdateStudent(updatedStudent) {
-  await api.patch(`/section/${updatedStudent.sectionId}/student/${updatedStudent?.id}`, updatedStudent)
-    .catch(console.error)
+  await api
+    .patch(
+      `/section/${updatedStudent.sectionId}/student/${updatedStudent?.id}`,
+      updatedStudent
+    )
+    .catch(console.error);
   emit("refresh");
   closeEditModal();
 }
@@ -359,9 +378,8 @@ function closeDeleteModal() {
   selectedStudent.value = null;
 }
 async function handleConfirmDelete() {
-  const { id, sectionId } = selectedStudent.value
-  await api.delete(`/section/${sectionId}/student/${id}`)
-    .catch(console.error)
+  const { id, sectionId } = selectedStudent.value;
+  await api.delete(`/section/${sectionId}/student/${id}`).catch(console.error);
   emit("refresh");
   closeDeleteModal();
 }

@@ -8,8 +8,6 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { Chart, PieController, ArcElement, Tooltip, Legend } from "chart.js";
-import AssingTags from "./assingTags.vue";
-import UnassignTags from "./unassignTags.vue";
 
 Chart.register(PieController, ArcElement, Tooltip, Legend);
 

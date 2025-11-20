@@ -5,7 +5,7 @@
     </div>
     <div class="tagHeader">
       <tagCount />
-      <assingTags />
+      <assignTags />
       <unassignTags />
       <summaryTagsChart :assignTags="10" :unassignTags="10" :totalTags="30" />
     </div>
@@ -15,9 +15,9 @@
 <script setup>
 import tagCount from "@/components/Tags/tagCount.vue";
 import tagsList from "@/components/Tags/tagsList.vue";
-import assingTags from "@/components/Tags/assingTags.vue";
 import unassignTags from "@/components/Tags/unassignTags.vue";
 import summaryTagsChart from "@/components/Tags/summaryTagsChart.vue";
+import assignTags from "@/components/Tags/assignTags.vue";
 </script>
 
 <style scoped>
@@ -38,33 +38,35 @@ import summaryTagsChart from "@/components/Tags/summaryTagsChart.vue";
 }
 
 /* Tablet */
-@media (max-width: 1024px) .rfid-tags {
-  padding: 0.875rem;
-
-  .tagHeader {
-    margin-bottom: 1.25rem;
-  }
-}
-
-/* Mobile */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .rfid-tags {
-    padding: 0.75rem;
+    padding: 0.875rem;
+
+    .tagHeader {
+      margin-bottom: 1.25rem;
+    }
   }
 
-  .tagHeader {
-    margin-bottom: 1rem;
-  }
-}
+  /* Mobile */
+  @media (max-width: 768px) {
+    .rfid-tags {
+      padding: 0.75rem;
+    }
 
-/* Small Mobile */
-@media (max-width: 480px) {
-  .rfid-tags {
-    padding: 0.5rem;
+    .tagHeader {
+      margin-bottom: 1rem;
+    }
   }
 
-  .tagHeader {
-    margin-bottom: 0.875rem;
+  /* Small Mobile */
+  @media (max-width: 480px) {
+    .rfid-tags {
+      padding: 0.5rem;
+    }
+
+    .tagHeader {
+      margin-bottom: 0.875rem;
+    }
   }
 }
 </style>
