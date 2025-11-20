@@ -96,6 +96,7 @@ const sidebarItems = computed(() =>
       label: "Students",
     },
     { to: "/rfid-tags", icon: "fa-solid fa-id-badge", label: "RFID Tags" },
+    { to: "/rfid-tags", icon: "fa-solid fa-tags", label: "Sections" },
     { to: "/events", icon: "fa-solid fa-calendar-days", label: "Events" },
     {
       to: "/attendance-logs",
