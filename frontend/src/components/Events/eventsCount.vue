@@ -1,5 +1,7 @@
 <template>
-  <div class="stat-root shadow-lg rounded-lg p-4 flex items-center gap-4 w-full max-w-sm">
+  <div
+    class="stat-root shadow-lg rounded-lg p-4 flex items-center gap-4 w-full max-w-sm"
+  >
     <div class="icon-box" aria-hidden="true">
       <i :class="icon" class="text-2xl"></i>
     </div>

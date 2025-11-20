@@ -1,0 +1,116 @@
+<template>
+  <div class="w-full p-10">
+    <!-- Top Controls -->
+    <div
+      class="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 mb-8"
+    >
+      <input
+        type="text"
+        v-model="searchQuery"
+        placeholder="Search sections..."
+        class="w-full md:w-80 px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+      />
+
+      <button
+        class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-green-700 transition"
+        @click="showModal = true"
+      >
+        + Add
+      </button>
+    </div>
+
+    <!-- Section List -->
+    <div
+      class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+    >
+      <div
+        v-for="section in filteredSections"
+        :key="section.id"
+        class="p-5 bg-white border border-gray-200 rounded-lg hover:border-green-500 transition cursor-pointer"
+      >
+        <h3 class="text-xl font-semibold text-gray-800 mb-1">
+          {{ section.name }}
+        </h3>
+
+        <p class="text-gray-500 text-sm mb-4">
+          {{ section.description }}
+        </p>
+
+        <button
+          class="w-full bg-green-500 text-white py-2 rounded-lg text-sm hover:bg-green-600 transition"
+          @click="viewSection(section.id)"
+        >
+          View
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <p
+      v-if="filteredSections.length === 0"
+      class="text-center text-gray-400 text-lg italic mt-10"
+    >
+      No sections found.
+    </p>
+
+    <!-- Imported Modal -->
+    <addSection
+      :show="showModal"
+      @close="showModal = false"
+      @add="confirmAdd"
+    />
+  </div>
+</template>
+
+<script>
+import addSection from "@/components/CRUD/addSection.vue";
+
+export default {
+  name: "SectionList",
+  components: {
+    addSection,
+  },
+  data() {
+    return {
+      searchQuery: "",
+      showModal: false,
+      sections: [
+        { id: 1, name: "Section 1", description: "Description for Section 1" },
+        { id: 2, name: "Section 2", description: "Description for Section 2" },
+        { id: 3, name: "Section 3", description: "Description for Section 3" },
+      ],
+    };
+  },
+
+  computed: {
+    filteredSections() {
+      const q = this.searchQuery.toLowerCase();
+      return this.sections.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q)
+      );
+    },
+  },
+
+  methods: {
+    confirmAdd(newSection) {
+      const newId = this.sections.length
+        ? Math.max(...this.sections.map((s) => s.id)) + 1
+        : 1;
+
+      this.sections.push({
+        id: newId,
+        name: newSection.name,
+        description: newSection.description,
+      });
+
+      this.showModal = false;
+    },
+
+    viewSection(id) {
+      alert(`Viewing section with ID: ${id}`);
+    },
+  },
+};
+</script>
