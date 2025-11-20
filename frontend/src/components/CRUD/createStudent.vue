@@ -140,7 +140,7 @@
           >
             <option value="">Select a section</option>
             <option v-for="s in sections" :key="s.id" :value="s.id">
-              {{ s.label }}
+              {{ s.name }}
             </option>
           </select>
           <input

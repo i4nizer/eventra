@@ -83,14 +83,14 @@
               <div class="student-name">{{ s.name }}</div>
               <div class="student-email">{{ s.email }}</div>
             </td>
-            <td class="p-3 align-middle section-text">{{ s.section }}</td>
+            <td class="p-3 align-middle section-text">{{ sections.get(s.id)?.name }}</td>
             <td class="p-3 align-middle">
               <span class="badge badge-tag">
-                {{ s.tag }}
+                {{ s.rfid }}
               </span>
             </td>
             <td class="p-3 align-middle">
-              <span class="badge badge-balance"> ₱ {{ s.balance }} </span>
+              <span class="badge badge-balance"> ₱ {{ balances.get(s.id) || 0 }} </span>
             </td>
             <td class="p-3 align-middle">
               <div class="flex items-center gap-2">
@@ -179,14 +179,14 @@
           <div class="card-row">
             <div class="card-label">RFID Tag</div>
             <div class="card-value">
-              <span class="badge badge-tag">{{ s.tag }}</span>
+              <span class="badge badge-tag">{{ s.rfid }}</span>
             </div>
           </div>
 
           <div class="card-row">
             <div class="card-label">Balance</div>
             <div class="card-value">
-              <span class="badge badge-balance">₱ {{ s.balance }}</span>
+              <span class="badge badge-balance">₱ {{ balances?.get(s.id) || 0 }}</span>
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@
       :open="isCreateModalOpen"
       :onClose="closeCreateModal"
       :onCreate="handleCreateStudent"
-      :sections="sections"
+      :sections="props.sections"
     />
   </div>
 
@@ -236,7 +236,7 @@
     :student="selectedStudent"
     :onClose="closeEditModal"
     :onUpdate="handleUpdateStudent"
-    :sections="sections"
+    :sections="props.sections"
     :availableTags="availableTags"
   />
 
@@ -262,6 +262,7 @@ import createStudent from "@/components/CRUD/createStudent.vue";
 import editStudent from "@/components/CRUD/updateStudent.vue";
 import viewStudent from "@/components/CRUD/readStudent.vue";
 import confirmDelete from "@/components/CRUD/deleteStudent.vue";
+import { useApi } from "@/composables/api";
 
 const SortIcon = {
   props: ["field", "sort"],
@@ -272,7 +273,8 @@ const SortIcon = {
 };
 
 const props = defineProps({
-  students: { type: Array, default: () => null },
+  students: { type: Array, default: () => [] },
+  balances: { type: Array, default: () => [] },
   defaultPerPage: { type: Number, default: 10 },
   sections: { type: Array, default: () => [] },
 });
@@ -291,15 +293,14 @@ const isViewModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const selectedStudent = ref(null);
 
+// Balance Map
+const balances = computed(() => new Map(props.balances || []))
+
+// Section Map
+const sections = computed(() => new Map(props.students.map((s) => [s.id, props.sections.find((e) => e.id == s.sectionId)])))
+
 // RFID Tags (for dropdown)
-const availableTags = ref([
-  "TAG-001",
-  "TAG-002",
-  "TAG-003",
-  "TAG-004",
-  "TAG-005",
-  "TAG-006",
-]);
+const availableTags = computed(() => props.students?.map((s) => s.rfid) || []);
 
 // =======================
 // Modal Functions
@@ -311,8 +312,13 @@ function closeCreateModal() {
   isCreateModalOpen.value = false;
 }
 
+const { api } = useApi()
+
 async function handleCreateStudent(studentData) {
-  console.log("Creating student:", studentData);
+  const form = new FormData()
+  Object.keys(studentData).forEach((k) => form.append(k, studentData[k]))
+  await api.post(`/section/${studentData.sectionId}/student`, form)
+    .catch(console.error)
   emit("refresh");
   closeCreateModal();
 }
@@ -326,8 +332,9 @@ function closeEditModal() {
   isEditModalOpen.value = false;
   selectedStudent.value = null;
 }
-function handleUpdateStudent(updatedStudent) {
-  console.log("Updating student:", updatedStudent);
+async function handleUpdateStudent(updatedStudent) {
+  await api.patch(`/section/${updatedStudent.sectionId}/student/${updatedStudent?.id}`, updatedStudent)
+    .catch(console.error)
   emit("refresh");
   closeEditModal();
 }
@@ -351,8 +358,10 @@ function closeDeleteModal() {
   isDeleteModalOpen.value = false;
   selectedStudent.value = null;
 }
-function handleConfirmDelete() {
-  console.log("Deleting student:", selectedStudent.value);
+async function handleConfirmDelete() {
+  const { id, sectionId } = selectedStudent.value
+  await api.delete(`/section/${sectionId}/student/${id}`)
+    .catch(console.error)
   emit("refresh");
   closeDeleteModal();
 }
@@ -366,62 +375,11 @@ function sortBy(field) {
   }
 }
 
-const sample = [
-  {
-    id: 1,
-    name: "Alice Cruz",
-    email: "alice@example.com",
-    section: "A1",
-    tag: "TAG-001",
-    balance: "40.00",
-  },
-  {
-    id: 2,
-    name: "Ben Torres",
-    email: "ben@example.com",
-    section: "B2",
-    tag: "TAG-002",
-    balance: "50.00",
-  },
-  {
-    id: 3,
-    name: "Clara Reyes",
-    email: "clara@example.com",
-    section: "A1",
-    tag: "TAG-003",
-    balance: "30.00",
-  },
-  {
-    id: 4,
-    name: "David Li",
-    email: "david@example.com",
-    section: "C1",
-    tag: "TAG-004",
-    balance: "100.00",
-  },
-  {
-    id: 5,
-    name: "Ella Gomez",
-    email: "ella@example.com",
-    section: "B2",
-    tag: "TAG-005",
-    balance: "60.00",
-  },
-  {
-    id: 6,
-    name: "Frank Yu",
-    email: "frank@example.com",
-    section: "A2",
-    tag: "TAG-006",
-    balance: "80.00",
-  },
-];
-
 // =======================
 // Computed Properties
 // =======================
 const dataSource = computed(() =>
-  props.students && props.students.length ? props.students : sample
+  props.students && props.students.length ? props.students : []
 );
 
 const filtered = computed(() => {

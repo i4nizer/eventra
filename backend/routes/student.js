@@ -7,7 +7,7 @@ import middlewares from "../middlewares/index.js"
 const student = express.Router({ mergeParams: true })
 student.route("/")
     .get(middlewares.auth.access, controllers.student.get)
-    .post(middlewares.auth.access, controllers.student.post)
+    .post(middlewares.auth.access, middlewares.upload.single("photo"), controllers.student.post)
 student.route("/:stuid")
     .get(middlewares.auth.access, controllers.student.get)
     .patch(middlewares.auth.access, controllers.student.patch)

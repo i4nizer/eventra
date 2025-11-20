@@ -5,6 +5,7 @@ import activity from "./activity.js"
 import attendance from "./attendance.js"
 import violation from "./violation.js"
 import payment from "./payment.js"
+import middlewares from "../middlewares/index.js"
 
 //
 
@@ -15,6 +16,7 @@ routes.use("/activity", activity)
 routes.use("/attendance", attendance)
 routes.use("/violation", violation)
 routes.use("/payment", payment)
+routes.use("/uploads/photo", middlewares.auth.photo, express.static(`uploads/photo`))
 
 //
 

@@ -39,7 +39,10 @@ const post = async (req, res) => {
     const parsed = schema.student.StudentCreateSchema.safeParse(req.body)
     if (!parsed.success) return res.status(400).send(parsed.error.issues.at(0)?.message)
     
-    const student = await models.student.Student.create({ ...parsed.data, sectionId: secid })
+    const data = { ...parsed.data, sectionId: secid }
+    if (req.file) data.photo = req.file.filename
+
+    const student = await models.student.Student.create(data)
     res.json(student.dataValues)
 }
 
