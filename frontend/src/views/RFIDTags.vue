@@ -1,10 +1,13 @@
 <template>
   <div class="rfid-tags">
-    <div class="tagHeader">
-      <tagCount />
-    </div>
     <div class="tagList">
       <tagsList />
+    </div>
+    <div class="tagHeader">
+      <tagCount />
+      <assingTags />
+      <unassignTags />
+      <summaryTagsChart :assignTags="10" :unassignTags="10" :totalTags="30" />
     </div>
   </div>
 </template>
@@ -12,11 +15,18 @@
 <script setup>
 import tagCount from "@/components/Tags/tagCount.vue";
 import tagsList from "@/components/Tags/tagsList.vue";
+import assingTags from "@/components/Tags/assingTags.vue";
+import unassignTags from "@/components/Tags/unassignTags.vue";
+import summaryTagsChart from "@/components/Tags/summaryTagsChart.vue";
 </script>
 
 <style scoped>
 .rfid-tags {
   padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem;
 }
 
 .tagHeader {
@@ -28,11 +38,9 @@ import tagsList from "@/components/Tags/tagsList.vue";
 }
 
 /* Tablet */
-@media (max-width: 1024px) {
-  .rfid-tags {
-    padding: 0.875rem;
-  }
-  
+@media (max-width: 1024px) .rfid-tags {
+  padding: 0.875rem;
+
   .tagHeader {
     margin-bottom: 1.25rem;
   }
@@ -43,7 +51,7 @@ import tagsList from "@/components/Tags/tagsList.vue";
   .rfid-tags {
     padding: 0.75rem;
   }
-  
+
   .tagHeader {
     margin-bottom: 1rem;
   }
@@ -54,7 +62,7 @@ import tagsList from "@/components/Tags/tagsList.vue";
   .rfid-tags {
     padding: 0.5rem;
   }
-  
+
   .tagHeader {
     margin-bottom: 0.875rem;
   }

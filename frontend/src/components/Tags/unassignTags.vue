@@ -30,10 +30,10 @@ import { computed } from "vue";
 
 const props = defineProps({
   count: { type: Number, default: 0 },
-  title: { type: String, default: "Assigned Tags" },
+  title: { type: String, default: "Unassigned Tags" },
   subtitle: {
     type: String,
-    default: "Number of RFID tags assigned to students",
+    default: "Number of RFID Unassigned tags to students",
   },
   icon: { type: String, default: "fa-solid fa-id-badge" },
   loading: { type: Boolean, default: false },

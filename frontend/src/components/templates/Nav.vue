@@ -95,14 +95,18 @@ const sidebarItems = computed(() =>
       icon: "fa-solid fa-user-graduate",
       label: "Students",
     },
-    { to: "/events", icon: "fa-solid fa-calendar-days", label: "Events" },
     { to: "/rfid-tags", icon: "fa-solid fa-id-badge", label: "RFID Tags" },
+    { to: "/events", icon: "fa-solid fa-calendar-days", label: "Events" },
     {
       to: "/attendance-logs",
       icon: "fa-solid fa-file-lines",
       label: "Attendance Logs",
     },
-    { to: "/payment-logs", icon: "fa-solid fa-peso-sign", label: "Payment Logs" },
+    {
+      to: "/payment-logs",
+      icon: "fa-solid fa-peso-sign",
+      label: "Payment Logs",
+    },
     { to: "/reports", icon: "fa-solid fa-chart-bar", label: "Reports" },
     { to: "/settings", icon: "fa-solid fa-cog", label: "Settings" },
   ].filter((item) => hasAccess(item.roles))
