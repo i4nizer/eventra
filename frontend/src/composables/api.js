@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as cookie from "cookie"
 
 //
 
@@ -13,6 +14,9 @@ let token = ""
 
 export const useApi = (prefix = `${window.location.protocol}//${window.location.hostname}:4000`) => {
 
+    token = cookie.parse(document.cookie)?.token || ""
+    api = axios.create({ baseURL: prefix, withCredentials: false, headers: { Authorization: `Bearer ${token}` } })
+
     const signUp = async (name, email, password) => {
         return await api.post("/auth/sign-up", { name, email, password })
     }
@@ -21,6 +25,7 @@ export const useApi = (prefix = `${window.location.protocol}//${window.location.
         const res = await api.post("/auth/sign-in", { email, password })
         api = axios.create({ baseURL: prefix, withCredentials: false, headers: { Authorization: `Bearer ${res.data.token}` } })
         token = res.data.token
+        document.cookie = cookie.serialize("token", token)
         return res
     }
 
@@ -28,6 +33,7 @@ export const useApi = (prefix = `${window.location.protocol}//${window.location.
         const res = await api.post("/auth/sign-out")
         api = axios.create({ baseURL: prefix, withCredentials: false })
         token = ""
+        document.cookie = ""
         return res
     }
 
