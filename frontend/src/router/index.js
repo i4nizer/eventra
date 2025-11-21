@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Auth from "@/views/Auth.vue";
+import { useApi } from "@/composables/api";
 
 const routes = [
   // make home available at "/"
@@ -77,5 +78,11 @@ const router = createRouter({
     return { top: 0 };
   },
 });
+
+router.beforeEach((to, from, next) => {
+  const { token } = useApi()
+  if (!token && to.name != "Auth") return next({ name: "Auth" })
+  next()
+})
 
 export default router;
