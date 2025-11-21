@@ -33,7 +33,7 @@
         </h3>
 
         <p class="text-gray-500 text-sm mb-4">
-          {{ section.description }}
+          {{ section.year }}
         </p>
 
         <button
@@ -62,55 +62,54 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import addSection from "@/components/CRUD/addSection.vue";
+import { useApi } from "@/composables/api";
+import { computed, onBeforeMount, ref } from "vue";
 
-export default {
-  name: "SectionList",
-  components: {
-    addSection,
-  },
-  data() {
-    return {
-      searchQuery: "",
-      showModal: false,
-      sections: [
-        { id: 1, name: "Section 1", description: "Description for Section 1" },
-        { id: 2, name: "Section 2", description: "Description for Section 2" },
-        { id: 3, name: "Section 3", description: "Description for Section 3" },
-      ],
-    };
-  },
+//
 
-  computed: {
-    filteredSections() {
-      const q = this.searchQuery.toLowerCase();
-      return this.sections.filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.description.toLowerCase().includes(q)
-      );
-    },
-  },
+// --- Api
+const { api } = useApi()
 
-  methods: {
-    confirmAdd(newSection) {
-      const newId = this.sections.length
-        ? Math.max(...this.sections.map((s) => s.id)) + 1
-        : 1;
+// --- Sections Fetching
+const sections = ref([])
 
-      this.sections.push({
-        id: newId,
-        name: newSection.name,
-        description: newSection.description,
-      });
+const getSections = async () => {
+  await api.get("/section")
+    .then((res) => sections.value = res.data)
+    .catch(console.error)
+}
 
-      this.showModal = false;
-    },
+// --- Section Create
+const showModal = ref(false)
 
-    viewSection(id) {
-      alert(`Viewing section with ID: ${id}`);
-    },
-  },
-};
+const confirmAdd = async (newSection) => {
+  await api.post("/section", newSection)
+    .then((res) => sections.value.push(res.data))
+    .catch(console.error)
+    .finally(() => showModal.value = false)
+}
+
+const viewSection = (id) => {
+  alert(`Viewing section with ID: ${id}`);
+}
+
+// --- Filtering
+const searchQuery = ref("")
+
+const filteredSections = computed(() => {
+  const q = searchQuery.value.toLowerCase();
+  return sections.value.filter(
+    (s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.year.toLowerCase().includes(q)
+  );
+})
+
+// --- Data Fetching
+onBeforeMount(getSections)
+
+//
+
 </script>

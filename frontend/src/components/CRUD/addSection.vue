@@ -16,11 +16,14 @@
       </div>
 
       <div class="mb-5">
-        <label class="text-sm text-gray-600">Description</label>
-        <textarea
-          v-model="localData.description"
+        <label class="text-sm text-gray-600">Year</label>
+        <input
+          min="1"
+          max="4"
+          type="number"
+          v-model="localData.year"
           class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
-        ></textarea>
+        ></input>
       </div>
 
       <div class="flex justify-end gap-2">
@@ -52,7 +55,7 @@ export default {
     return {
       localData: {
         name: "",
-        description: "",
+        year: 1,
       },
     };
   },
@@ -62,10 +65,10 @@ export default {
 
       this.$emit("add", {
         name: this.localData.name,
-        description: this.localData.description,
+        year: this.localData.year,
       });
 
-      this.localData = { name: "", description: "" };
+      this.localData = { name: "", year: "" };
     },
   },
 };
