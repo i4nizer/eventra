@@ -1,4 +1,3 @@
-\
 <template>
   <div class="upcoming-events-landscape mt-6">
     <h2 class="text-xl font-bold mb-4">Upcoming Events</h2>
@@ -24,56 +23,28 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
+import { useApi } from "@/composables/api";
 
 const router = useRouter();
+const { api } = useApi();
 
-// Example events data; replace with API or props
-const events = ref([
-  {
-    id: 1,
-    title: "Orientation Day",
-    date: "2025-11-25",
-    description: "Welcome event for new students.",
-    image: null,
-  },
-  {
-    id: 2,
-    title: "Science Fair",
-    date: "2025-12-01",
-    description: "Annual science fair showcasing projects.",
-    image: null,
-  },
-  {
-    id: 3,
-    title: "Sports Meet",
-    date: "2025-12-10",
-    description: "Inter-school sports competition.",
-    image: null,
-  },
-  {
-    id: 4,
-    title: "Art Exhibition",
-    date: "2025-12-15",
-    description: "Showcase of student artworks.",
-    image: null,
-  },
-  {
-    id: 5,
-    title: "Christmas Party",
-    date: "2025-12-20",
-    description: "End of year celebration.",
-    image: null,
-  },
-  {
-    id: 6,
-    title: "New Year Event",
-    date: "2026-01-01",
-    description: "Welcoming the new year together.",
-    image: null,
-  },
-]);
+//--- Events
+const events = ref([]);
+const getEvents = async () => {
+  await api
+    .get("/activity")
+    .then((res) => {
+      events.value = res.data.map((event) => ({
+        id: event.id,
+        title: event.name,
+        date: event.startAt,
+        description: event.description,
+      }));
+    })
+    .catch(console.error);
+};
 
 const goToEvent = (event) => {
   router.push(`/events`);
@@ -88,6 +59,8 @@ const formatDate = (date) => {
     day: "numeric",
   });
 };
+
+onBeforeMount(getEvents);
 </script>
 
 <style scoped>

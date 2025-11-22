@@ -28,6 +28,26 @@
 <script setup>
 import { computed } from "vue";
 
+// //--- Tags
+// const tas = ref([]);
+// const getTags = async () => {
+//   loading.value = true;
+//   await api
+//     .get(`/activity`)
+//     .then((res) => {
+//       tags.value = res.data;
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching tags:", error);
+//     })
+//     .finally(() => {
+//       loading.value = false;
+//     });
+// };
+
+// onBeforeMount(getTags);
+// const formattedCount = computed(() => tags.value.length.toLocaleString());
+
 const props = defineProps({
   count: { type: Number, default: 90 },
   title: { type: String, default: "Tags" },

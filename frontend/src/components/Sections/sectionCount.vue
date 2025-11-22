@@ -26,35 +26,36 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from "vue";
+import { computed, ref, onBeforeMount } from "vue";
 import { useApi } from "@/composables/api";
 
 const { api } = useApi();
 const loading = ref(true);
 
-//--- Events
-const events = ref([]);
-const getEvents = async () => {
+// --- Sections
+const section = ref([]);
+const getSection = async () => {
   loading.value = true;
   await api
-    .get(`/activity`)
+    .get(`/section`)
     .then((res) => {
-      events.value = res.data;
+      section.value = res.data;
     })
     .catch((error) => {
-      console.error("Error fetching events:", error);
+      console.error("Error fetching section:", error);
     })
     .finally(() => {
       loading.value = false;
     });
 };
 
-onBeforeMount(getEvents);
-const formattedCount = computed(() => events.value.length.toLocaleString());
+onBeforeMount(getSection);
+
+const formattedCount = computed(() => section.value.length.toLocaleString());
 
 const props = defineProps({
-  title: { type: String, default: "Events" },
-  subtitle: { type: String, default: "Number of active or past events" },
-  icon: { type: String, default: "fa-solid fa-user-graduate" },
+  title: { type: String, default: "Sections" },
+  subtitle: { type: String, default: "Number of class sections" },
+  icon: { type: String, default: "fa-solid fa-layer-group" },
 });
 </script>

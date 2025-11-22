@@ -21,9 +21,9 @@
 
 <script setup>
 import studentCount from "@/components/students/studentCounts.vue";
-import sectionCount from "@/components/Department/sectionCount.vue";
+import sectionCount from "@/components/Sections/sectionCount.vue";
 import tagCount from "@/components/Tags/tagCount.vue";
-import accountsCount from "@/components/Accounts/accountsCount.vue";
+
 import eventsCount from "@/components/Events/eventsCount.vue";
 import eventChart from "@/components/Events/eventChart.vue";
 import upcomingEvents from "@/components/Events/upcomingEvents.vue";
@@ -40,8 +40,7 @@ import upcomingEvents from "@/components/Events/upcomingEvents.vue";
 }
 
 .stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
   gap: 1rem;
   width: 100%;
 }

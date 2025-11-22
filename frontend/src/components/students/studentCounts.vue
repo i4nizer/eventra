@@ -26,15 +26,34 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
+import { useApi } from "@/composables/api";
 
+const { api } = useApi();
+
+const loading = ref(true);
+
+//--- Students
+const students = ref([]);
+const getStudents = async () => {
+  loading.value = true;
+  await api
+    .get(`/section/student`)
+    .then((res) => {
+      students.value = res.data;
+    })
+    .catch(console.error)
+    .finally(() => {
+      loading.value = false;
+    });
+};
+
+//
+onBeforeMount(getStudents);
+const formattedCount = computed(() => students.value.length.toLocaleString());
 const props = defineProps({
-  count: { type: Number, default: 20 },
   title: { type: String, default: "Students" },
   subtitle: { type: String, default: "Total number of registered students" },
   icon: { type: String, default: "fa-solid fa-user-graduate" },
-  loading: { type: Boolean, default: false },
 });
-
-const formattedCount = computed(() => props.count.toLocaleString());
 </script>

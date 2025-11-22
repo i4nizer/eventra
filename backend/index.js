@@ -23,22 +23,24 @@
     SOFTWARE.
 */
 
-import express from "express"
-import cors from "cors"
-import boot from "./boot/index.js"
-import routes from "./routes/index.js"
-import config from "./config/index.js"
+import express from "express";
+import cors from "cors";
+import boot from "./boot/index.js";
+import routes from "./routes/index.js";
+import config from "./config/index.js";
 
 //
 
-const app = express()
-app.use(cors({ origin: "*", credentials: false }))
-app.use(express.json())
-app.use("/", routes)
+const app = express();
+app.use(cors({ origin: "*", credentials: false }));
+app.use(express.json());
+app.use("/", routes);
 
 //
 
-await boot.run()
+await boot.run();
 
-const url = `http://0.0.0.0:${config.env.port}`
-app.listen(config.env.port, "0.0.0.0", () => console.info(`Api running on ${url}.`))
+const url = `http://0.0.0.0:${config.env.port}`;
+app.listen(config.env.port, "0.0.0.0", () =>
+  console.info(`Api running on ${url}.`)
+);
