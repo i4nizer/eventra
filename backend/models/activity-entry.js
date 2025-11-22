@@ -10,6 +10,11 @@ const attr = {
 		primaryKey: true,
 		autoIncrement: true,
 	},
+	name: {
+		type: DataTypes.STRING,
+		allowNull: false,
+		defaultValue: "",
+	},
 	startAt: {
 		type: DataTypes.DATE,
 		allowNull: false,
