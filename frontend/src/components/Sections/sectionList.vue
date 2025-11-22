@@ -13,17 +13,8 @@
       </div>
 
       <button class="btn-add" @click="showModal = true">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-            clip-rule="evenodd"
-          />
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
         </svg>
         <span class="btn-text">Add Section</span>
       </button>
@@ -31,20 +22,24 @@
 
     <!-- Section Grid -->
     <div class="section-grid">
-      <div
-        v-for="section in filteredSections"
-        :key="section.id"
-        class="section-card"
-      >
+      <div v-for="section in filteredSections" :key="section.id" class="section-card">
         <div class="section-card-header">
           <h3 class="section-title">{{ section.name }}</h3>
           <p class="section-year">{{ section.year }}</p>
         </div>
 
         <div class="section-card-footer">
-          <button class="btn-view-section" @click="viewSection(section)">
+          <button class="btn-close" @click="viewSection(section)">
             <i class="fa-solid fa-eye"></i>
             View Students
+          </button>
+          <button class="btn-submit" @click="openEditModal(section)">
+            <i class="fa-solid fa-pen-to-square"></i>
+            Edit
+          </button>
+          <button class="btn-cancel" @click="openDeleteModal(section)">
+            <i class="fa-solid fa-trash"></i>
+            Delete
           </button>
         </div>
       </div>
@@ -57,10 +52,14 @@
     </div>
 
     <!-- Add Section Modal -->
-    <addSection
-      :show="showModal"
-      @close="showModal = false"
-      @add="confirmAdd"
+    <addSection :show="showModal" @close="showModal = false" @add="confirmAdd"/>
+
+    <!-- Edit Section Modal -->
+    <editSection
+      :show="showEditModal"
+      :section="selectedSectionForEdit"
+      @close="closeEditModal"
+      @submit="confirmEdit"
     />
 
     <!-- Read Section Modal -->
@@ -70,16 +69,25 @@
       :section-name="selectedSectionName"
       @close="closeReadModal"
     />
+
+    <!-- Delete Section Modal -->
+    <deleteSection
+      :open="showDeleteModal"
+      :section="selectedSectionForDelete"
+      :on-close="closeDeleteModal"
+      :on-confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup>
 import addSection from "@/components/CRUD/addSection.vue";
+import editSection from "@/components/CRUD/editSection.vue";
+import deleteSection from "@/components/CRUD/deleteSection.vue";
 import readSection from "@/components/CRUD/readSection.vue";
 import { useApi } from "@/composables/api";
 import { computed, onBeforeMount, ref } from "vue";
 
-// --- Api
 const { api } = useApi();
 
 // --- Sections Fetching
@@ -103,6 +111,64 @@ const confirmAdd = async (newSection) => {
     .finally(() => (showModal.value = false));
 };
 
+// --- Section Edit
+const showEditModal = ref(false);
+const selectedSectionForEdit = ref(null);
+
+const openEditModal = (section) => {
+  selectedSectionForEdit.value = { ...section };
+  showEditModal.value = true;
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+  selectedSectionForEdit.value = null;
+};
+
+const confirmEdit = async (updatedSection) => {
+  await api
+    .put(`/section/${updatedSection.id}`, {
+      name: updatedSection.name,
+      year: updatedSection.year
+    })
+    .then((res) => {
+      const idx = sections.value.findIndex((s) => s.id === updatedSection.id);
+      if (idx !== -1) {
+        sections.value[idx] = res.data;
+      }
+    })
+    .catch(console.error)
+    .finally(() => closeEditModal());
+};
+
+// --- Section Delete
+const showDeleteModal = ref(false);
+const selectedSectionForDelete = ref(null);
+
+const openDeleteModal = (section) => {
+  selectedSectionForDelete.value = { ...section };
+  showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false;
+  selectedSectionForDelete.value = null;
+};
+
+const confirmDelete = async () => {
+  if (!selectedSectionForDelete.value) return;
+  
+  await api
+    .delete(`/section/${selectedSectionForDelete.value.id}`)
+    .then(() => {
+      sections.value = sections.value.filter(
+        (s) => s.id !== selectedSectionForDelete.value.id
+      );
+    })
+    .catch(console.error)
+    .finally(() => closeDeleteModal());
+};
+
 // --- View Section (Read Modal)
 const showReadModal = ref(false);
 const selectedSection = ref(null);
@@ -113,7 +179,6 @@ const viewSection = async (section) => {
   selectedSection.value = section;
   selectedSectionName.value = `${section.name} - ${section.year}`;
   
-  // Fetch students for this section
   await api
     .get(`/section/${section.id}/student`)
     .then((res) => {
@@ -130,22 +195,6 @@ const closeReadModal = () => {
   selectedSectionName.value = "";
 };
 
-// --- Student Actions
-const handleEditStudent = (student) => {
-  console.log("Edit student:", student);
-  // Add your edit logic here
-};
-
-const handleViewStudent = (student) => {
-  console.log("View student:", student);
-  // Add your view logic here
-};
-
-const handleDeleteStudent = (student) => {
-  console.log("Delete student:", student);
-  // Add your delete logic here
-};
-
 // --- Filtering
 const searchQuery = ref("");
 
@@ -156,12 +205,10 @@ const filteredSections = computed(() => {
   );
 });
 
-// --- Data Fetching
 onBeforeMount(getSections);
 </script>
 
 <style scoped>
-/* Page Wrapper */
 .page-wrapper {
   width: 100%;
   padding: 2.5rem;
@@ -169,12 +216,9 @@ onBeforeMount(getSections);
 }
 
 @media (max-width: 768px) {
-  .page-wrapper {
-    padding: 1rem;
-  }
+  .page-wrapper { padding: 1rem; }
 }
 
-/* Controls Wrapper */
 .controls-wrapper {
   max-width: 64rem;
   margin: 0 auto 2rem;
@@ -191,43 +235,23 @@ onBeforeMount(getSections);
   }
 }
 
-/* Search Wrapper */
 .search-wrapper-section {
   position: relative;
   flex: 1;
 }
 
-.search-input {
-  width: 100%;
-  padding: 0.625rem 0.75rem 0.625rem 2.5rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  color: var(--text);
-  font-size: 0.875rem;
-  outline: none;
-  transition: all 0.2s;
+.search-wrapper-section .search-input {
+  padding-left: 2.5rem;
 }
 
-.search-input::placeholder {
-  color: var(--muted);
-}
-
-.search-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.search-icon {
+.search-wrapper-section .search-icon {
   position: absolute;
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--accent);
   pointer-events: none;
 }
 
-/* Section Grid */
 .section-grid {
   max-width: 64rem;
   margin: 0 auto;
@@ -237,18 +261,13 @@ onBeforeMount(getSections);
 }
 
 @media (min-width: 640px) {
-  .section-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .section-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (min-width: 1024px) {
-  .section-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .section-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* Section Card */
 .section-card {
   padding: 1.25rem;
   background: var(--bg);
@@ -267,9 +286,7 @@ onBeforeMount(getSections);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.section-card-header {
-  flex: 1;
-}
+.section-card-header { flex: 1; }
 
 .section-title {
   font-size: 1.25rem;
@@ -285,39 +302,18 @@ onBeforeMount(getSections);
 
 .section-card-footer {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
-.btn-view-section {
+.section-card-footer button {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.625rem 1rem;
-  background: var(--accent);
-  color: white;
-  border: 1px solid var(--accent);
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
-.btn-view-section:hover {
-  opacity: 0.9;
-}
-
-/* Dark Mode */
-.dark .btn-view-section {
-  color: var(--accent);
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Empty State */
 .empty-state-page {
   max-width: 64rem;
   margin: 4rem auto;
@@ -338,12 +334,6 @@ onBeforeMount(getSections);
   font-style: italic;
 }
 
-/* Utility Classes */
-.h-5 {
-  height: 1.25rem;
-}
-
-.w-5 {
-  width: 1.25rem;
-}
+.h-5 { height: 1.25rem; }
+.w-5 { width: 1.25rem; }
 </style>

@@ -1,22 +1,49 @@
 <template>
-  <div class="upcoming-events-landscape mt-6">
-    <h2 class="text-xl font-bold mb-4">Upcoming Events</h2>
+  <div class="mt-6" style="width: 100%;">
+    <h2 class="text-xl font-bold mb-4" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: var(--text);">
+      Upcoming Events
+    </h2>
 
-    <div class="events-container flex overflow-x-auto space-x-4 pb-2">
+    <div 
+      class="flex overflow-x-auto space-x-4 pb-2"
+      style="display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 0.5rem;"
+    >
       <div
         v-for="event in events"
         :key="event.id"
-        class="event-card flex-shrink-0 w-64 bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow"
+        class="surface"
+        style="
+          flex-shrink: 0;
+          width: 16rem;
+          border-radius: 0.5rem;
+          padding: 1rem;
+          cursor: pointer;
+          transition: all 0.15s;
+          border: 1px solid var(--border);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        "
         @click="goToEvent(event)"
+        @mouseenter="$event.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.15)'"
+        @mouseleave="$event.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'"
       >
         <img
           v-if="event.image"
           :src="event.image"
           :alt="event.title"
-          class="w-full h-32 object-cover rounded-md mb-3"
+          style="
+            width: 100%;
+            height: 8rem;
+            object-fit: cover;
+            border-radius: 0.375rem;
+            margin-bottom: 0.75rem;
+          "
         />
-        <h3 class="text-lg font-semibold">{{ event.title }}</h3>
-        <p class="text-gray-500 text-sm">{{ formatDate(event.date) }}</p>
+        <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem;">
+          {{ event.title }}
+        </h3>
+        <p class="text-muted" style="font-size: 0.875rem;">
+          {{ formatDate(event.date) }}
+        </p>
       </div>
     </div>
   </div>
@@ -64,29 +91,22 @@ onBeforeMount(getEvents);
 </script>
 
 <style scoped>
-.upcoming-events-landscape {
-  width: 100%;
-}
-
-/* Horizontal scrollbar styling */
-.events-container::-webkit-scrollbar {
+/* Horizontal scrollbar styling using theme variables */
+div[style*="overflow-x: auto"]::-webkit-scrollbar {
   height: 8px;
 }
 
-.events-container::-webkit-scrollbar-thumb {
+div[style*="overflow-x: auto"]::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
 }
 
-.events-container::-webkit-scrollbar-track {
+div[style*="overflow-x: auto"]::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Limit description lines for uniform card height */
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Dark mode scrollbar */
+.dark div[style*="overflow-x: auto"]::-webkit-scrollbar-thumb {
+  background-color: var(--accent);
 }
 </style>
