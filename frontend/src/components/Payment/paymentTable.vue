@@ -23,7 +23,7 @@
           </option>
         </select>
 
-        <button @click="$emit('refresh')" class="btn-refresh">
+        <button @click="refreshData" class="btn-refresh">
           <i class="fa-solid fa-arrows-rotate"></i>
           <span class="btn-text">Refresh</span>
         </button>
@@ -39,8 +39,14 @@
       </button>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Loading payments...</span>
+    </div>
+
     <!-- Desktop Table -->
-    <div class="desktop-table">
+    <div v-else class="desktop-table">
       <table class="w-full text-left text-sm">
         <thead class="table-head">
           <tr>
@@ -128,7 +134,7 @@
     </div>
 
     <!-- Mobile Cards -->
-    <div class="mobile-cards">
+    <div v-if="!loading" class="mobile-cards">
       <div
         v-for="(p, idx) in paged"
         :key="p.id || idx"
@@ -261,7 +267,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
+import axios from "axios";
 import AddPayment from "@/components/CRUD/addPayment.vue";
 import AddPaymentAmount from "@/components/CRUD/addPaymentAmount.vue";
 import ShowBalance from "@/components/CRUD/showBalance.vue";
@@ -277,42 +284,110 @@ const SortIcon = {
 };
 
 const props = defineProps({
-  payments: { type: Array, default: () => null },
+  violationId: { type: Number, default: null },
   defaultPerPage: { type: Number, default: 10 },
+  apiUrl: { type: String, default: "http://localhost:4000" },
 });
 
-const emit = defineEmits(["delete", "view", "refresh", "pay", "paymentSubmit"]);
+const emit = defineEmits(["error", "success"]);
+
+const API_BASE = props.apiUrl;
+const getAuthHeader = () => {
+  const token = localStorage.getItem('token'); // Adjust based on your auth storage
+  return { Authorization: `Bearer ${token}` };
+};
+
+const payments = ref([]);
+const loading = ref(false);
 
 const q = ref("");
 const page = ref(1);
 const perPage = ref(props.defaultPerPage);
 const sort = ref({ field: "createdAt", dir: "desc" });
 
-// Add Payment modal state (Step 1)
 const isAddPaymentModalOpen = ref(false);
 const scannedStudent = ref(null);
-
-// Add Payment Amount modal state (Step 2)
 const isAddPaymentAmountModalOpen = ref(false);
-
-// Balance modal state (Step 3)
 const isBalanceModalOpen = ref(false);
-const balanceData = ref({
-  name: '',
-  balance: 0
-});
-
-// View modal state
+const balanceData = ref({ name: '', balance: 0 });
 const isViewModalOpen = ref(false);
 const selectedPaymentForView = ref(null);
-
-// Delete modal state
 const isDeleteModalOpen = ref(false);
 const selectedPaymentForDelete = ref(null);
 
+async function fetchPayments() {
+  loading.value = true;
+  try {
+    const endpoint = props.violationId 
+      ? `/payment/violation/${props.violationId}`
+      : '/payment';
+    
+    const response = await axios.get(`${API_BASE}${endpoint}`, {
+      headers: getAuthHeader(),
+    });
+    
+    payments.value = response.data;
+  } catch (error) {
+    console.error('Error fetching payments:', error);
+    emit('error', error.response?.data || 'Failed to fetch payments');
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function refreshData() {
+  await fetchPayments();
+  emit('success', 'Payments refreshed');
+}
+
+async function createPayment(violationId, paymentData) {
+  try {
+    const response = await axios.post(
+      `${API_BASE}/payment/violation/${violationId}`,
+      paymentData,
+      { headers: getAuthHeader() }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error creating payment:', error);
+    throw error;
+  }
+}
+
+async function updatePayment(paymentId, updateData) {
+  try {
+    const response = await axios.patch(
+      `${API_BASE}/payment/${paymentId}`,
+      updateData,
+      { headers: getAuthHeader() }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error updating payment:', error);
+    throw error;
+  }
+}
+
+// Delete payment
+async function deletePayment(paymentId) {
+  try {
+    const response = await axios.delete(
+      `${API_BASE}/payment/${paymentId}`,
+      { headers: getAuthHeader() }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting payment:', error);
+    throw error;
+  }
+}
+
+// Modal handlers
 function openAddPaymentModal() {
   isAddPaymentModalOpen.value = true;
-  emit('pay');
 }
 
 function closeAddPaymentModal() {
@@ -320,16 +395,9 @@ function closeAddPaymentModal() {
 }
 
 function handleStudentScanned(studentInfo) {
-  // Store the scanned student info
   scannedStudent.value = studentInfo;
-  
-  // Close the barcode scan modal
   closeAddPaymentModal();
-  
-  // Open the payment amount modal
   isAddPaymentAmountModalOpen.value = true;
-  
-  console.log('Student scanned:', studentInfo);
 }
 
 function closeAddPaymentAmountModal() {
@@ -338,52 +406,49 @@ function closeAddPaymentAmountModal() {
 }
 
 function handleBackToScan() {
-  // Close amount modal and reopen scan modal
   closeAddPaymentAmountModal();
   isAddPaymentModalOpen.value = true;
 }
 
-function handlePaymentSubmit(paymentData) {
-  // Emit the payment data to parent component
-  emit('paymentSubmit', paymentData);
-  
-  console.log('Payment submitted:', paymentData);
-  
-  // Close the amount modal
-  closeAddPaymentAmountModal();
-  
-  // Calculate the updated balance (this should ideally come from your backend)
-  // For now, we'll use a placeholder calculation
-  const newBalance = calculateNewBalance(paymentData);
-  
-  // Set balance data for the modal
-  balanceData.value = {
-    name: paymentData.studentInfo.name,
-    balance: newBalance
-  };
-  
-  // Open the balance modal
-  isBalanceModalOpen.value = true;
+async function handlePaymentSubmit(paymentData) {
+  try {
+    const newPayment = await createPayment(
+      paymentData.violationId,
+      {
+        value: paymentData.amount,
+        remarks: paymentData.remarks || ""
+      }
+    );
+    
+    emit('success', 'Payment created successfully');
+    
+    closeAddPaymentAmountModal();
+    
+    const newBalance = calculateNewBalance(paymentData);
+    
+    balanceData.value = {
+      name: paymentData.studentInfo.name,
+      balance: newBalance
+    };
+    
+    isBalanceModalOpen.value = true;
+    
+    await fetchPayments();
+  } catch (error) {
+    emit('error', error.response?.data || 'Failed to create payment');
+    closeAddPaymentAmountModal();
+  }
 }
 
 function calculateNewBalance(paymentData) {
-  // Balance represents what the student still needs to pay
-  // When they make a payment, we subtract it from their outstanding balance
-  // Example: If student owes ₱500 and pays ₱100, new balance owed is ₱400
-  
   const outstandingBalance = paymentData.studentInfo.balance || 0;
   const newBalance = outstandingBalance - paymentData.amount;
-  
-  // Return the new outstanding balance (can be 0 or negative if overpaid)
-  return Math.max(0, newBalance); // Prevent negative balance display
+  return Math.max(0, newBalance);
 }
 
 function closeBalanceModal() {
   isBalanceModalOpen.value = false;
-  balanceData.value = {
-    name: '',
-    balance: 0
-  };
+  balanceData.value = { name: '', balance: 0 };
 }
 
 function sortBy(field) {
@@ -404,7 +469,6 @@ function handleView(payment) {
     date: formatDate(payment.createdAt),
   };
   isViewModalOpen.value = true;
-  emit('view', payment);
 }
 
 function closeViewModal() {
@@ -428,98 +492,20 @@ function closeDeleteModal() {
   selectedPaymentForDelete.value = null;
 }
 
-function confirmDelete() {
-  emit('delete', selectedPaymentForDelete.value.originalData);
-  closeDeleteModal();
+async function confirmDelete() {
+  try {
+    await deletePayment(selectedPaymentForDelete.value.originalData.id);
+    emit('success', 'Payment deleted successfully');
+    closeDeleteModal();
+    await fetchPayments();
+  } catch (error) {
+    emit('error', error.response?.data || 'Failed to delete payment');
+  }
 }
-
-const sample = [
-  {
-    id: 1,
-    value: 100,
-    remarks: "Paid in full",
-    violationId: 201,
-    violationType: "Late Attendance",
-    studentId: 2021001,
-    studentName: "Juan Dela Cruz",
-    createdAt: "2024-01-15T14:30:00",
-    updatedAt: "2024-01-15T14:30:00",
-  },
-  {
-    id: 2,
-    value: 150,
-    remarks: "Partial payment",
-    violationId: 202,
-    violationType: "Dress Code Violation",
-    studentId: 2021045,
-    studentName: "Maria Santos",
-    createdAt: "2024-01-16T10:15:00",
-    updatedAt: "2024-01-16T10:15:00",
-  },
-  {
-    id: 3,
-    value: 200,
-    remarks: "Cash payment",
-    violationId: 203,
-    violationType: "Missing ID",
-    studentId: 2020123,
-    studentName: "Jose Reyes",
-    createdAt: "2024-01-17T09:45:00",
-    updatedAt: "2024-01-17T09:45:00",
-  },
-  {
-    id: 4,
-    value: 50,
-    remarks: "Trip Lang",
-    violationId: 204,
-    violationType: "Late Submission",
-    studentId: 2019087,
-    studentName: "Ana Lim",
-    createdAt: "2024-01-18T13:20:00",
-    updatedAt: "2024-01-18T13:20:00",
-  },
-  {
-    id: 5,
-    value: 100,
-    remarks: "Paid via GCash",
-    violationId: 205,
-    violationType: "Late Attendance",
-    studentId: 2021002,
-    studentName: "Pedro Garcia",
-    createdAt: "2024-01-19T08:00:00",
-    updatedAt: "2024-01-19T08:00:00",
-  },
-  {
-    id: 6,
-    value: 175,
-    remarks: "First offense",
-    violationId: 206,
-    violationType: "Improper Uniform",
-    studentId: 2021078,
-    studentName: "Sofia Reyes",
-    createdAt: "2024-01-20T11:30:00",
-    updatedAt: "2024-01-20T11:30:00",
-  },
-  {
-    id: 7,
-    value: 300,
-    remarks: "Repeat violation",
-    violationId: 207,
-    violationType: "Absent Without Leave",
-    studentId: 2020056,
-    studentName: "Miguel Torres",
-    createdAt: "2024-01-21T15:45:00",
-    updatedAt: "2024-01-21T15:45:00",
-  },
-];
-
-const dataSource = computed(() =>
-  props.payments && props.payments.length ? props.payments : sample
-);
 
 const filtered = computed(() => {
   const qq = q.value.trim().toLowerCase();
-  return dataSource.value.filter((p) => {
+  return payments.value.filter((p) => {
     if (!qq) return true;
     return (
       (p.studentName || "").toLowerCase().includes(qq) ||
@@ -558,7 +544,9 @@ const sorted = computed(() => {
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(sorted.value.length / perPage.value))
 );
+
 const startIndex = computed(() => (page.value - 1) * perPage.value);
+
 const paged = computed(() =>
   sorted.value.slice(startIndex.value, startIndex.value + perPage.value)
 );
@@ -575,9 +563,26 @@ const formatDate = (dateString) => {
 };
 
 watch([q, perPage], () => (page.value = 1));
+
+onMounted(() => {
+  fetchPayments();
+});
 </script>
 
 <style scoped>
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+.loading-state i {
+  font-size: 1.5rem;
+}
+
 @media (min-width: 640px) {
   .header-top {
     flex-direction: row;
@@ -602,7 +607,6 @@ watch([q, perPage], () => (page.value = 1));
   }
 }
 
-/* Pay Button Section */
 .pay-button-section {
   padding: 1rem;
   border-bottom: 1px solid var(--border);
@@ -611,7 +615,6 @@ watch([q, perPage], () => (page.value = 1));
   justify-content: center;
 }
 
-/* Desktop Table */
 .desktop-table {
   display: none;
   overflow-x: auto;
@@ -623,14 +626,12 @@ watch([q, perPage], () => (page.value = 1));
   }
 }
 
-/* Card */
 .card-header-right {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* Small Mobile Optimizations */
 @media (max-width: 480px) {
   .table-header {
     padding: 0.75rem;

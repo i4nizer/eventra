@@ -1,73 +1,83 @@
 <template>
-  <div class="w-full p-10">
+  <div class="page-wrapper">
     <!-- Top Controls -->
-    <div
-      class="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 mb-8"
-    >
-      <input
-        type="text"
-        v-model="searchQuery"
-        placeholder="Search sections..."
-        class="w-full md:w-80 px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-      />
+    <div class="controls-wrapper">
+      <div class="search-wrapper-section">
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Search sections..."
+          class="search-input"
+        />
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      </div>
 
-      <button
-        class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-green-700 transition"
-        @click="showModal = true"
-      >
-        + Add
+      <button class="btn-add" @click="showModal = true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span class="btn-text">Add Section</span>
       </button>
     </div>
 
-    <!-- Section List -->
-    <div
-      class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-    >
+    <!-- Section Grid -->
+    <div class="section-grid">
       <div
         v-for="section in filteredSections"
         :key="section.id"
-        class="p-5 bg-white border border-gray-200 rounded-lg hover:border-green-500 transition cursor-pointer"
+        class="section-card"
       >
-        <h3 class="text-xl font-semibold text-gray-800 mb-1">
-          {{ section.name }}
-        </h3>
+        <div class="section-card-header">
+          <h3 class="section-title">{{ section.name }}</h3>
+          <p class="section-year">{{ section.year }}</p>
+        </div>
 
-        <p class="text-gray-500 text-sm mb-4">
-          {{ section.year }}
-        </p>
-
-        <button
-          class="w-full bg-green-500 text-white py-2 rounded-lg text-sm hover:bg-green-600 transition"
-          @click="viewSection(section.id)"
-        >
-          View
-        </button>
+        <div class="section-card-footer">
+          <button class="btn-view-section" @click="viewSection(section)">
+            <i class="fa-solid fa-eye"></i>
+            View Students
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Empty State -->
-    <p
-      v-if="filteredSections.length === 0"
-      class="text-center text-gray-400 text-lg italic mt-10"
-    >
-      No sections found.
-    </p>
+    <div v-if="filteredSections.length === 0" class="empty-state-page">
+      <i class="fa-solid fa-folder-open empty-icon"></i>
+      <p class="empty-text">No sections found.</p>
+    </div>
 
-    <!-- Imported Modal -->
+    <!-- Add Section Modal -->
     <addSection
       :show="showModal"
       @close="showModal = false"
       @add="confirmAdd"
+    />
+
+    <!-- Read Section Modal -->
+    <readSection
+      :open="showReadModal"
+      :students="selectedSectionStudents"
+      :section-name="selectedSectionName"
+      @close="closeReadModal"
     />
   </div>
 </template>
 
 <script setup>
 import addSection from "@/components/CRUD/addSection.vue";
+import readSection from "@/components/CRUD/readSection.vue";
 import { useApi } from "@/composables/api";
 import { computed, onBeforeMount, ref } from "vue";
-
-//
 
 // --- Api
 const { api } = useApi();
@@ -93,8 +103,47 @@ const confirmAdd = async (newSection) => {
     .finally(() => (showModal.value = false));
 };
 
-const viewSection = (id) => {
-  alert(`Viewing section with ID: ${id}`);
+// --- View Section (Read Modal)
+const showReadModal = ref(false);
+const selectedSection = ref(null);
+const selectedSectionStudents = ref([]);
+const selectedSectionName = ref("");
+
+const viewSection = async (section) => {
+  selectedSection.value = section;
+  selectedSectionName.value = `${section.name} - ${section.year}`;
+  
+  // Fetch students for this section
+  await api
+    .get(`/section/${section.id}/student`)
+    .then((res) => {
+      selectedSectionStudents.value = res.data;
+      showReadModal.value = true;
+    })
+    .catch(console.error);
+};
+
+const closeReadModal = () => {
+  showReadModal.value = false;
+  selectedSection.value = null;
+  selectedSectionStudents.value = [];
+  selectedSectionName.value = "";
+};
+
+// --- Student Actions
+const handleEditStudent = (student) => {
+  console.log("Edit student:", student);
+  // Add your edit logic here
+};
+
+const handleViewStudent = (student) => {
+  console.log("View student:", student);
+  // Add your view logic here
+};
+
+const handleDeleteStudent = (student) => {
+  console.log("Delete student:", student);
+  // Add your delete logic here
 };
 
 // --- Filtering
@@ -109,6 +158,192 @@ const filteredSections = computed(() => {
 
 // --- Data Fetching
 onBeforeMount(getSections);
-
-//
 </script>
+
+<style scoped>
+/* Page Wrapper */
+.page-wrapper {
+  width: 100%;
+  padding: 2.5rem;
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .page-wrapper {
+    padding: 1rem;
+  }
+}
+
+/* Controls Wrapper */
+.controls-wrapper {
+  max-width: 64rem;
+  margin: 0 auto 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .controls-wrapper {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* Search Wrapper */
+.search-wrapper-section {
+  position: relative;
+  flex: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  pointer-events: none;
+}
+
+/* Section Grid */
+.section-grid {
+  max-width: 64rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .section-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Section Card */
+.section-card {
+  padding: 1.25rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-card:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.section-card-header {
+  flex: 1;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.section-year {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.section-card-footer {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-view-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-view-section:hover {
+  opacity: 0.9;
+}
+
+/* Dark Mode */
+.dark .btn-view-section {
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Empty State */
+.empty-state-page {
+  max-width: 64rem;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: var(--muted);
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+.empty-text {
+  font-size: 1.125rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Utility Classes */
+.h-5 {
+  height: 1.25rem;
+}
+
+.w-5 {
+  width: 1.25rem;
+}
+</style>
