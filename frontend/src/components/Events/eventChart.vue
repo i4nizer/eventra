@@ -37,74 +37,35 @@ const props = defineProps({
   events: {
     type: Array,
     default: () => [
-      {
-        id: 1,
-        title: "Orientation",
-        registered: 150,
-        attendees: 120,
-        category: "special",
-      },
+      { id: 1, title: "Orientation", registered: 150, attendees: 120 },
       {
         id: 2,
         title: "Daily Attendance 2025-10-01",
         registered: 200,
         attendees: 190,
-        category: "normal",
       },
-      {
-        id: 3,
-        title: "Alumni Meet",
-        registered: 250,
-        attendees: 200,
-        category: "special",
-      },
-      {
-        id: 4,
-        title: "TechFest",
-        registered: 300,
-        attendees: 250,
-        category: "special",
-      },
-      {
-        id: 5,
-        title: "Coding Bootcamp",
-        registered: 120,
-        attendees: 100,
-        category: "normal",
-      },
-      {
-        id: 6,
-        title: "Hackathon",
-        registered: 180,
-        attendees: 150,
-        category: "special",
-      },
+      { id: 3, title: "Alumni Meet", registered: 250, attendees: 200 },
+      { id: 4, title: "TechFest", registered: 300, attendees: 250 },
+      { id: 5, title: "Coding Bootcamp", registered: 120, attendees: 100 },
+      { id: 6, title: "Hackathon", registered: 180, attendees: 150 },
       {
         id: 7,
         title: "Internship Orientation",
         registered: 220,
         attendees: 200,
-        category: "normal",
       },
-      {
-        id: 8,
-        title: "IT Summit",
-        registered: 350,
-        attendees: 300,
-        category: "special",
-      },
+      { id: 8, title: "IT Summit", registered: 350, attendees: 300 },
     ],
   },
 });
 
-// Resolve --accent CSS variable to a usable color string
+// Accent Color Resolver
 function getAccent() {
   try {
     const raw = getComputedStyle(document.documentElement)
       .getPropertyValue("--accent")
       ?.trim();
-    if (!raw) return "#10b981";
-    return raw;
+    return raw || "#10b981";
   } catch {
     return "#10b981";
   }
@@ -112,18 +73,8 @@ function getAccent() {
 
 function hexToRgba(hex, alpha = 1) {
   if (!hex) return `rgba(16,185,129,${alpha})`;
-  const h = hex.trim();
-  if (/^rgba?\(/i.test(h)) {
-    return h.replace(/^rgb\(/i, "rgba(").replace(/\)$/, `, ${alpha})`);
-  }
-  if (!/^#/.test(h)) return h;
-  let v = h.slice(1);
-  if (v.length === 3)
-    v = v
-      .split("")
-      .map((c) => c + c)
-      .join("");
-  const num = parseInt(v, 16);
+  const v = hex.replace("#", "");
+  const num = parseInt(v.length === 3 ? v.repeat(2) : v, 16);
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
   const b = num & 255;
@@ -134,30 +85,11 @@ const accentRaw = getAccent();
 const registeredColor = accentRaw;
 const attendeesColor = hexToRgba(accentRaw, 0.78);
 
-const categoryColors = {
-  special: { registered: registeredColor, attendees: attendeesColor },
-  normal: { registered: registeredColor, attendees: attendeesColor },
-  other: { registered: registeredColor, attendees: attendeesColor },
-};
-
-const colorFor = (category) => categoryColors[category] ?? categoryColors.other;
-
-const categoryList = computed(() => [
-  ...new Set(props.events.map((e) => e.category)),
-]);
-
-const selectedCategory = ref("all");
-
-const filteredEvents = computed(() =>
-  selectedCategory.value === "all"
-    ? props.events
-    : props.events.filter((e) => e.category === selectedCategory.value)
-);
-
+// DIRECTLY USE props.events (no filtering)
 const chartData = computed(() => {
-  const labels = filteredEvents.value.map((e) => e.title);
-  const registered = filteredEvents.value.map((e) => Number(e.registered ?? 0));
-  const attendees = filteredEvents.value.map((e) => Number(e.attendees ?? 0));
+  const labels = props.events.map((e) => e.title);
+  const registered = props.events.map((e) => Number(e.registered ?? 0));
+  const attendees = props.events.map((e) => Number(e.attendees ?? 0));
 
   return {
     labels,
@@ -165,19 +97,20 @@ const chartData = computed(() => {
       {
         label: "Registered",
         data: registered,
-        backgroundColor: filteredEvents.value.map(() => registeredColor),
+        backgroundColor: labels.map(() => registeredColor),
         borderRadius: 6,
       },
       {
         label: "Attendees",
         data: attendees,
-        backgroundColor: filteredEvents.value.map(() => attendeesColor),
+        backgroundColor: labels.map(() => attendeesColor),
         borderRadius: 6,
       },
     ],
   };
 });
 
+// Dark mode handling
 const isDark = ref(document.documentElement.classList.contains("dark"));
 let mo = null;
 
@@ -197,10 +130,11 @@ onBeforeUnmount(() => {
 
 function resolveMuted() {
   try {
-    const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue("--muted")
-      ?.trim();
-    return raw || "#6b7280";
+    return (
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--muted")
+        ?.trim() || "#6b7280"
+    );
   } catch {
     return "#6b7280";
   }
@@ -210,7 +144,7 @@ const chartTextColor = computed(() =>
   isDark.value ? "#ffffff" : resolveMuted()
 );
 
-// Detect mobile
+// Mobile detection
 const isMobile = ref(window.innerWidth < 768);
 
 onMounted(() => {
@@ -224,65 +158,40 @@ onMounted(() => {
   });
 });
 
+// Chart Options
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  interaction: { mode: "index", intersect: false },
   plugins: {
     legend: {
       position: isMobile.value ? "bottom" : "top",
       labels: {
         color: chartTextColor.value,
-        font: {
-          size: isMobile.value ? 10 : 12,
-        },
-        padding: isMobile.value ? 8 : 10,
+        font: { size: isMobile.value ? 10 : 12 },
       },
     },
     tooltip: {
       titleColor: chartTextColor.value,
       bodyColor: chartTextColor.value,
-      titleFont: {
-        size: isMobile.value ? 11 : 13,
-      },
-      bodyFont: {
-        size: isMobile.value ? 10 : 12,
-      },
       callbacks: {
         title: (ctx) => ctx[0].label,
         label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}`,
         afterBody: (ctx) => {
           const idx = ctx[0].dataIndex;
-          const ev = filteredEvents.value[idx];
-          const pct =
-            ev && ev.registered
-              ? Math.round(((ev.attendees ?? 0) / ev.registered) * 100)
-              : 0;
-          return `Present %: ${pct}%   •   Category: ${
-            ev?.category ?? "other"
-          }`;
+          const ev = props.events[idx];
+          const pct = Math.round(
+            ((ev.attendees ?? 0) / (ev.registered || 1)) * 100
+          );
+          return `Present %: ${pct}%`;
         },
       },
-    },
-  },
-  elements: {
-    bar: {
-      maxBarThickness: isMobile.value ? 24 : 64,
-      barPercentage: isMobile.value ? 0.5 : 0.65,
-      categoryPercentage: isMobile.value ? 0.6 : 0.8,
     },
   },
   scales: {
     x: {
       ticks: {
-        maxRotation: isMobile.value ? 90 : 45,
-        minRotation: isMobile.value ? 45 : 0,
-        autoSkip: true,
-        autoSkipPadding: isMobile.value ? 4 : 8,
         color: chartTextColor.value,
-        font: {
-          size: isMobile.value ? 9 : 11,
-        },
+        font: { size: isMobile.value ? 9 : 11 },
       },
       grid: { display: false },
     },
@@ -291,14 +200,8 @@ const chartOptions = computed(() => ({
       ticks: {
         precision: 0,
         color: chartTextColor.value,
-        font: {
-          size: isMobile.value ? 9 : 11,
-        },
       },
     },
-  },
-  layout: {
-    padding: isMobile.value ? 4 : 6,
   },
 }));
 </script>
