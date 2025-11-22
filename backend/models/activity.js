@@ -14,6 +14,11 @@ const attr = {
 		type: DataTypes.STRING,
 		allowNull: false,
 	},
+	fine: {
+		type: DataTypes.DECIMAL(10, 2),
+		allowNull: false,
+		defaultValue: 20,
+	},
 	description: {
 		type: DataTypes.STRING(512),
         allowNull: false,

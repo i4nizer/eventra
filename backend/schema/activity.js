@@ -5,6 +5,7 @@ import z from "zod"
 const ActivitySchema = z.object({
     id: z.number().int(),
     name: z.string().min(1),
+    fine: z.coerce.number().min(0).default(20),
     description: z.string().default(""),
     startAt: z.coerce.date(),
     finishAt: z.coerce.date(),
@@ -14,6 +15,7 @@ const ActivitySchema = z.object({
 
 const ActivityCreateSchema = ActivitySchema.pick({
     name: true,
+    fine: true,
     description: true,
     startAt: true,
     finishAt: true,
@@ -21,6 +23,7 @@ const ActivityCreateSchema = ActivitySchema.pick({
 
 const ActivityUpdateSchema = ActivitySchema.pick({
 	name: true,
+	fine: true,
 	description: true,
 	startAt: true,
 	finishAt: true,
