@@ -9,6 +9,7 @@ const routes = [
     path: "/",
     name: "Auth",
     component: Auth,
+    meta: { hideNav: true },
   },
   {
     path: "/dashboard",
@@ -79,10 +80,10 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, from, next) => {
-  const { token } = useApi()
-  if (!token && to.name != "Auth") return next({ name: "Auth" })
-  next()
-})
+// router.beforeEach((to, from, next) => {
+//   const { token } = useApi();
+//   if (!token && to.name != "Auth") return next({ name: "Auth" });
+//   next();
+// });
 
 export default router;

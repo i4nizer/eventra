@@ -70,46 +70,45 @@ import { computed, onBeforeMount, ref } from "vue";
 //
 
 // --- Api
-const { api } = useApi()
+const { api } = useApi();
 
 // --- Sections Fetching
-const sections = ref([])
+const sections = ref([]);
 
 const getSections = async () => {
-  await api.get("/section")
-    .then((res) => sections.value = res.data)
-    .catch(console.error)
-}
+  await api
+    .get("/section")
+    .then((res) => (sections.value = res.data))
+    .catch(console.error);
+};
 
 // --- Section Create
-const showModal = ref(false)
+const showModal = ref(false);
 
 const confirmAdd = async (newSection) => {
-  await api.post("/section", newSection)
+  await api
+    .post("/section", newSection)
     .then((res) => sections.value.push(res.data))
     .catch(console.error)
-    .finally(() => showModal.value = false)
-}
+    .finally(() => (showModal.value = false));
+};
 
 const viewSection = (id) => {
   alert(`Viewing section with ID: ${id}`);
-}
+};
 
 // --- Filtering
-const searchQuery = ref("")
+const searchQuery = ref("");
 
 const filteredSections = computed(() => {
   const q = searchQuery.value.toLowerCase();
   return sections.value.filter(
-    (s) =>
-      s.name.toLowerCase().includes(q) ||
-      s.year.toLowerCase().includes(q)
+    (s) => s.name.toLowerCase().includes(q) || s.year.toLowerCase().includes(q)
   );
-})
+});
 
 // --- Data Fetching
-onBeforeMount(getSections)
+onBeforeMount(getSections);
 
 //
-
 </script>

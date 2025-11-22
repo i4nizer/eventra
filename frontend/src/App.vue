@@ -8,15 +8,15 @@
       v-if="showNav && isMobile"
       @click="toggleMobileSidebar"
       class="fixed top-4 left-4 z-50 p-3 rounded-lg shadow-lg transition-all duration-200 hover:scale-105"
-      style="background: var(--surface2); border: 1px solid var(--border);"
+      style="background: var(--surface2); border: 1px solid var(--border)"
       aria-label="Toggle menu"
     >
       <i
         :class="[
           isSidebarOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars',
-          'text-xl'
+          'text-xl',
         ]"
-        style="color: var(--accent);"
+        style="color: var(--accent)"
       ></i>
     </button>
 
