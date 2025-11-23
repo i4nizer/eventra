@@ -44,22 +44,8 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {{ event.eventDate }}
+              {{ formatDate(event.eventDate) }}
             </p>
-
-            <!-- Time Entries -->
-            <div class="event-time-entries">
-              <div
-                v-for="entry in event.timeEntries"
-                :key="entry.name"
-                class="event-time-entry"
-              >
-                <span class="entry-name">{{ entry.name }}</span>
-                <span class="entry-time">
-                  {{ entry.startTime }} — {{ entry.endTime }}
-                </span>
-              </div>
-            </div>
 
             <!-- Sections -->
             <p class="event-section flex items-center gap-1">
@@ -83,7 +69,16 @@
                   d="M12 14l6.16-3.422a12.083 12.083 0 01.34 6.825L12 14z"
                 />
               </svg>
-              {{ event.sections.join(", ") }}
+              {{
+                event.sections
+                  .map((id) => {
+                    const sec = sections.value?.find(
+                      (s) => Number(s.id) === Number(id)
+                    );
+                    return sec ? sec.label : `Unknown Section`; // fallback text instead of raw ID
+                  })
+                  .join(", ") || "No sections"
+              }}
             </p>
 
             <!-- Fines -->
@@ -128,7 +123,12 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {{ event.createdAt }}
+              {{ formatDate(event.createdAt) }}
+            </p>
+
+            <!-- Elegant Description -->
+            <p class="event-description">
+              {{ event.description }}
             </p>
           </div>
 
@@ -155,13 +155,14 @@
 </template>
 
 <script setup>
-import { useApi } from "@/composables/api"
+import { format } from "date-fns"; // Import date-fns for formatting
+import { useApi } from "@/composables/api";
 import { ref, computed, onBeforeMount } from "vue";
 import EventModal from "./EventModal.vue"; // ✅ Import modal component
 
 //
 
-const { api } = useApi()
+const { api } = useApi();
 
 //
 
@@ -194,14 +195,23 @@ const events = ref([
 ]);
 
 const getEvents = async () => {
-  const activities = await api.get("/activity").then((res) => res.data).catch(() => undefined)
-  if (!activities) return console.error(`Failed to GET events.`)
+  const activities = await api
+    .get("/activity")
+    .then((res) => res.data)
+    .catch(() => undefined);
+  if (!activities) return console.error(`Failed to GET events.`);
 
-  const eprms = []
+  const eprms = [];
   for (const activity of activities) {
     // --- Fetch activity's entries and sections
-    const actentprms = api.get(`/activity/${activity.id}/entry`).then((res) => res.data).catch(() => [])
-    const actsecprms = api.get(`/activity/${activity.id}/section`).then((res) => res.data).catch(() => [])
+    const actentprms = api
+      .get(`/activity/${activity.id}/entry`)
+      .then((res) => res.data)
+      .catch(() => []);
+    const actsecprms = api
+      .get(`/activity/${activity.id}/section`)
+      .then((res) => res.data)
+      .catch(() => []);
 
     // --- Merge fetch then format into event
     const eventprms = Promise.all([actentprms, actsecprms])
@@ -209,35 +219,41 @@ const getEvents = async () => {
         id: activity.id,
         name: activity.name,
         fines: activity.fine,
+        description: activity.description,
         eventDate: activity.startAt,
+        startAt: activity.startAt, // <--- actual start datetime
+        finishAt: activity.finishAt, // <--- actual finish datetime
         createdAt: activity.createdAt,
         sections: secs.map((s) => s.name),
-        timeEntries: ents.map((e) => ({ name: e.name, startTime: e.startAt, endTime: e.finishAt })),
+        timeEntries: ents.map((e) => ({
+          name: e.name,
+          startTime: e.startAt,
+          endTime: e.finishAt,
+        })),
       }))
       .then((res) => events.value.push(res))
-      .catch(console.error)
+      .catch(console.error);
 
     // --- List only, handle later
-    eprms.push(eventprms)
+    eprms.push(eventprms);
   }
 
   // --- Handle all fetching and formatting in palalel
-  await Promise.all(eprms).catch(console.error)
-}
+  await Promise.all(eprms).catch(console.error);
+};
 
 // --- Sections
-const sections = ref([
-  // { id: 1, label: "BSIT 1A" },
-  // { id: 2, label: "BSIT 1B" },
-  // { id: 3, label: "BSCS 2B" },
-]);
+const sections = ref([]);
 
 const getSections = async () => {
-  await api.get("/section")
-    .then((res) => res.data.map((s) => ({ id: s.id, label: `${s.year}-${s.name}` })))
+  await api
+    .get("/section")
+    .then((res) =>
+      res.data.map((s) => ({ id: s.id, label: `${s.year}-${s.name}` }))
+    )
     .then((res) => sections.value.push(...res))
-    .catch(console.error)
-}
+    .catch(console.error);
+};
 
 // --- Filtering/Sorting
 const searchQuery = ref("");
@@ -274,14 +290,20 @@ const updateEvent = async (updatedEvent) => {
     description: "", // *desc
     startAt: updatedEvent.eventDate, // *startTime
     finishAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // *endTime
-  }
+  };
 
   // --- Updates event
-  const activity = await api.patch("/activity", event).then((res) => res.data).catch(() => undefined)
-  if (!activity) return 
+  const activity = await api
+    .patch("/activity", event)
+    .then((res) => res.data)
+    .catch(() => undefined);
+  if (!activity) return;
 
   // --- Entries needs id to keep trackable
-  const entries = await api.get(`/activity/${activity.id}/section`).then((res) => res.data).catch(() => [])
+  const entries = await api
+    .get(`/activity/${activity.id}/section`)
+    .then((res) => res.data)
+    .catch(() => []);
   // const entforadds = updatedEvent.timeEntries.filter((e) => !entries.some((n) => n.id == e.id))
   // const entfordels = entries.filter((e) => !updatedEvent.timeEntries.some((t) => t.id == e.id))
   // const entaddprms = entforadds.map((e) => api.post(`/activity/${activity.id}/entry`, e))
@@ -289,12 +311,23 @@ const updateEvent = async (updatedEvent) => {
   // await Promise.all([...entaddprms, ...entdelprms]).catch(console.error)
 
   // --- Sections might change
-  const sections = await api.get(`/activity/${activity.id}/section`).then((res) => res.data).catch(() => [])
-  const secforadds = updatedEvent.sections.filter((s) => !sections.some((o) => o.id == s))
-  const secfordels = sections.filter((s) => !updatedEvent.sections.includes(s.id))
-  const secaddprms = secforadds.map((s) => api.post(`/activity/${activity.id}/section/section/${s}`))
-  const secdelprms = secfordels.map((s) => api.delete(`/activity/${activity.id}/section/section/${s.id}`))
-  await Promise.all([...secaddprms, ...secdelprms]).catch(console.error)
+  const sections = await api
+    .get(`/activity/${activity.id}/section`)
+    .then((res) => res.data)
+    .catch(() => []);
+  const secforadds = updatedEvent.sections.filter(
+    (s) => !sections.some((o) => o.id == s)
+  );
+  const secfordels = sections.filter(
+    (s) => !updatedEvent.sections.includes(s.id)
+  );
+  const secaddprms = secforadds.map((s) =>
+    api.post(`/activity/${activity.id}/section/section/${s}`)
+  );
+  const secdelprms = secfordels.map((s) =>
+    api.delete(`/activity/${activity.id}/section/section/${s.id}`)
+  );
+  await Promise.all([...secaddprms, ...secdelprms]).catch(console.error);
 
   const index = events.value.findIndex((e) => e.id === updatedEvent.id);
   if (index !== -1) events.value[index] = updatedEvent;
@@ -302,16 +335,20 @@ const updateEvent = async (updatedEvent) => {
 
 const deleteEvent = async (id) => {
   if (confirm("Are you sure you want to delete this event?")) {
-    await api.delete(`/activity/${id}`).catch(console.error)
+    await api.delete(`/activity/${id}`).catch(console.error);
     events.value = events.value.filter((e) => e.id !== id);
     closeModal();
   }
 };
 
 // --- Data Fetching
-const getData = async () => await Promise.all([getEvents(), getSections()])
-onBeforeMount(getData)
+const getData = async () => await Promise.all([getEvents(), getSections()]);
+onBeforeMount(getData);
 
+// Add a computed property to format the createdAt date
+const formatDate = (date) => {
+  return format(new Date(date), "MMMM d, yyyy, h:mm a"); // Example: "November 23, 2025, 5:31 PM"
+};
 </script>
 
 <style scoped>
@@ -327,8 +364,7 @@ onBeforeMount(getData)
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   gap: 0.75rem;
 }
 
@@ -387,11 +423,12 @@ onBeforeMount(getData)
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 2rem;
+  width: 100%;
 }
 
 .event-card {
-  width: 100%;
+  width: 32% !important;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 1rem;
@@ -415,6 +452,23 @@ onBeforeMount(getData)
   .event-card {
     width: calc(25% - 0.75rem);
   }
+}
+
+.event-description {
+  font-size: 0.875rem; /* Slightly smaller than title */
+  color: #374151; /* Gray-700 for elegance */
+  line-height: 1.5; /* Comfortable reading */
+  margin: 0.5rem 0 1rem 0; /* Spacing around */
+  background: rgba(16, 185, 129, 0.05); /* Soft accent background */
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid #10b981; /* Elegant accent bar */
+  border-radius: 0.375rem;
+  font-style: italic; /* Slightly stylized */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Show max 3 lines */
+  -webkit-box-orient: vertical;
 }
 
 .event-card:hover {
@@ -505,27 +559,39 @@ onBeforeMount(getData)
   box-shadow: 0 0 15px 3px rgba(16, 185, 129, 0.4);
 }
 
+/* Minimal design for event-time-entries */
 .event-time-entries {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .event-time-entry {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--surface);
   padding: 0.5rem 1rem;
+  background: #f9f9f9; /* Light background for contrast */
+  border: 1px solid #ddd; /* Subtle border */
   border-radius: 0.375rem;
-  border: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: #333;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-time-entry:hover {
+  background: #f1f1f1; /* Slightly darker background on hover */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
 }
 
 .entry-name {
   font-weight: 600;
+  color: #555;
 }
 
 .entry-time {
-  color: var(--muted);
+  color: #777;
+  font-size: 0.875rem;
 }
 </style>

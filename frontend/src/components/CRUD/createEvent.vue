@@ -42,9 +42,38 @@
           </p>
         </div>
 
+        <!-- Event Start & End Times -->
+        <div class="flex gap-4">
+          <div class="flex-1">
+            <label class="input-label">Start Time</label>
+            <input
+              v-model="startAt"
+              type="datetime-local"
+              class="input-field"
+              :class="{ 'input-error': errors.startAt }"
+            />
+            <p v-if="errors.startAt" class="error-message">
+              {{ errors.startAt }}
+            </p>
+          </div>
+
+          <div class="flex-1">
+            <label class="input-label">Finish Time</label>
+            <input
+              v-model="finishAt"
+              type="datetime-local"
+              class="input-field"
+              :class="{ 'input-error': errors.finishAt }"
+            />
+            <p v-if="errors.finishAt" class="error-message">
+              {{ errors.finishAt }}
+            </p>
+          </div>
+        </div>
+
         <!-- Multiple Time Entries -->
         <div>
-          <label class="input-label">Event Time</label>
+          <label class="input-label">Event Entries</label>
           <div
             v-for="(entry, index) in timeEntries"
             :key="index"
@@ -169,6 +198,20 @@
           </p>
         </div>
 
+        <div>
+          <label class="input-label">Description</label>
+          <textarea
+            v-model="description"
+            class="input-field"
+            :class="{ 'input-error': errors.description }"
+            placeholder="Describe the event..."
+            rows="3"
+          ></textarea>
+          <p v-if="errors.description" class="error-message">
+            {{ errors.description }}
+          </p>
+        </div>
+
         <p v-if="errors.submit" class="error-message-submit">
           {{ errors.submit }}
         </p>
@@ -202,26 +245,32 @@ const props = defineProps({
 });
 
 const name = ref("");
-const timeEntries = ref([{ name: "", startTime: "", endTime: "" }]); // Multiple time entries
+const timeEntries = ref([{ name: "", startTime: "", endTime: "" }]);
 const selectedSections = ref([]);
 const searchQuery = ref("");
 const errors = ref({});
 const submitting = ref(false);
 const selectAll = ref(false);
-const fines = ref(""); // New fines field
+const fines = ref("");
+const startAt = ref("");
+const finishAt = ref("");
+const description = ref("");
 
 watch(
   () => props.open,
   (val) => {
     if (val) {
       name.value = "";
-      fines.value = ""; // Reset fines field
+      fines.value = "";
       timeEntries.value = [{ name: "", startTime: "", endTime: "" }];
       selectedSections.value = [];
       searchQuery.value = "";
       errors.value = {};
       submitting.value = false;
       selectAll.value = false;
+      startAt.value = "";
+      finishAt.value = "";
+      description.value = "";
     }
   }
 );
@@ -256,8 +305,15 @@ const toggleSelectAll = () => {
 function validate() {
   const err = {};
   if (!name.value.trim()) err.name = "Event name is required.";
+  if (!description.value.trim()) err.description = "Description is required.";
   if (fines.value === "" || fines.value < 0)
     err.fines = "Fines must be a positive number.";
+  if (!startAt.value) err.startAt = "Event start time is required.";
+  if (!finishAt.value) err.finishAt = "Event end time is required.";
+  if (startAt.value && finishAt.value && startAt.value >= finishAt.value) {
+    err.finishAt = "Event end time must be after start time.";
+  }
+
   err.timeEntries = timeEntries.value.map((entry) => {
     const entryErrors = {};
     if (!entry.name.trim()) entryErrors.name = "Entry name is required.";
@@ -279,18 +335,22 @@ function validate() {
   return err;
 }
 
-// Handle form submission
+// Include event start/end in payload
 async function handleSubmit() {
   const err = validate();
   errors.value = err;
   if (Object.keys(err).length) return;
+
   submitting.value = true;
 
   const payload = {
     name: name.value.trim(),
-    fines: parseFloat(fines.value), // Include fines in the payload
+    fines: parseFloat(fines.value),
+    startAt: startAt.value,
+    finishAt: finishAt.value,
     timeEntries: timeEntries.value,
     sections: selectedSections.value,
+    description: description.value.trim(),
   };
 
   try {
