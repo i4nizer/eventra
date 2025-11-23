@@ -5,8 +5,8 @@ import z from "zod"
 const ViolationSchema = z.object({
     id: z.number().int(),
     fine: z.coerce.number().int(),
+    entryId: z.coerce.number().int(),
     studentId: z.coerce.number().int(),
-    activityEntryId: z.coerce.number().int(),
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
 })

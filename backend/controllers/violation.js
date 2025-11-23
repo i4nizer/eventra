@@ -11,9 +11,9 @@ const get = async (req, res) => {
 
     if (vioid) {
         const filter = {
-            id: vioid,
+			id: vioid,
+            ...(entid && { entryId: entid }),
             ...(stuid && { studentId: stuid }),
-            ...(entid && { activityEntryId: entid }),
         }
 
         const violation = await models.violation.Violation.findOne({ where: filter })
@@ -26,8 +26,8 @@ const get = async (req, res) => {
     
     const options = {
         where: {
+            ...(entid && { entryId: entid }),
             ...(stuid && { studentId: stuid }),
-            ...(entid && { activityEntryId: entid }),
             ...(parsed.data.alpha && { createdAt: { [Op.gte]: new Date(parsed.data.alpha) } }),
             ...(parsed.data.omega && { createdAt: { [Op.gte]: new Date(parsed.data.omega) } }),
         },

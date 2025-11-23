@@ -9,21 +9,21 @@ const attr = {
 		type: DataTypes.INTEGER,
 		primaryKey: true,
 		autoIncrement: true,
-    },
-    fine: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
+	},
+	fine: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	},
+	entryId: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		references: { model: "activities-entries", key: "id" },
+		onDelete: "CASCADE",
+	},
 	studentId: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
 		references: { model: "students", key: "id" },
-		onDelete: "CASCADE",
-	},
-	activityEntryId: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-		references: { model: "activities-entries", key: "id" },
 		onDelete: "CASCADE",
 	},
 	createdAt: {

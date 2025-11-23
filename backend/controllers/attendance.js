@@ -13,7 +13,7 @@ const get = async (req, res) => {
         const filter = {
             id: attid,
             ...(stuid && { studentId: stuid }),
-            ...(entid && { activityEntryId: entid }),
+            ...(entid && { entryId: entid }),
         }
 
         const attendance = await models.attendance.Attendance.findOne({ where: filter })
@@ -27,7 +27,7 @@ const get = async (req, res) => {
     const options = {
         where: {
             ...(stuid && { studentId: stuid }),
-            ...(entid && { activityEntryId: entid }),
+            ...(entid && { entryId: entid }),
             ...(parsed.data.alpha && { createdAt: { [Op.gte]: new Date(parsed.data.alpha) } }),
             ...(parsed.data.omega && { createdAt: { [Op.gte]: new Date(parsed.data.omega) } }),
         },
@@ -43,7 +43,7 @@ const post = async (req, res) => {
     if (!req.params.stuid && !req.params.entid) return res.status(400).send("Missing stuid and entid.")
     const { stuid, entid } = req.params
 
-    const attendance = await models.attendance.Attendance.create({ studentId: stuid, activityEntryId: entid })
+    const attendance = await models.attendance.Attendance.create({ studentId: stuid, entryId: entid })
     res.json(attendance.dataValues)
 }
 
