@@ -315,6 +315,8 @@ const selectedPaymentForView = ref(null);
 const isDeleteModalOpen = ref(false);
 const selectedPaymentForDelete = ref(null);
 
+// Replace the fetchPayments function in paymentTable.vue with this:
+
 async function fetchPayments() {
   loading.value = true;
   try {
@@ -326,7 +328,115 @@ async function fetchPayments() {
       headers: getAuthHeader(),
     });
     
-    payments.value = response.data;
+    const rawPayments = response.data;
+    
+    // Enrich payments with student and violation info
+    const enrichedPayments = await Promise.all(
+      rawPayments.map(async (payment) => {
+        try {
+          // Fetch the violation to get studentId and activityEntryId
+          const violationRes = await axios.get(
+            `${API_BASE}/violation/${payment.violationId}`,
+            { headers: getAuthHeader() }
+          );
+          const violation = violationRes.data;
+          
+          // Fetch student info
+          let studentName = 'Unknown';
+          let studentSid = 'N/A';
+          try {
+            const studentsRes = await axios.get(
+              `${API_BASE}/section/student`,
+              { headers: getAuthHeader() }
+            );
+            const student = studentsRes.data.find(s => s.id === violation.studentId);
+            if (student) {
+              studentName = student.name;
+              studentSid = student.sid;
+            }
+          } catch (e) {
+            console.error('Error fetching student:', e);
+          }
+          
+          // Fetch activity entry to get violation type/name
+          let violationType = `Violation #${violation.id}`;
+          try {
+            const activityRes = await axios.get(
+              `${API_BASE}/activity/entry/${violation.activityEntryId}`,
+              { headers: getAuthHeader() }
+            );
+            if (activityRes.data?.name) {
+              violationType = activityRes.data.name;
+            }
+          } catch (e) {
+            // Activity entry might not have a name, use fine amount instead
+            violationType = `Fine: ₱${violation.fine}`;
+          }
+          
+          return {
+            ...payment,
+            studentName,
+            studentId: studentSid,
+            violationType,
+            fine: violation.fine
+          };
+        } catch (err) {
+          console.error('Error enriching payment:', err);
+          return {
+            ...payment,
+            studentName: 'Unknown',
+            studentId: 'N/A',
+            violationType: `Violation #${payment.violationId}`
+          };
+        }
+      })
+    );
+    
+    payments.value = enrichedPayments;
+  } catch (error) {
+    console.error('Error fetching payments:', error);
+    emit('error', error.response?.data || 'Failed to fetch payments');
+  } finally {
+    loading.value = false;
+  }
+}
+
+// ALTERNATIVE: If the above is too slow (too many API calls),
+// you can cache the students and activities first:
+
+async function fetchPaymentsOptimized() {
+  loading.value = true;
+  try {
+    // Fetch all data in parallel
+    const [paymentsRes, studentsRes, violationsRes] = await Promise.all([
+      axios.get(`${API_BASE}/payment`, { headers: getAuthHeader() }),
+      axios.get(`${API_BASE}/section/student`, { headers: getAuthHeader() }),
+      axios.get(`${API_BASE}/violation`, { headers: getAuthHeader() })
+    ]);
+    
+    const rawPayments = paymentsRes.data;
+    const students = studentsRes.data;
+    const violations = violationsRes.data;
+    
+    // Create lookup maps for fast access
+    const studentMap = new Map(students.map(s => [s.id, s]));
+    const violationMap = new Map(violations.map(v => [v.id, v]));
+    
+    // Enrich payments
+    const enrichedPayments = rawPayments.map(payment => {
+      const violation = violationMap.get(payment.violationId) || {};
+      const student = studentMap.get(violation.studentId) || {};
+      
+      return {
+        ...payment,
+        studentName: student.name || 'Unknown',
+        studentId: student.sid || 'N/A',
+        violationType: `Fine: ₱${violation.fine || 0}`,
+        fine: violation.fine || 0
+      };
+    });
+    
+    payments.value = enrichedPayments;
   } catch (error) {
     console.error('Error fetching payments:', error);
     emit('error', error.response?.data || 'Failed to fetch payments');
@@ -410,33 +520,88 @@ function handleBackToScan() {
   isAddPaymentModalOpen.value = true;
 }
 
+// Replace the handlePaymentSubmit function in paymentTable.vue with this:
+
 async function handlePaymentSubmit(paymentData) {
   try {
-    const newPayment = await createPayment(
-      paymentData.violationId,
-      {
-        value: paymentData.amount,
-        remarks: paymentData.remarks || ""
+    const { studentInfo, amount } = paymentData;
+    const violations = studentInfo.violations || [];
+    
+    // Check if there are violations to pay
+    if (violations.length === 0) {
+      emit('error', 'No outstanding violations found for this student');
+      closeAddPaymentAmountModal();
+      return;
+    }
+    
+    // Check if amount exceeds total balance
+    if (amount > studentInfo.balance) {
+      emit('error', `Amount exceeds outstanding balance of ₱${studentInfo.balance.toFixed(2)}`);
+      return;
+    }
+    
+    let remainingAmount = amount;
+    const paymentsToCreate = [];
+    
+    // Shuffle violations for random selection
+    const shuffled = [...violations].sort(() => Math.random() - 0.5);
+    
+    // Distribute payment across violations
+    for (const violation of shuffled) {
+      if (remainingAmount <= 0) break;
+      
+      // Calculate how much to pay for this violation
+      const paymentForThis = Math.min(remainingAmount, violation.remaining);
+      
+      if (paymentForThis > 0) {
+        paymentsToCreate.push({
+          violationId: violation.id,
+          value: paymentForThis,
+          remarks: `Payment applied to violation #${violation.id}`
+        });
+        remainingAmount -= paymentForThis;
       }
-    );
+    }
     
-    emit('success', 'Payment created successfully');
+    // Create all payment records
+    for (const payment of paymentsToCreate) {
+      await createPayment(payment.violationId, {
+        value: payment.value,
+        remarks: payment.remarks
+      });
+    }
     
+    emit('success', `Payment of ₱${amount.toFixed(2)} created successfully`);
     closeAddPaymentAmountModal();
     
-    const newBalance = calculateNewBalance(paymentData);
+    // Calculate and show new balance
+    const newBalance = Math.max(0, studentInfo.balance - amount);
     
     balanceData.value = {
-      name: paymentData.studentInfo.name,
+      name: studentInfo.name,
       balance: newBalance
     };
     
     isBalanceModalOpen.value = true;
     
+    // Refresh the payments table
     await fetchPayments();
+    
   } catch (error) {
+    console.error('Payment error:', error);
     emit('error', error.response?.data || 'Failed to create payment');
     closeAddPaymentAmountModal();
+  }
+}
+
+function handlePay() {
+  if (isValidAmount.value) {
+    const paymentData = {
+      studentInfo: props.studentInfo, // This now includes violations array
+      amount: parseFloat(amount.value)
+    };
+    props.onPay(paymentData);
+    // Don't call handleClose here - let parent handle it
   }
 }
 
