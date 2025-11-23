@@ -11,9 +11,8 @@
 
       <select v-model="sortBy" class="sort-select">
         <option value="name">Name</option>
-        <option value="startTime">Start Time</option>
-        <option value="endTime">End Time</option>
-        <option value="section">Section</option>
+        <option value="eventDate">Event Date</option>
+        <option value="fines">Fines</option>
       </select>
     </div>
 
@@ -28,9 +27,9 @@
         <div class="event-card-content">
           <div>
             <h3 class="event-title">{{ event.name }}</h3>
+
             <!-- Event Date -->
             <p class="event-date flex items-center gap-1">
-              Event Date:
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-4 w-4 text-gray-500"
@@ -47,26 +46,22 @@
               </svg>
               {{ event.eventDate }}
             </p>
-            <!-- Time -->
-            <p class="event-time flex items-center gap-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {{ event.startTime }} — {{ event.endTime }}
-            </p>
 
-            <!-- Section -->
+            <!-- Time Entries -->
+            <div class="event-time-entries">
+              <div
+                v-for="entry in event.timeEntries"
+                :key="entry.name"
+                class="event-time-entry"
+              >
+                <span class="entry-name">{{ entry.name }}</span>
+                <span class="entry-time">
+                  {{ entry.startTime }} — {{ entry.endTime }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Sections -->
             <p class="event-section flex items-center gap-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -88,7 +83,7 @@
                   d="M12 14l6.16-3.422a12.083 12.083 0 01.34 6.825L12 14z"
                 />
               </svg>
-              {{ event.section }}
+              {{ event.sections.join(", ") }}
             </p>
 
             <!-- Fines -->
@@ -151,8 +146,9 @@
     <EventModal
       v-if="selectedEvent"
       :event="selectedEvent"
+      :sections="sections"
       @close="closeModal"
-      @edit="editEvent"
+      @update="updateEvent"
       @delete="deleteEvent"
     />
   </div>
@@ -166,43 +162,33 @@ const events = ref([
   {
     id: 1,
     name: "Orientation",
-    startTime: "8:00 AM",
-    endTime: "10:00 AM",
-    section: "BSIT 1A",
+    timeEntries: [
+      { name: "Opening", startTime: "08:00", endTime: "09:00" },
+      { name: "Main Event", startTime: "09:00", endTime: "10:00" },
+    ],
+    sections: ["BSIT 1A", "BSIT 1B"],
     fines: 0,
-    eventDate: "2025-MM-DD",
-    createdAt: "2025-MM-DD",
+    eventDate: "2025-11-23",
+    createdAt: "2025-11-20",
   },
   {
     id: 2,
     name: "Tech Fair",
-    startTime: "1:00 PM",
-    endTime: "4:00 PM",
-    section: "BSCS 2B",
+    timeEntries: [
+      { name: "Exhibit", startTime: "13:00", endTime: "15:00" },
+      { name: "Closing", startTime: "15:00", endTime: "16:00" },
+    ],
+    sections: ["BSCS 2B"],
     fines: 150,
-    eventDate: "2025-MM-DD",
-    createdAt: "2025-MM-DD",
+    eventDate: "2025-11-24",
+    createdAt: "2025-11-21",
   },
-  {
-    id: 3,
-    name: "Hackathon",
-    startTime: "9:00 AM",
-    endTime: "3:00 PM",
-    section: "BSIT 3C",
-    fines: 50,
-    eventDate: "2025-MM-DD",
-    createdAt: "2025-MM-DD",
-  },
-  {
-    id: 4,
-    name: "General Assembly",
-    startTime: "10:00 AM",
-    endTime: "12:00 PM",
-    section: "BSIT 4A",
-    fines: 100,
-    eventDate: "2025-MM-DD",
-    createdAt: "2025-MM-DD",
-  },
+]);
+
+const sections = ref([
+  { id: 1, label: "BSIT 1A" },
+  { id: 2, label: "BSIT 1B" },
+  { id: 3, label: "BSCS 2B" },
 ]);
 
 const searchQuery = ref("");
@@ -215,7 +201,10 @@ const filteredAndSortedEvents = computed(() => {
     const q = searchQuery.value.toLowerCase();
     result = result.filter(
       (e) =>
-        e.name.toLowerCase().includes(q) || e.section.toLowerCase().includes(q)
+        e.name.toLowerCase().includes(q) ||
+        e.sections.some((s) => s.toLowerCase().includes(q)) ||
+        e.timeEntries.some((entry) => entry.name.toLowerCase().includes(q)) ||
+        e.fines.toString().includes(q)
     );
   }
   return [...result].sort((a, b) => {
@@ -227,7 +216,10 @@ const filteredAndSortedEvents = computed(() => {
 
 const openModal = (event) => (selectedEvent.value = event);
 const closeModal = () => (selectedEvent.value = null);
-const editEvent = (event) => alert(`Editing ${event.name}`);
+const updateEvent = (updatedEvent) => {
+  const index = events.value.findIndex((e) => e.id === updatedEvent.id);
+  if (index !== -1) events.value[index] = updatedEvent;
+};
 const deleteEvent = (id) => {
   if (confirm("Are you sure you want to delete this event?")) {
     events.value = events.value.filter((e) => e.id !== id);
@@ -425,5 +417,29 @@ const deleteEvent = (id) => {
 
 :global(.dark) .event-card:hover {
   box-shadow: 0 0 15px 3px rgba(16, 185, 129, 0.4);
+}
+
+.event-time-entries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.event-time-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+}
+
+.entry-name {
+  font-weight: 600;
+}
+
+.entry-time {
+  color: var(--muted);
 }
 </style>

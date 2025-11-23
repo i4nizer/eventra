@@ -152,6 +152,23 @@
           </p>
         </div>
 
+        <!-- Fines Field -->
+        <div>
+          <label class="input-label">Fines</label>
+          <input
+            v-model="fines"
+            type="number"
+            class="input-field"
+            :class="{ 'input-error': errors.fines }"
+            placeholder="e.g. 50"
+            min="0"
+            step="0.01"
+          />
+          <p v-if="errors.fines" class="error-message">
+            {{ errors.fines }}
+          </p>
+        </div>
+
         <p v-if="errors.submit" class="error-message-submit">
           {{ errors.submit }}
         </p>
@@ -191,12 +208,14 @@ const searchQuery = ref("");
 const errors = ref({});
 const submitting = ref(false);
 const selectAll = ref(false);
+const fines = ref(""); // New fines field
 
 watch(
   () => props.open,
   (val) => {
     if (val) {
       name.value = "";
+      fines.value = ""; // Reset fines field
       timeEntries.value = [{ name: "", startTime: "", endTime: "" }];
       selectedSections.value = [];
       searchQuery.value = "";
@@ -233,10 +252,12 @@ const toggleSelectAll = () => {
   }
 };
 
-// Validate form inputs
+// Update the validation function to include fines
 function validate() {
   const err = {};
   if (!name.value.trim()) err.name = "Event name is required.";
+  if (fines.value === "" || fines.value < 0)
+    err.fines = "Fines must be a positive number.";
   err.timeEntries = timeEntries.value.map((entry) => {
     const entryErrors = {};
     if (!entry.name.trim()) entryErrors.name = "Entry name is required.";
@@ -267,6 +288,7 @@ async function handleSubmit() {
 
   const payload = {
     name: name.value.trim(),
+    fines: parseFloat(fines.value), // Include fines in the payload
     timeEntries: timeEntries.value,
     sections: selectedSections.value,
   };
@@ -347,5 +369,25 @@ async function handleSubmit() {
 
 .btn-remove-entry:hover {
   opacity: 0.85;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  transition: border 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 118, 255, 0.25);
+}
+
+.error-message {
+  color: var(--danger);
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
 }
 </style>
