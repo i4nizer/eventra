@@ -9,6 +9,7 @@ const ActivitySchema = z.object({
     description: z.string().default(""),
     startAt: z.coerce.date(),
     finishAt: z.coerce.date(),
+    evaluated: z.boolean().default(false),
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
 })

@@ -32,6 +32,11 @@ const attr = {
 		type: DataTypes.DATE,
 		allowNull: false,
 	},
+	evaluated: {
+		type: DataTypes.BOOLEAN,
+		allowNull: false,
+		defaultValue: false,
+	},
 	createdAt: {
 		type: DataTypes.DATE,
 		allowNull: false,
