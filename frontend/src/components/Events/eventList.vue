@@ -265,12 +265,44 @@ const filteredAndSortedEvents = computed(() => {
 
 const openModal = (event) => (selectedEvent.value = event);
 const closeModal = () => (selectedEvent.value = null);
-const updateEvent = (updatedEvent) => {
+
+const updateEvent = async (updatedEvent) => {
+  // *need to add desc, event end datetime
+  const event = {
+    name: updatedEvent.name,
+    fine: updatedEvent.fines,
+    description: "", // *desc
+    startAt: updatedEvent.eventDate, // *startTime
+    finishAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // *endTime
+  }
+
+  // --- Updates event
+  const activity = await api.patch("/activity", event).then((res) => res.data).catch(() => undefined)
+  if (!activity) return 
+
+  // --- Entries needs id to keep trackable
+  const entries = await api.get(`/activity/${activity.id}/section`).then((res) => res.data).catch(() => [])
+  // const entforadds = updatedEvent.timeEntries.filter((e) => !entries.some((n) => n.id == e.id))
+  // const entfordels = entries.filter((e) => !updatedEvent.timeEntries.some((t) => t.id == e.id))
+  // const entaddprms = entforadds.map((e) => api.post(`/activity/${activity.id}/entry`, e))
+  // const entdelprms = entfordels.map((e) => api.delete(`/activity/${activity.id}/entry/${e.id}`))
+  // await Promise.all([...entaddprms, ...entdelprms]).catch(console.error)
+
+  // --- Sections might change
+  const sections = await api.get(`/activity/${activity.id}/section`).then((res) => res.data).catch(() => [])
+  const secforadds = updatedEvent.sections.filter((s) => !sections.some((o) => o.id == s))
+  const secfordels = sections.filter((s) => !updatedEvent.sections.includes(s.id))
+  const secaddprms = secforadds.map((s) => api.post(`/activity/${activity.id}/section/section/${s}`))
+  const secdelprms = secfordels.map((s) => api.delete(`/activity/${activity.id}/section/section/${s.id}`))
+  await Promise.all([...secaddprms, ...secdelprms]).catch(console.error)
+
   const index = events.value.findIndex((e) => e.id === updatedEvent.id);
   if (index !== -1) events.value[index] = updatedEvent;
 };
-const deleteEvent = (id) => {
+
+const deleteEvent = async (id) => {
   if (confirm("Are you sure you want to delete this event?")) {
+    await api.delete(`/activity/${id}`).catch(console.error)
     events.value = events.value.filter((e) => e.id !== id);
     closeModal();
   }
