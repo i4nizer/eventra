@@ -111,7 +111,7 @@ const isValid = ref(false);
 const isLoading = ref(false);
 const studentInfo = ref(null);
 const studentBalance = ref(0);
-const studentViolations = ref([]); // NEW: Store violations with remaining amounts
+const studentViolations = ref([]);
 const error = ref('');
 const barcodeInput = ref(null);
 let searchTimeout = null;
@@ -143,7 +143,7 @@ async function fetchStudentBySid(sid) {
   }
 }
 
-// NEW: Fetch violations with their remaining balances
+//Fetch violations with their remaining balances
 async function fetchStudentViolationsWithBalance(studentId) {
   try {
     const violationsResponse = await axios.get(
@@ -221,7 +221,7 @@ function handleNext() {
     props.onNext({
       ...studentInfo.value,
       balance: studentBalance.value,
-      violations: studentViolations.value // Pass violations to next step
+      violations: studentViolations.value
     });
     handleClose();
   }

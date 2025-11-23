@@ -133,7 +133,6 @@ function validateAmount() {
   const numAmount = parseFloat(amount.value);
   const maxBalance = props.studentInfo?.balance || 0;
   
-  // Valid if: is a number, greater than 0, and doesn't exceed balance
   isValidAmount.value = !isNaN(numAmount) && numAmount > 0 && numAmount <= maxBalance;
 }
 
@@ -146,15 +145,13 @@ function formatAmount(value) {
   });
 }
 
-// UPDATED: Pass the full studentInfo (which includes violations) to parent
 function handlePay() {
   if (isValidAmount.value && props.studentInfo) {
     const paymentData = {
-      studentInfo: props.studentInfo, // Contains: id, name, sid, balance, violations[]
+      studentInfo: props.studentInfo, 
       amount: parseFloat(amount.value)
     };
     props.onPay(paymentData);
-    // Parent (paymentTable) will handle closing the modal
   }
 }
 

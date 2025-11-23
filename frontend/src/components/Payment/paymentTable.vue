@@ -315,8 +315,6 @@ const selectedPaymentForView = ref(null);
 const isDeleteModalOpen = ref(false);
 const selectedPaymentForDelete = ref(null);
 
-// Replace the fetchPayments function in paymentTable.vue with this:
-
 async function fetchPayments() {
   loading.value = true;
   try {
@@ -369,7 +367,6 @@ async function fetchPayments() {
               violationType = activityRes.data.name;
             }
           } catch (e) {
-            // Activity entry might not have a name, use fine amount instead
             violationType = `Fine: ₱${violation.fine}`;
           }
           
@@ -400,9 +397,6 @@ async function fetchPayments() {
     loading.value = false;
   }
 }
-
-// ALTERNATIVE: If the above is too slow (too many API calls),
-// you can cache the students and activities first:
 
 async function fetchPaymentsOptimized() {
   loading.value = true;
@@ -520,8 +514,7 @@ function handleBackToScan() {
   isAddPaymentModalOpen.value = true;
 }
 
-// Replace the handlePaymentSubmit function in paymentTable.vue with this:
-
+// Payment handlers
 async function handlePaymentSubmit(paymentData) {
   try {
     const { studentInfo, amount } = paymentData;
@@ -597,11 +590,10 @@ async function handlePaymentSubmit(paymentData) {
 function handlePay() {
   if (isValidAmount.value) {
     const paymentData = {
-      studentInfo: props.studentInfo, // This now includes violations array
+      studentInfo: props.studentInfo, 
       amount: parseFloat(amount.value)
     };
     props.onPay(paymentData);
-    // Don't call handleClose here - let parent handle it
   }
 }
 
