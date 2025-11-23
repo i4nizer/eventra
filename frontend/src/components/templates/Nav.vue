@@ -108,7 +108,7 @@ const sidebarItems = computed(() =>
       icon: "fa-solid fa-peso-sign",
       label: "Payment Logs",
     },
-    { to: "/reports", icon: "fa-solid fa-chart-bar", label: "Reports" },
+    { to: "/violation-logs", icon: "fa-solid fa-triangle-exclamation", label: "Violation Logs" },
     { to: "/settings", icon: "fa-solid fa-cog", label: "Settings" },
   ].filter((item) => hasAccess(item.roles))
 );
