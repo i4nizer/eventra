@@ -4,6 +4,7 @@ import config from "../config/index.js";
 //
 
 const photo = async (req, res, next) => {
+  if (config.env.authBypass) return next()
   const token = req.query.token;
   if (!token) return res.status(401).send("Authorization required.");
 
@@ -15,10 +16,9 @@ const photo = async (req, res, next) => {
 };
 
 const access = async (req, res, next) => {
-  return next();
+  if (config.env.authBypass) return next();
   const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith("Bearer "))
-    return res.status(401).send("Authorization required.");
+  if (!auth || !auth.startsWith("Bearer ")) return res.status(401).send("Authorization required.");
 
   const access = auth.split(" ")[1];
   await Promise.resolve()
