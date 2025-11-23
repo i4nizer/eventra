@@ -9,7 +9,7 @@ let busy = false
 
 const run = async (interval = 1000) => {
     setInterval(() => loop().catch(console.error).finally(() => busy = false), interval)
-    console.info(`Task, violation task watching for evals every ${interval}ms.`)
+    console.info(`Task, violation task running.`)
 }
 
 const loop = async () => {

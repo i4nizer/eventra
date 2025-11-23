@@ -37,8 +37,9 @@ const run = async () => {
     await config.sequelize.authenticate()
     console.info("Boot, sequelize authenticated.")
 
-    if (!config.env.sequelizeSync) return
-    await config.sequelize.sync({ alter: true })
+    const { sequelizeSync, sequelizeAlter, sequelizeForce } = config.env
+    if (!sequelizeSync) return
+    await config.sequelize.sync({ alter: sequelizeAlter, force: sequelizeForce })
     console.info("Boot, sequelize tables synced.")
 }
 

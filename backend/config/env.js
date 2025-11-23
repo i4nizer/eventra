@@ -9,6 +9,8 @@ const env = {
   sequelizeUri: process.env.SEQUELIZE_URI,
   sequelizeName: process.env.SEQUELIZE_NAME,
   sequelizeSync: !!process.env.SEQUELIZE_SYNC,
+  sequelizeAlter: !!process.env.SEQUELIZE_ALTER,
+  sequelizeForce: !!process.env.SEQUELIZE_FORCE,
   sequelizeLogging: !!process.env.SEQUELIZE_LOGGING,
   jwtAccessLife: Number(process.env.JWT_ACCESS_LIFE),
   jwtAccessSecret: process.env.JWT_ACCESS_SECRET,
