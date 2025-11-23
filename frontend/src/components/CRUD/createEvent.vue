@@ -44,17 +44,33 @@
 
         <!-- Multiple Time Entries -->
         <div>
-          <label class="input-label">Event Times</label>
+          <label class="input-label">Event Time</label>
           <div
             v-for="(entry, index) in timeEntries"
             :key="index"
-            class="grid grid-cols-2 gap-3 mb-2"
+            class="entry-group"
           >
             <div>
-              <label class="input-label">Start time</label>
+              <label class="input-label">Entry Name</label>
+              <input
+                v-model="entry.name"
+                type="text"
+                class="input-field"
+                placeholder="e.g. Opening Ceremony"
+                :class="{
+                  'input-error': errors.timeEntries?.[index]?.name,
+                }"
+              />
+              <p v-if="errors.timeEntries?.[index]?.name" class="error-message">
+                {{ errors.timeEntries[index].name }}
+              </p>
+            </div>
+
+            <div>
+              <label class="input-label">Start Date & Time</label>
               <input
                 v-model="entry.startTime"
-                type="time"
+                type="datetime-local"
                 class="input-field"
                 :class="{
                   'input-error': errors.timeEntries?.[index]?.startTime,
@@ -69,10 +85,10 @@
             </div>
 
             <div>
-              <label class="input-label">End time</label>
+              <label class="input-label">End Date & Time</label>
               <input
                 v-model="entry.endTime"
-                type="time"
+                type="datetime-local"
                 class="input-field"
                 :class="{
                   'input-error': errors.timeEntries?.[index]?.endTime,
@@ -91,7 +107,7 @@
               class="btn-remove-entry"
               @click="removeTimeEntry(index)"
             >
-              Remove
+              <i class="fa-solid fa-trash"></i>
             </button>
           </div>
           <button type="button" class="btn-add-entry" @click="addTimeEntry">
@@ -169,7 +185,7 @@ const props = defineProps({
 });
 
 const name = ref("");
-const timeEntries = ref([{ startTime: "", endTime: "" }]); // Multiple time entries
+const timeEntries = ref([{ name: "", startTime: "", endTime: "" }]); // Multiple time entries
 const selectedSections = ref([]);
 const searchQuery = ref("");
 const errors = ref({});
@@ -181,7 +197,7 @@ watch(
   (val) => {
     if (val) {
       name.value = "";
-      timeEntries.value = [{ startTime: "", endTime: "" }];
+      timeEntries.value = [{ name: "", startTime: "", endTime: "" }];
       selectedSections.value = [];
       searchQuery.value = "";
       errors.value = {};
@@ -193,7 +209,7 @@ watch(
 
 // Add a new time entry
 const addTimeEntry = () => {
-  timeEntries.value.push({ startTime: "", endTime: "" });
+  timeEntries.value.push({ name: "", startTime: "", endTime: "" });
 };
 
 // Remove a time entry
@@ -223,10 +239,12 @@ function validate() {
   if (!name.value.trim()) err.name = "Event name is required.";
   err.timeEntries = timeEntries.value.map((entry) => {
     const entryErrors = {};
-    if (!entry.startTime) entryErrors.startTime = "Start time is required.";
-    if (!entry.endTime) entryErrors.endTime = "End time is required.";
+    if (!entry.name.trim()) entryErrors.name = "Entry name is required.";
+    if (!entry.startTime)
+      entryErrors.startTime = "Start date & time is required.";
+    if (!entry.endTime) entryErrors.endTime = "End date & time is required.";
     if (entry.startTime && entry.endTime && entry.startTime >= entry.endTime) {
-      entryErrors.endTime = "End time must be after start time.";
+      entryErrors.endTime = "End date & time must be after start date & time.";
     }
     return entryErrors;
   });
@@ -265,6 +283,37 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
+.entry-group {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  padding: 1rem 2rem 1rem 2rem;
+}
+.modal-form {
+  max-width: 45vw; /* Increase the maximum width */
+  width: 100%; /* Adjust width to take up more space */
+  max-height: 90vh; /* Increase the maximum height */
+  height: auto; /* Allow height to adjust based on content */
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  overflow-y: auto; /* Enable scrolling if content overflows */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-backdrop-simple {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Darken the backdrop */
+  z-index: 1000;
+}
+
 .checkbox-list {
   max-height: 10rem;
   overflow-y: auto;
@@ -283,9 +332,20 @@ async function handleSubmit() {
 
 .btn-remove-entry {
   background-color: var(--danger);
-  color: white;
-  padding: 0.25rem 0.5rem;
+  color: #fff;
+  padding: 0.25rem;
   border-radius: 0.375rem;
   cursor: pointer;
+  height: 2.5rem;
+  width: 2.5rem;
+  margin-top: auto;
+}
+
+.btn-remove-entry i {
+  font-size: 1rem;
+}
+
+.btn-remove-entry:hover {
+  opacity: 0.85;
 }
 </style>
