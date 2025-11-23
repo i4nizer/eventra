@@ -6,6 +6,9 @@ dotenv.config({ quiet: true })
 const env = {
 	port: Number(process.env.PORT),
 	authBypass: !!process.env.AUTH_BYPASS,
+	adminName: process.env.ADMIN_NAME,
+	adminEmail: process.env.ADMIN_EMAIL,
+	adminPassword: process.env.ADMIN_PASSWORD,
 	sequelizeRaw: process.env.SEQUELIZE_RAW,
 	sequelizeUri: process.env.SEQUELIZE_URI,
 	sequelizeName: process.env.SEQUELIZE_NAME,
