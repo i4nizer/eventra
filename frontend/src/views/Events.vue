@@ -3,10 +3,7 @@
     <div class="eventHeader">
       <div class="header-content">
         <eventsCount />
-        <button
-          @click="openCreateModal"
-          class="btn-add"
-        >
+        <button @click="openCreateModal" class="btn-add">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -38,35 +35,45 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useApi } from "@/composables/api";
 import eventsCount from "@/components/Events/eventsCount.vue";
 import eventList from "@/components/Events/eventList.vue";
 import createEvent from "@/components/CRUD/createEvent.vue";
 
+const { api } = useApi();
 const isCreateModalOpen = ref(false);
 
-// Define your sections here or fetch from API
-const sections = ref([
-  { id: '1A', label: '1A / Grade 7' },
-  { id: '2B', label: '2B / Grade 8' },
-  { id: '3C', label: '3C / Grade 9' },
-  { id: '4D', label: '4D / Grade 10' },
-  // Add more sections as needed
-]);
+const sections = ref([]);
 
+const getSections = async () => {
+  await api
+    .get(`/section`)
+    .then((res) => {
+      sections.value = res.data.map((section) => ({
+        id: section.id,
+        label: `${section.name} / Year ${section.year}`,
+      }));
+    })
+    .catch(console.error);
+};
+
+onMounted(getSections);
+
+// Open the Create Event modal
 function openCreateModal() {
   isCreateModalOpen.value = true;
 }
 
+// Close the Create Event modal
 function closeCreateModal() {
   isCreateModalOpen.value = false;
 }
 
+// Handle event creation
 async function handleCreateEvent(eventData) {
-  // Implement your event creation logic here
-  // For example, call an API to save the event
-  console.log('Creating event:', eventData);
-  
+  console.log("Creating event:", eventData);
+
   // Example API call (uncomment and modify as needed):
   // try {
   //   await api.createEvent(eventData);
@@ -103,7 +110,6 @@ async function handleCreateEvent(eventData) {
   }
 }
 
-
 @media (min-width: 640px) {
   .btn-add {
     width: auto;
@@ -128,7 +134,7 @@ async function handleCreateEvent(eventData) {
   .events {
     padding: 0.875rem;
   }
-  
+
   .eventHeader {
     margin-bottom: 1.25rem;
   }
@@ -139,7 +145,7 @@ async function handleCreateEvent(eventData) {
   .events {
     padding: 0.75rem;
   }
-  
+
   .eventHeader {
     margin-bottom: 1rem;
   }
@@ -154,7 +160,7 @@ async function handleCreateEvent(eventData) {
   .events {
     padding: 0.5rem;
   }
-  
+
   .eventHeader {
     margin-bottom: 0.875rem;
   }
