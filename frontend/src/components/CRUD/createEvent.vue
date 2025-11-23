@@ -25,7 +25,7 @@
       </header>
 
       <!-- Form content -->
-        <div class="space-y-4">
+      <div class="space-y-4">
         <div>
           <label class="input-label">Event name</label>
           <input
@@ -42,64 +42,130 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="input-label">Start time</label>
-            <input
-              v-model="startTime"
-              type="time"
-              class="input-field"
-              :class="{
-                'input-error': errors.startTime || errors.time,
-              }"
-            />
-            <p v-if="errors.startTime" class="error-message">
-              {{ errors.startTime }}
-            </p>
-          </div>
-
-          <div>
-            <label class="input-label">End time</label>
-            <input
-              v-model="endTime"
-              type="time"
-              class="input-field"
-              :class="{
-                'input-error': errors.endTime || errors.time,
-              }"
-            />
-            <p v-if="errors.endTime" class="error-message">
-              {{ errors.endTime }}
-            </p>
-          </div>
-        </div>
-        <p v-if="errors.time" class="error-message">{{ errors.time }}</p>
-
+        <!-- Multiple Time Entries -->
         <div>
-          <label class="input-label">Section / Year level</label>
-          <select
-            v-if="sections && sections.length"
-            v-model="section"
-            class="input-field"
-            :class="{
-              'input-error': errors.section,
-            }"
+          <label class="input-label">Event Time</label>
+          <div
+            v-for="(entry, index) in timeEntries"
+            :key="index"
+            class="entry-group"
           >
-            <option v-for="s in sections" :key="s.id" :value="s.id">
-              {{ s.label }}
-            </option>
-          </select>
+            <div>
+              <label class="input-label">Entry Name</label>
+              <input
+                v-model="entry.name"
+                type="text"
+                class="input-field"
+                placeholder="e.g. Opening Ceremony"
+                :class="{
+                  'input-error': errors.timeEntries?.[index]?.name,
+                }"
+              />
+              <p v-if="errors.timeEntries?.[index]?.name" class="error-message">
+                {{ errors.timeEntries[index].name }}
+              </p>
+            </div>
+
+            <div>
+              <label class="input-label">Start Date & Time</label>
+              <input
+                v-model="entry.startTime"
+                type="datetime-local"
+                class="input-field"
+                :class="{
+                  'input-error': errors.timeEntries?.[index]?.startTime,
+                }"
+              />
+              <p
+                v-if="errors.timeEntries?.[index]?.startTime"
+                class="error-message"
+              >
+                {{ errors.timeEntries[index].startTime }}
+              </p>
+            </div>
+
+            <div>
+              <label class="input-label">End Date & Time</label>
+              <input
+                v-model="entry.endTime"
+                type="datetime-local"
+                class="input-field"
+                :class="{
+                  'input-error': errors.timeEntries?.[index]?.endTime,
+                }"
+              />
+              <p
+                v-if="errors.timeEntries?.[index]?.endTime"
+                class="error-message"
+              >
+                {{ errors.timeEntries[index].endTime }}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="btn-remove-entry"
+              @click="removeTimeEntry(index)"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <button type="button" class="btn-add-entry" @click="addTimeEntry">
+            + Add Time Entry
+          </button>
+        </div>
+
+        <!-- Sections as checkboxes with search -->
+        <div>
+          <label class="input-label">Sections / Year Levels</label>
           <input
-            v-else
-            v-model="section"
-            placeholder="e.g. 3A / Grade 10"
-            class="input-field"
-            :class="{
-              'input-error': errors.section,
-            }"
+            v-model="searchQuery"
+            placeholder="Search sections..."
+            class="input-field mb-2"
           />
+          <div class="flex items-center mb-2">
+            <input
+              type="checkbox"
+              id="selectAll"
+              v-model="selectAll"
+              @change="toggleSelectAll"
+            />
+            <label for="selectAll" class="ml-2">Select All</label>
+          </div>
+          <div class="checkbox-list">
+            <div
+              v-for="s in filteredSections"
+              :key="s.id"
+              class="flex items-center mb-1"
+            >
+              <input
+                type="checkbox"
+                :id="`section-${s.id}`"
+                :value="s.id"
+                v-model="selectedSections"
+              />
+              <label :for="`section-${s.id}`" class="ml-2">{{ s.label }}</label>
+            </div>
+          </div>
           <p v-if="errors.section" class="error-message">
             {{ errors.section }}
+          </p>
+        </div>
+
+        <!-- Fines Field -->
+        <div>
+          <label class="input-label">Fines</label>
+          <input
+            v-model="fines"
+            type="number"
+            class="input-field"
+            :class="{ 'input-error': errors.fines }"
+            placeholder="e.g. 50"
+            min="0"
+            step="0.01"
+          />
+          <p v-if="errors.fines" class="error-message">
+            {{ errors.fines }}
           </p>
         </div>
 
@@ -107,9 +173,14 @@
           {{ errors.submit }}
         </p>
       </div>
-      
+
       <footer class="modal-footer-inline">
-        <button type="button" @click="onClose" class="btn-cancel" :disabled="submitting">
+        <button
+          type="button"
+          @click="onClose"
+          class="btn-cancel"
+          :disabled="submitting"
+        >
           Cancel
         </button>
         <button type="submit" class="btn-submit" :disabled="submitting">
@@ -121,7 +192,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 
 const props = defineProps({
   open: Boolean,
@@ -131,37 +202,84 @@ const props = defineProps({
 });
 
 const name = ref("");
-const startTime = ref("");
-const endTime = ref("");
-const section = ref("");
+const timeEntries = ref([{ name: "", startTime: "", endTime: "" }]); // Multiple time entries
+const selectedSections = ref([]);
+const searchQuery = ref("");
 const errors = ref({});
 const submitting = ref(false);
+const selectAll = ref(false);
+const fines = ref(""); // New fines field
 
 watch(
   () => props.open,
   (val) => {
     if (val) {
       name.value = "";
-      startTime.value = "";
-      endTime.value = "";
-      section.value = props.sections?.length ? props.sections[0].id : "";
+      fines.value = ""; // Reset fines field
+      timeEntries.value = [{ name: "", startTime: "", endTime: "" }];
+      selectedSections.value = [];
+      searchQuery.value = "";
       errors.value = {};
       submitting.value = false;
+      selectAll.value = false;
     }
   }
 );
 
+// Add a new time entry
+const addTimeEntry = () => {
+  timeEntries.value.push({ name: "", startTime: "", endTime: "" });
+};
+
+// Remove a time entry
+const removeTimeEntry = (index) => {
+  timeEntries.value.splice(index, 1);
+};
+
+// Filter sections based on the search query
+const filteredSections = computed(() => {
+  return props.sections.filter((s) =>
+    s.label.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// Toggle select all functionality
+const toggleSelectAll = () => {
+  if (selectAll.value) {
+    selectedSections.value = props.sections.map((s) => s.id);
+  } else {
+    selectedSections.value = [];
+  }
+};
+
+// Update the validation function to include fines
 function validate() {
   const err = {};
   if (!name.value.trim()) err.name = "Event name is required.";
-  if (!startTime.value) err.startTime = "Start time is required.";
-  if (!endTime.value) err.endTime = "End time is required.";
-  if (startTime.value && endTime.value && startTime.value >= endTime.value)
-    err.time = "End time must be after start time.";
-  if (!section.value) err.section = "Please pick a section/year level.";
+  if (fines.value === "" || fines.value < 0)
+    err.fines = "Fines must be a positive number.";
+  err.timeEntries = timeEntries.value.map((entry) => {
+    const entryErrors = {};
+    if (!entry.name.trim()) entryErrors.name = "Entry name is required.";
+    if (!entry.startTime)
+      entryErrors.startTime = "Start date & time is required.";
+    if (!entry.endTime) entryErrors.endTime = "End date & time is required.";
+    if (entry.startTime && entry.endTime && entry.startTime >= entry.endTime) {
+      entryErrors.endTime = "End date & time must be after start date & time.";
+    }
+    return entryErrors;
+  });
+  if (err.timeEntries.some((entry) => Object.keys(entry).length > 0)) {
+    err.timeEntries = err.timeEntries;
+  } else {
+    delete err.timeEntries;
+  }
+  if (!selectedSections.value.length)
+    err.section = "Please select at least one section.";
   return err;
 }
 
+// Handle form submission
 async function handleSubmit() {
   const err = validate();
   errors.value = err;
@@ -170,9 +288,9 @@ async function handleSubmit() {
 
   const payload = {
     name: name.value.trim(),
-    startTime: startTime.value,
-    endTime: endTime.value,
-    section: section.value,
+    fines: parseFloat(fines.value), // Include fines in the payload
+    timeEntries: timeEntries.value,
+    sections: selectedSections.value,
   };
 
   try {
@@ -187,4 +305,89 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
+.entry-group {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  padding: 1rem 2rem 1rem 2rem;
+}
+.modal-form {
+  max-width: 45vw; /* Increase the maximum width */
+  width: 100%; /* Adjust width to take up more space */
+  max-height: 90vh; /* Increase the maximum height */
+  height: auto; /* Allow height to adjust based on content */
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  overflow-y: auto; /* Enable scrolling if content overflows */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-backdrop-simple {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Darken the backdrop */
+  z-index: 1000;
+}
+
+.checkbox-list {
+  max-height: 10rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
+
+.btn-add-entry {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.btn-remove-entry {
+  background-color: var(--danger);
+  color: #fff;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  height: 2.5rem;
+  width: 2.5rem;
+  margin-top: auto;
+}
+
+.btn-remove-entry i {
+  font-size: 1rem;
+}
+
+.btn-remove-entry:hover {
+  opacity: 0.85;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  transition: border 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 118, 255, 0.25);
+}
+
+.error-message {
+  color: var(--danger);
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
 </style>
