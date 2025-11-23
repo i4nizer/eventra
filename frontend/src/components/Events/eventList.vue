@@ -155,42 +155,91 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { useApi } from "@/composables/api"
+import { ref, computed, onBeforeMount } from "vue";
 import EventModal from "./EventModal.vue"; // ✅ Import modal component
 
+//
+
+const { api } = useApi()
+
+//
+
+// --- Events
 const events = ref([
-  {
-    id: 1,
-    name: "Orientation",
-    timeEntries: [
-      { name: "Opening", startTime: "08:00", endTime: "09:00" },
-      { name: "Main Event", startTime: "09:00", endTime: "10:00" },
-    ],
-    sections: ["BSIT 1A", "BSIT 1B"],
-    fines: 0,
-    eventDate: "2025-11-23",
-    createdAt: "2025-11-20",
-  },
-  {
-    id: 2,
-    name: "Tech Fair",
-    timeEntries: [
-      { name: "Exhibit", startTime: "13:00", endTime: "15:00" },
-      { name: "Closing", startTime: "15:00", endTime: "16:00" },
-    ],
-    sections: ["BSCS 2B"],
-    fines: 150,
-    eventDate: "2025-11-24",
-    createdAt: "2025-11-21",
-  },
+  // {
+  //   id: 1,
+  //   name: "Orientation",
+  //   timeEntries: [
+  //     { name: "Opening", startTime: "08:00", endTime: "09:00" },
+  //     { name: "Main Event", startTime: "09:00", endTime: "10:00" },
+  //   ],
+  //   sections: ["BSIT 1A", "BSIT 1B"],
+  //   fines: 0,
+  //   eventDate: "2025-11-23",
+  //   createdAt: "2025-11-20",
+  // },
+  // {
+  //   id: 2,
+  //   name: "Tech Fair",
+  //   timeEntries: [
+  //     { name: "Exhibit", startTime: "13:00", endTime: "15:00" },
+  //     { name: "Closing", startTime: "15:00", endTime: "16:00" },
+  //   ],
+  //   sections: ["BSCS 2B"],
+  //   fines: 150,
+  //   eventDate: "2025-11-24",
+  //   createdAt: "2025-11-21",
+  // },
 ]);
 
+const getEvents = async () => {
+  const activities = await api.get("/activity").then((res) => res.data).catch(() => undefined)
+  if (!activities) return console.error(`Failed to GET events.`)
+
+  const eprms = []
+  for (const activity of activities) {
+    // --- Fetch activity's entries and sections
+    const actentprms = api.get(`/activity/${activity.id}/entry`).then((res) => res.data).catch(() => [])
+    const actsecprms = api.get(`/activity/${activity.id}/section`).then((res) => res.data).catch(() => [])
+
+    // --- Merge fetch then format into event
+    const eventprms = Promise.all([actentprms, actsecprms])
+      .then(([ents, secs]) => ({
+        id: activity.id,
+        name: activity.name,
+        fines: activity.fine,
+        eventDate: activity.startAt,
+        createdAt: activity.createdAt,
+        sections: secs.map((s) => s.name),
+        timeEntries: ents.map((e) => ({ name: e.name, startTime: e.startAt, endTime: e.finishAt })),
+      }))
+      .then((res) => events.value.push(res))
+      .catch(console.error)
+
+    // --- List only, handle later
+    eprms.push(eventprms)
+  }
+
+  // --- Handle all fetching and formatting in palalel
+  await Promise.all(eprms).catch(console.error)
+}
+
+// --- Sections
 const sections = ref([
-  { id: 1, label: "BSIT 1A" },
-  { id: 2, label: "BSIT 1B" },
-  { id: 3, label: "BSCS 2B" },
+  // { id: 1, label: "BSIT 1A" },
+  // { id: 2, label: "BSIT 1B" },
+  // { id: 3, label: "BSCS 2B" },
 ]);
 
+const getSections = async () => {
+  await api.get("/section")
+    .then((res) => res.data.map((s) => ({ id: s.id, label: `${s.year}-${s.name}` })))
+    .then((res) => sections.value.push(...res))
+    .catch(console.error)
+}
+
+// --- Filtering/Sorting
 const searchQuery = ref("");
 const sortBy = ref("name");
 const selectedEvent = ref(null);
@@ -226,6 +275,11 @@ const deleteEvent = (id) => {
     closeModal();
   }
 };
+
+// --- Data Fetching
+const getData = async () => await Promise.all([getEvents(), getSections()])
+onBeforeMount(getData)
+
 </script>
 
 <style scoped>
