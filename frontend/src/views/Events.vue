@@ -72,16 +72,28 @@ function closeCreateModal() {
 
 // Handle event creation
 async function handleCreateEvent(eventData) {
-  console.log("Creating event:", eventData);
+  // *need to add desc, event start and end datetime
+  const event = {
+    name: eventData.name,
+    fine: eventData.fines,
+    description: "", // *desc
+    startAt: new Date(), // *startTime
+    finishAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // *endTime
+  }
 
-  // Example API call (uncomment and modify as needed):
-  // try {
-  //   await api.createEvent(eventData);
-  //   // Optionally refresh the event list
-  //   // or show a success message
-  // } catch (error) {
-  //   throw new Error('Failed to create event');
-  // }
+  // --- Creates event
+  const activity = await api.post("/activity", event).then((res) => res.data).catch(() => undefined)
+  if (!activity) return
+
+  // --- Specifies sections included in the event
+  const secbase = `/activity/${activity.id}/section/section`
+  const secprms = eventData.sections.map((s) => api.post(`${secbase}/${s}`).then((res) => res.data))
+  const actsecs = await Promise.all(secprms).catch(console.error)
+
+  // --- Lists times when to tap rfid
+  const entries = eventData.timeEntries.map((e) => ({ name: e.name, startAt: e.startTime, finishAt: e.endTime }))
+  const entprms = entries.map((e) => api.post(`/activity/${activity.id}/entry`, e).then((res) => res.data))
+  const actents = await Promise.all(entprms).catch(console.error)
 }
 </script>
 
