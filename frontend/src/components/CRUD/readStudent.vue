@@ -96,6 +96,7 @@
 </template>
 
 <script setup>
+import { useApi } from "@/composables/api";
 import { computed } from "vue";
 
 const props = defineProps({
@@ -105,12 +106,14 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
+const { token } = useApi()
+
 // Backend base URL to serve the photo
-const backendBaseUrl = "http://localhost:4000"; // Adjust accordingly or make dynamic
+const backendBaseUrl = `${location.protocol}//${location.hostname}:4000`; // Adjust accordingly or make dynamic
 
 const photoUrl = computed(() => {
   if (props.student?.photo) {
-    return `${backendBaseUrl}/uploads/photo/${props.student.photo}`;
+    return `${backendBaseUrl}/uploads/photo/${props.student.photo}?token=${token}`;
   }
   return "";
 });

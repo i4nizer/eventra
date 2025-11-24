@@ -386,16 +386,11 @@ function closeEditModal() {
   isEditModalOpen.value = false;
   selectedStudent.value = null;
 }
-
-// ... inside your script setup or methods ...
-async function handleUpdateStudent({ id, originalSectionId, payload }) {
-  try {
-    await api.patch(`/section/${originalSectionId}/student/${id}`, payload);
-    emit("refresh");
-    closeEditModal();
-  } catch (error) {
-    console.error("Failed to update student:", error);
-  }
+async function handleUpdateStudent(student) {
+  await api.patch(`/section/${student.sectionId}/student/${student.id}`, student)
+    .then(() => emit("refresh"))
+    .then(() => closeEditModal())
+    .catch(console.error)
 }
 // ---- View ----
 function openViewModal(student) {

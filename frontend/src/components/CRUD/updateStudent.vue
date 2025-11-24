@@ -307,36 +307,18 @@ async function handleSubmit() {
   if (Object.keys(err).length) return;
   submitting.value = true;
 
-  // Prepare JSON payload as per API spec (no FormData)
-  // For photo: since API expects string filename, we send empty string if photo removed, or original filename if unchanged, or "" if new photo (upload not handled here)
-  let photoValue = "";
-  if (photo.value) {
-    // New photo selected, but API does not support file upload here
-    // So send empty string or handle upload separately
-    photoValue = "";
-  } else if (photoPreview.value && props.student?.photo) {
-    // Photo unchanged
-    photoValue = props.student.photo;
-  } else {
-    // Photo removed
-    photoValue = "";
-  }
-
   const payload = {
+    id: props.student.id,
     sid: sid.value.trim(),
     rfid: rfid.value.trim(),
     name: name.value.trim(),
     email: email.value.trim(),
-    photo: photoValue,
-  };
-
+    sectionId: sectionId.value,
+  }
+  if (!!photo.value) payload.photo = photo.value.trim()
+  
   try {
-    if (props.onUpdate)
-      await props.onUpdate({
-        id: props.student.id,
-        sectionId: sectionId.value,
-        payload,
-      });
+    if (props.onUpdate) await props.onUpdate(payload);
     submitting.value = false;
     props.onClose && props.onClose();
   } catch (e) {
