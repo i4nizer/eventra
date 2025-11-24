@@ -48,6 +48,10 @@
               >{{ formatYear(section.year) }} year</span
             >
           </h3>
+          <div class="section-dates">
+            <small>Created: {{ formatDate(section.createdAt) }}</small>
+            <small>Updated: {{ formatDate(section.updatedAt) }}</small>
+          </div>
         </div>
         <div class="section-actions">
           <button class="btn-view" @click="viewSection(section)">
@@ -111,20 +115,29 @@ const { api } = useApi();
 const sections = ref([]);
 
 const getSections = async () => {
-  await api
-    .get("/section")
-    .then((res) => (sections.value = res.data))
-    .catch(console.error);
+  try {
+    const res = await api.get("/section");
+    sections.value = res.data;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const showModal = ref(false);
 
 const confirmAdd = async (newSection) => {
-  await api
-    .post("/section", newSection)
-    .then((res) => sections.value.push(res.data))
-    .catch(console.error)
-    .finally(() => (showModal.value = false));
+  if (!newSection.name || !newSection.year) {
+    alert("Please provide both section name and year.");
+    return;
+  }
+  try {
+    const res = await api.post("/section", newSection);
+    sections.value.push(res.data);
+    showModal.value = false;
+  } catch (error) {
+    console.error(error);
+    alert("Failed to add section. Please try again.");
+  }
 };
 
 const showEditModal = ref(false);
@@ -141,19 +154,24 @@ const closeEditModal = () => {
 };
 
 const confirmEdit = async (updatedSection) => {
-  await api
-    .put(`/section/${updatedSection.id}`, {
+  if (!updatedSection.name || !updatedSection.year) {
+    alert("Please provide both section name and year.");
+    return;
+  }
+  try {
+    const res = await api.put(`/section/${updatedSection.id}`, {
       name: updatedSection.name,
       year: updatedSection.year,
-    })
-    .then((res) => {
-      const idx = sections.value.findIndex((s) => s.id === updatedSection.id);
-      if (idx !== -1) {
-        sections.value[idx] = res.data;
-      }
-    })
-    .catch(console.error)
-    .finally(() => closeEditModal());
+    });
+    const idx = sections.value.findIndex((s) => s.id === updatedSection.id);
+    if (idx !== -1) {
+      sections.value[idx] = res.data;
+    }
+    closeEditModal();
+  } catch (error) {
+    console.error(error);
+    alert("Failed to update section. Please try again.");
+  }
 };
 
 const showDeleteModal = ref(false);
@@ -171,16 +189,16 @@ const closeDeleteModal = () => {
 
 const confirmDelete = async () => {
   if (!selectedSectionForDelete.value) return;
-
-  await api
-    .delete(`/section/${selectedSectionForDelete.value.id}`)
-    .then(() => {
-      sections.value = sections.value.filter(
-        (s) => s.id !== selectedSectionForDelete.value.id
-      );
-    })
-    .catch(console.error)
-    .finally(() => closeDeleteModal());
+  try {
+    await api.delete(`/section/${selectedSectionForDelete.value.id}`);
+    sections.value = sections.value.filter(
+      (s) => s.id !== selectedSectionForDelete.value.id
+    );
+    closeDeleteModal();
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete section. Please try again.");
+  }
 };
 
 const formatYear = (year) => {
@@ -196,6 +214,19 @@ const formatYear = (year) => {
   return `${y}th`;
 };
 
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+  return new Date(dateString).toLocaleString(undefined, options);
+};
+
 const showReadModal = ref(false);
 const selectedSection = ref(null);
 const selectedSectionStudents = ref([]);
@@ -205,13 +236,13 @@ const viewSection = async (section) => {
   selectedSection.value = section;
   selectedSectionName.value = `${section.name} - ${section.year}`;
 
-  await api
-    .get(`/section/${section.id}/student`)
-    .then((res) => {
-      selectedSectionStudents.value = res.data;
-      showReadModal.value = true;
-    })
-    .catch(console.error);
+  try {
+    const res = await api.get(`/section/${section.id}/student`);
+    selectedSectionStudents.value = res.data;
+    showReadModal.value = true;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const closeReadModal = () => {
@@ -226,7 +257,9 @@ const searchQuery = ref("");
 const filteredSections = computed(() => {
   const q = searchQuery.value.toLowerCase();
   return sections.value.filter(
-    (s) => s.name.toLowerCase().includes(q) || s.year.toLowerCase().includes(q)
+    (s) =>
+      s.name.toLowerCase().includes(q) ||
+      String(s.year).toLowerCase().includes(q)
   );
 });
 
@@ -234,6 +267,13 @@ onBeforeMount(getSections);
 </script>
 
 <style scoped>
+.section-dates {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  gap: 1rem;
+}
 .page-wrapper {
   width: 100%;
   margin: 0 auto;
