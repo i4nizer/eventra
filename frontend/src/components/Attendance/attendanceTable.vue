@@ -231,7 +231,11 @@ const SortIcon = {
 };
 
 const props = defineProps({
-  attendance: { type: Array, default: () => null },
+  attendances: { type: Array, default: () => [] },
+  entries: { type: Array, default: () => [] },
+  students: { type: Array, default: () => [] },
+  activities: { type: Array, default: () => [] },
+  onDelete: { type: Function, default: () => (() => {}) },
   defaultPerPage: { type: Number, default: 10 },
 });
 
@@ -293,9 +297,9 @@ function closeDeleteModal() {
   selectedAttendanceForDelete.value = null;
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   // Emit the delete event with the original attendance data
-  emit('delete', selectedAttendanceForDelete.value.originalData);
+  await props.onDelete(selectedAttendanceForDelete.value.originalData);
   closeDeleteModal();
 }
 
@@ -365,9 +369,17 @@ const sample = [
   },
 ];
 
-const dataSource = computed(() =>
-  props.attendance && props.attendance.length ? props.attendance : sample
-);
+const formatted = computed(() => props.attendances.map((a) => ({
+  id: a.id,
+  studentId: props.students.find((s) => s.id == a.studentId)?.sid,
+  studentName: props.students.find((s) => s.id == a.studentId)?.name,
+  activityEntryId: a.entryId,
+  activityName: props.activities.find((a) => a.id == props.entries.find((e) => e.id == a.entryId).activityId)?.name,
+  createdAt: a.createdAt,
+  updatedAt: a.updatedAt,
+})))
+
+const dataSource = computed(() => formatted.value || sample);
 
 const filtered = computed(() => {
   const qq = q.value.trim().toLowerCase();
