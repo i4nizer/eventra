@@ -10,7 +10,7 @@
     </div>
     <div class="studentHeader">
       <studentCounts :count="students.length" />
-      <BarcodeSearchModal />
+      <BarcodeSearchModal :students :sections />
     </div>
   </div>
 </template>

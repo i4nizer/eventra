@@ -178,8 +178,19 @@
 </template>
 
 <script setup>
+import { useApi } from "@/composables/api";
 import { ref, nextTick } from "vue";
 
+//
+
+const props = defineProps({
+  students: { type: Array, default: () => [] },
+  sections: { type: Array, default: () => [] },
+})
+
+//
+
+const { api, token } = useApi()
 const barcode = ref("");
 const loading = ref(false);
 const studentInfo = ref(null);
@@ -236,29 +247,33 @@ const searchBarcode = async () => {
   showModal.value = false;
   showNotFoundModal.value = false;
 
-  try {
-    await new Promise((r) => setTimeout(r, 1500));
-    // Mock response example with photoUrl added:
-    if (barcode.value === "123456") {
-      studentInfo.value = {
-        id: "S123456",
-        name: "John Doe",
-        class: "Grade 10",
-        balance: 42.5,
-        photoUrl: "https://randomuser.me/api/portraits/men/75.jpg", // example photo URL
-      };
-      showModal.value = true;
-    } else {
-      studentInfo.value = null;
-      showNotFoundModal.value = true;
-    }
-  } catch (error) {
-    studentInfo.value = null;
-    showNotFoundModal.value = true;
-  } finally {
-    loading.value = false;
-    searched.value = true;
+  const student = props.students.find((s) => s.rfid == barcode.value)
+  const section = props.sections.find((s) => s.id == student?.sectionId)
+
+  if (!student) {
+    studentInfo.value = null
+    showNotFoundModal.value = true
+    loading.value = false
+    searched.value = true
+    return
   }
+
+  const balance = await api.get(`/section/${student.sectionId}/student/${student.id}/balance`)
+    .then((res) => res.data?.balance)
+    .catch(() => 0)
+  const photoUrl = `${location.protocol}//${location.hostname}:4000/uploads/photo/${student.photo}?token=${token}`
+
+  studentInfo.value = {
+    id: student.sid,
+    name: student.name,
+    class: `${section?.year}-${section?.name}`,
+    balance,
+    photoUrl: !student.photo ? "" : photoUrl,
+  };
+
+  loading.value = false
+  searched.value = true
+  showModal.value = true;
 };
 </script>
 
