@@ -5,3 +5,8 @@ Content-Type: application/json
 {
     "rfid": "12093"
 }
+
+###
+
+DELETE http://localhost:4000/esp/event/1/attendance/12369
+Authorization: Bearer <token>

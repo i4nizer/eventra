@@ -83,4 +83,5 @@
 | ↳/event                                       | get     |                                          |                                       | *array of event object*               |
 | ↳/event/:eveid                                | get     |                                          |                                       | *event object*                        |
 | ↳/event/:eveid/attendance                     | post    | rfid                                     | *create attendance*                   | *success text*                        |
+| ↳/event/:eveid/attendance/:rfid               | delete  |                                          | *delete attendance*                   | *success text*                        |
 | ↳/student/rfid                                | get     |                                          |                                       | *student object*                      |
