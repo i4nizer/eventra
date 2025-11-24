@@ -10,6 +10,7 @@
     </div>
     <div class="studentHeader">
       <studentCounts :count="students.length" />
+      <BarcodeSearchModal />
     </div>
   </div>
 </template>
@@ -17,6 +18,7 @@
 <script setup>
 import studentCounts from "@/components/students/studentCounts.vue";
 import studentTable from "@/components/students/studentTable.vue";
+import BarcodeSearchModal from "@/components/students/barcodeScan.vue";
 import { useApi } from "@/composables/api";
 import { ref, onBeforeMount } from "vue";
 
@@ -70,6 +72,12 @@ onBeforeMount(getData);
 </script>
 
 <style scoped>
+.studentHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
 .students {
   padding: 1rem;
   display: flex;
