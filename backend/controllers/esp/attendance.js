@@ -32,7 +32,12 @@ const post = async (req, res) => {
     const section = await models.activitySection.ActivitySection.findOne({ where: secfil })
     if (!section) return res.status(400).send("Student is not on the list.")
     
-    await models.attendance.Attendance.create({ entryId: entry.id, studentId: student.id })
+    // --- Check if the student already have an attendance entry
+    const attdata = { entryId: entry.id, studentId: student.id }
+    const attendance = await models.attendance.Attendance.findOne({ where: attdata })
+    if (attendance) return res.status(403).send("Student already have an attendance to this event.")
+    
+    await models.attendance.Attendance.create(attdata)
     return res.send(`Attendance recorded successfully for ${student.name}.`)
 }
 
