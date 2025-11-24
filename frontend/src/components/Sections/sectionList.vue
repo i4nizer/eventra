@@ -2,7 +2,7 @@
   <div class="page-wrapper">
     <!-- Top Controls -->
     <div class="controls-wrapper">
-      <div class="search-wrapper-section">
+      <div class="search-wrapper">
         <input
           type="text"
           v-model="searchQuery"
@@ -30,7 +30,7 @@
             clip-rule="evenodd"
           />
         </svg>
-        <span class="btn-text">Add Section</span>
+        <span>Add Section</span>
       </button>
     </div>
 
@@ -39,39 +39,37 @@
       <div
         v-for="section in filteredSections"
         :key="section.id"
-        class="section-item"
+        class="section-card"
       >
         <div class="section-info">
           <h3 class="section-title">
             {{ section.name }}
-            <span class="section-year"
-              >{{ formatYear(section.year) }} year</span
-            >
+            <span class="text-muted section-year">{{ formatYear(section.year) }} year</span>
           </h3>
           <div class="section-dates">
-            <small>Created: {{ formatDate(section.createdAt) }}</small>
-            <small>Updated: {{ formatDate(section.updatedAt) }}</small>
+            <small class="text-muted">Created: {{ formatDate(section.createdAt) }}</small>
+            <small class="text-muted">Updated: {{ formatDate(section.updatedAt) }}</small>
           </div>
         </div>
         <div class="section-actions">
-          <button class="btn-view" @click="viewSection(section)">
+          <button class="action-btn btn-view" @click="viewSection(section)">
             <i class="fa-solid fa-eye"></i>
             <span class="sr-only">View Students</span>
           </button>
-          <button class="btn-edit" @click="openEditModal(section)">
+          <button class="action-btn btn-edit" @click="openEditModal(section)">
             <i class="fa-solid fa-pen-to-square"></i>
             <span class="sr-only">Edit Section</span>
           </button>
-          <button class="btn-delete" @click="openDeleteModal(section)">
+          <button class="action-btn btn-delete" @click="openDeleteModal(section)">
             <i class="fa-solid fa-trash"></i>
             <span class="sr-only">Delete Section</span>
           </button>
         </div>
       </div>
 
-      <div v-if="filteredSections.length === 0" class="empty-state-page">
+      <div v-if="filteredSections.length === 0" class="empty-state">
         <i class="fa-solid fa-folder-open empty-icon"></i>
-        <p class="empty-text">No sections found.</p>
+        <p class="text-muted">No sections found.</p>
       </div>
     </div>
 
@@ -288,19 +286,12 @@ onBeforeMount(async () => {
 });
 </script>
 <style scoped>
-.section-dates {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: var(--muted);
-  display: flex;
-  gap: 1rem;
-}
+/* Page Layout */
 .page-wrapper {
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1.5rem;
   font-family: "Poppins", sans-serif;
-  color: var(--text);
 }
 
 .controls-wrapper {
@@ -312,30 +303,9 @@ onBeforeMount(async () => {
   flex-wrap: wrap;
 }
 
-.search-wrapper-section {
+.search-wrapper {
   position: relative;
   flex: 1 1 250px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.5rem 1rem 0.5rem 2.5rem;
-  border-radius: 12px;
-  border: 1.5px solid var(--border);
-  font-size: 1rem;
-  color: var(--text);
-  transition: border-color 0.3s ease;
-  background: var(--surface);
-}
-
-.search-input::placeholder {
-  color: var(--muted);
-}
-
-.search-input:focus {
-  border-color: var(--accent);
-  outline: none;
-  box-shadow: 0 0 6px var(--accent);
 }
 
 .search-icon {
@@ -343,29 +313,8 @@ onBeforeMount(async () => {
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--muted);
   pointer-events: none;
   font-size: 1rem;
-}
-
-.btn-add {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  white-space: nowrap;
-}
-
-.btn-add:hover {
-  background: #28b06d; /* Slightly darker accent */
 }
 
 .icon-add {
@@ -373,19 +322,14 @@ onBeforeMount(async () => {
   height: 1.25rem;
 }
 
-.btn-text {
-  line-height: 1;
-}
-
-/* Section List as vertical minimal cards */
-
+/* Section List Cards */
 .section-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.section-item {
+.section-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -397,7 +341,7 @@ onBeforeMount(async () => {
   cursor: default;
 }
 
-.section-item:hover {
+.section-card:hover {
   border-color: var(--accent);
   box-shadow: 0 8px 24px rgba(50, 204, 125, 0.15);
 }
@@ -421,38 +365,26 @@ onBeforeMount(async () => {
 
 .section-year {
   font-size: 0.875rem;
-  color: var(--muted);
   font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.section-dates {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .section-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
-.section-actions button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 1.125rem;
-  padding: 0.25rem;
-  border-radius: 8px;
-  transition: color 0.3s ease, background-color 0.3s ease;
-  display: flex;
-  align-items: center;
-}
-
-.section-actions button:hover {
-  color: var(--accent);
-  background: rgba(50, 204, 125, 0.15);
-}
-
-.empty-state-page {
+/* Empty State */
+.empty-state {
   text-align: center;
-  color: var(--muted);
-  font-style: italic;
   margin: 4rem 0;
   user-select: none;
 }
@@ -461,6 +393,7 @@ onBeforeMount(async () => {
   font-size: 3rem;
   opacity: 0.4;
   margin-bottom: 1rem;
+  color: var(--muted);
 }
 
 /* Accessibility helper */

@@ -1,36 +1,29 @@
 <template>
   <Teleport to="body">
-    <Transition name="fade">
-      <div v-if="show" class="modal-backdrop-simple">
-        <div class="modal-backdrop" @click="close"></div>
-
-        <form @submit.prevent="saveChanges" class="modal-form scrollable">
+    <Transition name="modal">
+      <div v-if="show" class="modal-overlay" @click.self="close">
+        <!-- Modal -->
+        <form @submit.prevent="saveChanges" class="modal-container modal-scrollable modal-large">
           <!-- Header -->
-          <header class="modal-header-inline">
+          <header class="modal-header modal-header-sticky">
             <div>
               <h3 class="modal-title">Edit Event</h3>
               <p class="modal-subtitle">
                 Modify event details and information.
               </p>
             </div>
-            <button type="button" @click="close" class="close-btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                />
-              </svg>
+            <button
+              type="button"
+              @click="close"
+              class="close-btn"
+              aria-label="Close modal"
+            >
+              <i class="fa-solid fa-xmark"></i>
             </button>
           </header>
 
           <!-- Form Content -->
-          <div class="space-y-4">
+          <div class="modal-body">
             <!-- Event Name -->
             <div>
               <label class="input-label">Event Name</label>
@@ -80,7 +73,7 @@
                 :key="index"
                 class="entry-group"
               >
-                <div>
+                <div class="flex-1">
                   <label class="input-label">Entry Name</label>
                   <input
                     v-model="entry.name"
@@ -99,7 +92,7 @@
                   </p>
                 </div>
 
-                <div>
+                <div class="flex-1">
                   <label class="input-label">Start Date & Time</label>
                   <input
                     v-model="entry.startTime"
@@ -117,7 +110,7 @@
                   </p>
                 </div>
 
-                <div>
+                <div class="flex-1">
                   <label class="input-label">End Date & Time</label>
                   <input
                     v-model="entry.endTime"
@@ -144,7 +137,7 @@
                 </button>
               </div>
 
-              <button type="button" class="btn-add-entry" @click="addTimeEntry">
+              <button type="button" class="btn-add" @click="addTimeEntry">
                 + Add Time Entry
               </button>
             </div>
@@ -226,17 +219,18 @@
           </div>
 
           <!-- Footer -->
-          <footer class="modal-footer-inline">
+          <footer class="modal-footer modal-footer-space-between modal-footer-sticky">
             <button
               type="button"
-              class="btn-cancel"
+              class="btn-close"
               @click="close"
               :disabled="submitting"
             >
-              Cancel
+              Close
             </button>
             <button type="submit" class="btn-submit" :disabled="submitting">
-              {{ submitting ? "Saving..." : "Save Changes" }}
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>{{ submitting ? "Saving..." : "Save Changes" }}</span>
             </button>
           </footer>
         </form>
@@ -397,80 +391,130 @@ const saveChanges = () => {
 </script>
 
 <style scoped>
-.modal-backdrop-simple {
+/* Modal scrollable container */
+.modal-scrollable {
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sticky header and footer */
+.modal-header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modal-footer-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.entry-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--surface);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.btn-remove-entry {
+  background-color: var(--danger);
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  height: 2.5rem;
+  width: 2.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  flex-shrink: 0;
+  border: none;
+  transition: opacity 0.15s;
 }
-.modal-form {
-  max-width: 45vw;
-  width: 100%;
-  max-height: 90vh;
-  height: auto;
-  background-color: white;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  overflow-y: auto;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+.btn-remove-entry:hover {
+  opacity: 0.9;
 }
-.entry-group {
-  display: flex;
-  align-items: center;
-  gap: 1vw;
-  padding: 1rem 2rem;
+
+.btn-remove-entry i {
+  font-size: 1rem;
 }
+
 .checkbox-list {
   max-height: 10rem;
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
   padding: 0.5rem;
+  background: var(--surface);
 }
-.input-field {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  font-size: 0.95rem;
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  transition: border 0.2s ease-in-out, box-shadow 0.2s;
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
 }
-.input-field:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(0, 118, 255, 0.25);
-}
-.error-message {
-  color: var(--danger);
-  font-size: 0.8rem;
-  margin-top: 0.2rem;
-}
-.btn-add-entry {
-  background-color: var(--primary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-}
-.btn-remove-entry {
-  background-color: var(--danger);
-  color: #fff;
-  padding: 0.25rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  height: 2.5rem;
-  width: 2.5rem;
-  margin-top: auto;
+
+.flex {
   display: flex;
-  justify-content: center;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.items-center {
   align-items: center;
 }
-.btn-remove-entry i {
-  font-size: 1rem;
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.h-5 {
+  height: 1.25rem;
+}
+
+.w-5 {
+  width: 1.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-form {
+    max-width: 95vw;
+  }
+
+  .entry-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .entry-group > div {
+    width: 100%;
+  }
+
+  .btn-remove-entry {
+    width: 100%;
+    height: auto;
+    padding: 0.75rem;
+  }
 }
 </style>
