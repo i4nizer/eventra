@@ -180,18 +180,6 @@ const events = ref([
   //   eventDate: "2025-11-23",
   //   createdAt: "2025-11-20",
   // },
-  // {
-  //   id: 2,
-  //   name: "Tech Fair",
-  //   timeEntries: [
-  //     { name: "Exhibit", startTime: "13:00", endTime: "15:00" },
-  //     { name: "Closing", startTime: "15:00", endTime: "16:00" },
-  //   ],
-  //   sections: ["BSCS 2B"],
-  //   fines: 150,
-  //   eventDate: "2025-11-24",
-  //   createdAt: "2025-11-21",
-  // },
 ]);
 
 const getEvents = async () => {

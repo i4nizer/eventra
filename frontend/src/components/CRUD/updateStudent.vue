@@ -1,7 +1,5 @@
 <template>
-  <div v-if="open" class="modal-backdrop-simple">
-    <div class="modal-backdrop" @click="onClose"></div>
-
+  <div v-if="open" class="modal-overlay">
     <form @submit.prevent="handleSubmit" class="modal-form scrollable">
       <header class="modal-header-inline">
         <div>
@@ -41,7 +39,19 @@
         <!-- RFID Input only -->
         <div>
           <label class="input-label">RFID</label>
+          <select
+            v-if="availableTags && availableTags.length"
+            v-model="rfid"
+            class="input-field"
+            :class="{ 'input-error': errors.rfid }"
+          >
+            <option value="">Select RFID tag</option>
+            <option v-for="tag in availableTags" :key="tag" :value="tag">
+              {{ tag }}
+            </option>
+          </select>
           <input
+            v-else
             v-model="rfid"
             class="input-field"
             :class="{ 'input-error': errors.rfid }"
@@ -185,6 +195,7 @@ const photoInput = ref(null);
 const sectionId = ref("");
 const errors = ref({});
 const submitting = ref(false);
+const backendBaseUrl = "http://localhost:4000";
 
 watch(
   () => props.open,
@@ -196,7 +207,13 @@ watch(
       email.value = props.student?.email || "";
       sectionId.value = props.student?.sectionId || "";
       photo.value = null;
-      photoPreview.value = props.student?.photoUrl || "";
+
+      if (props.student?.photo) {
+        photoPreview.value = `${backendBaseUrl}/uploads/photo/${props.student.photo}`;
+      } else {
+        photoPreview.value = "";
+      }
+
       errors.value = {};
       submitting.value = false;
     }
@@ -296,10 +313,10 @@ async function handleSubmit() {
     rfid: rfid.value.trim(),
     name: name.value.trim(),
     email: email.value.trim(),
-    photo: photo.value ? photo.value.trim() : "",
     sectionId: sectionId.value,
   }
-
+  if (!!photo.value) payload.photo = photo.value.trim()
+  
   try {
     if (props.onUpdate) await props.onUpdate(payload);
     submitting.value = false;

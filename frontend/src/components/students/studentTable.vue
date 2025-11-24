@@ -392,7 +392,6 @@ async function handleUpdateStudent(student) {
     .then(() => closeEditModal())
     .catch(console.error)
 }
-
 // ---- View ----
 function openViewModal(student) {
   const sectionObj = sections.value.get(student.id) || {};
