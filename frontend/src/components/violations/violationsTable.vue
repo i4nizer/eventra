@@ -190,7 +190,7 @@ async function fetchViolations() {
 
     violations.value = violationsRes.data.map(v => {
       const student = studentMap.get(v.studentId) || {};
-      const entry = entryMap.get(v.activityEntryId) || {};
+      const entry = entryMap.get(v.entryId) || {};
       const activity = activityMap.get(entry.activityId) || {};
       const payments = paymentsByViolation[v.id] || [];
       const totalPaid = payments.reduce((sum, p) => sum + Number(p.value), 0);
