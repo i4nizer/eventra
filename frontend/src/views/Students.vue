@@ -26,7 +26,6 @@ const { api } = useApi();
 
 // --- Sections
 const sections = ref([]);
-
 const getSections = async () => {
   await api
     .get(`/section`)
@@ -36,7 +35,6 @@ const getSections = async () => {
 
 // --- Students
 const students = ref([]);
-
 const getStudents = async () => {
   await api
     .get(`/section/student`)
