@@ -84,6 +84,7 @@
     <editSection
       :show="showEditModal"
       :section="selectedSectionForEdit"
+      :year-levels="yearLevels"
       @close="closeEditModal"
       @submit="confirmEdit"
     />
@@ -111,17 +112,7 @@ import { useApi } from "@/composables/api";
 import { computed, onBeforeMount, ref } from "vue";
 
 const { api } = useApi();
-
 const sections = ref([]);
-
-const getSections = async () => {
-  try {
-    const res = await api.get("/section");
-    sections.value = res.data;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 const showModal = ref(false);
 
@@ -144,9 +135,18 @@ const showEditModal = ref(false);
 const selectedSectionForEdit = ref(null);
 
 const openEditModal = (section) => {
-  selectedSectionForEdit.value = { ...section };
+  // Make a shallow copy and ensure year is string for binding
+  selectedSectionForEdit.value = { ...section, year: String(section.year) };
   showEditModal.value = true;
 };
+
+// Static year levels from 1st to 4th year
+const yearLevels = [
+  { value: "1", label: "1st Year" },
+  { value: "2", label: "2nd Year" },
+  { value: "3", label: "3rd Year" },
+  { value: "4", label: "4th Year" },
+];
 
 const closeEditModal = () => {
   showEditModal.value = false;
@@ -154,26 +154,41 @@ const closeEditModal = () => {
 };
 
 const confirmEdit = async (updatedSection) => {
+  if (!updatedSection.id) {
+    alert("Section ID is missing. Cannot update.");
+    return;
+  }
+
   if (!updatedSection.name || !updatedSection.year) {
     alert("Please provide both section name and year.");
     return;
   }
+
   try {
-    const res = await api.put(`/section/${updatedSection.id}`, {
-      name: updatedSection.name,
-      year: updatedSection.year,
+    const yearInt = Number.parseInt(updatedSection.year, 10);
+    if (Number.isNaN(yearInt) || yearInt < 1 || yearInt > 4) {
+      alert("Year must be a number between 1 and 4.");
+      return;
+    }
+
+    // Use PATCH method as per your API
+    const res = await api.patch(`/section/${updatedSection.id}`, {
+      name: updatedSection.name.trim(),
+      year: yearInt,
     });
+
+    // Update local sections list with the updated data
     const idx = sections.value.findIndex((s) => s.id === updatedSection.id);
     if (idx !== -1) {
       sections.value[idx] = res.data;
     }
+
     closeEditModal();
   } catch (error) {
-    console.error(error);
+    console.error("Update section failed:", error);
     alert("Failed to update section. Please try again.");
   }
 };
-
 const showDeleteModal = ref(false);
 const selectedSectionForDelete = ref(null);
 
@@ -263,9 +278,15 @@ const filteredSections = computed(() => {
   );
 });
 
-onBeforeMount(getSections);
+onBeforeMount(async () => {
+  try {
+    const res = await api.get("/section");
+    sections.value = res.data;
+  } catch (error) {
+    console.error(error);
+  }
+});
 </script>
-
 <style scoped>
 .section-dates {
   margin-top: 0.25rem;

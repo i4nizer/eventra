@@ -16,7 +16,7 @@
         <!-- Body -->
         <form @submit.prevent="handleSubmit">
           <!-- Section Name -->
-          <div style="margin-bottom: 1rem;">
+          <div style="margin-bottom: 1rem">
             <label class="input-label">Section Name</label>
             <input
               v-model="form.sectionName"
@@ -32,27 +32,22 @@
           </div>
 
           <!-- Year Level -->
-          <div style="margin-bottom: 1rem;">
+          <div style="margin-bottom: 1rem">
             <label class="input-label">Year Level</label>
             <select
               v-model="form.yearLevel"
               class="input-field select-input"
               :class="{ 'input-error': errors.yearLevel }"
-              style="width: 100%;"
+              style="width: 100%"
             >
               <option value="" disabled>Select year level</option>
-              <option value="1">Grade 1</option>
-              <option value="2">Grade 2</option>
-              <option value="3">Grade 3</option>
-              <option value="4">Grade 4</option>
-              <option value="5">Grade 5</option>
-              <option value="6">Grade 6</option>
-              <option value="7">Grade 7</option>
-              <option value="8">Grade 8</option>
-              <option value="9">Grade 9</option>
-              <option value="10">Grade 10</option>
-              <option value="11">Grade 11</option>
-              <option value="12">Grade 12</option>
+              <option
+                v-for="level in yearLevels"
+                :key="level.value"
+                :value="level.value"
+              >
+                {{ level.label }}
+              </option>
             </select>
             <p v-if="errors.yearLevel" class="error-message">
               <i class="fa-solid fa-circle-exclamation"></i>
@@ -84,88 +79,100 @@
 
 <script>
 export default {
-  name: 'EditSectionModal',
+  name: "EditSectionModal",
   props: {
     show: {
       type: Boolean,
-      default: false
+      default: false,
     },
     section: {
       type: Object,
       default: () => ({
         id: null,
-        name: '',
-        year: ''
-      })
-    }
+        name: "",
+        year: "",
+      }),
+    },
+    yearLevels: {
+      type: Array,
+      required: true,
+    },
   },
-  emits: ['close', 'submit'],
+  emits: ["close", "submit"],
   data() {
     return {
       form: {
-        sectionName: '',
-        yearLevel: ''
+        sectionName: "",
+        yearLevel: "",
       },
       errors: {
-        sectionName: '',
-        yearLevel: ''
+        sectionName: "",
+        yearLevel: "",
       },
-      submitError: '',
-      isSubmitting: false
-    }
+      submitError: "",
+      isSubmitting: false,
+    };
   },
   watch: {
     section: {
       immediate: true,
       handler(val) {
         if (val) {
-          this.form.sectionName = val.sectionName || ''
-          this.form.yearLevel = val.yearLevel || ''
+          this.form.sectionName = val.name || "";
+          this.form.yearLevel = val.year ? String(val.year) : "";
+        } else {
+          this.form.sectionName = "";
+          this.form.yearLevel = "";
         }
-      }
+      },
     },
     show(val) {
       if (val) {
-        this.resetErrors()
+        this.resetErrors();
       }
-    }
+    },
   },
   methods: {
     resetErrors() {
-      this.errors = { sectionName: '', yearLevel: '' }
-      this.submitError = ''
+      this.errors.sectionName = "";
+      this.errors.yearLevel = "";
+      this.submitError = "";
     },
     validate() {
-      this.resetErrors()
-      let isValid = true
+      this.resetErrors();
+      let isValid = true;
 
       if (!this.form.sectionName.trim()) {
-        this.errors.sectionName = 'Section name is required'
-        isValid = false
+        this.errors.sectionName = "Section name is required";
+        isValid = false;
       }
 
       if (!this.form.yearLevel) {
-        this.errors.yearLevel = 'Year level is required'
-        isValid = false
+        this.errors.yearLevel = "Year level is required";
+        isValid = false;
       }
 
-      return isValid
+      return isValid;
     },
     async handleSubmit() {
-      if (!this.validate()) return
+      if (!this.validate()) return;
 
-      this.isSubmitting = true
+      this.isSubmitting = true;
       try {
-        this.$emit('submit', { ...this.form })
-      } catch (err) {
-        this.submitError = 'Failed to update section. Please try again.'
+        this.$emit("submit", {
+          id: this.section.id,
+          name: this.form.sectionName,
+          year: parseInt(this.form.yearLevel, 10),
+        });
+      } catch {
+        this.submitError = "Failed to update section. Please try again.";
       } finally {
-        this.isSubmitting = false
+        this.isSubmitting = false;
       }
     },
     handleClose() {
-      this.$emit('close')
-    }
-  }
-}
+      this.$emit("close");
+    },
+  },
+};
 </script>
