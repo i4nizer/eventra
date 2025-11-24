@@ -62,9 +62,9 @@
               Section
               <SortIcon :field="'section'" :sort="sort" />
             </th>
-            <th class="p-3 cursor-pointer" @click="sortBy('Year')">
+            <th class="p-3 cursor-pointer" @click="sortBy('year')">
               Year
-              <SortIcon :field="'section'" :sort="sort" />
+              <SortIcon :field="'year'" :sort="sort" />
             </th>
             <th class="p-3">RFID Tags</th>
             <th class="p-3 cursor-pointer" @click="sortBy('balance')">
@@ -89,10 +89,10 @@
               <div class="student-email">{{ s.email }}</div>
             </td>
             <td class="p-3 align-middle section-text">
-              {{ sections.get(s.id)?.name }}
+              {{ sections.get(s.id)?.name || "" }}
             </td>
             <td class="p-3 align-middle section-text">
-              {{ sections.get(s.id)?.year }}
+              {{ formatYear(sections.get(s.id)?.year) }}
             </td>
             <td class="p-3 align-middle">
               <span class="badge badge-tag">
@@ -132,7 +132,7 @@
           </tr>
 
           <tr v-if="paged.length === 0">
-            <td class="p-6 text-center text-sm empty-state" :colspan="6">
+            <td class="p-6 text-center text-sm empty-state" :colspan="7">
               No students found.
             </td>
           </tr>
@@ -185,13 +185,13 @@
           <div class="card-row">
             <div class="card-label">Section</div>
             <div class="card-value section-text">
-              {{ sections.get(s.id)?.name }}
+              {{ sections.get(s.id)?.name || "" }}
             </div>
           </div>
           <div class="card-row">
             <div class="card-label">Year</div>
             <div class="card-value section-text">
-              {{ sections.get(s.id)?.year }}
+              {{ formatYear(sections.get(s.id)?.year) }}
             </div>
           </div>
           <div class="card-row">
@@ -205,7 +205,7 @@
             <div class="card-label">Balance</div>
             <div class="card-value">
               <span class="badge badge-balance"
-                >₱ {{ balances?.get(s.id) || 0 }}</span
+                >₱ {{ balances.get(s.id) || 0 }}</span
               >
             </div>
           </div>
@@ -316,19 +316,36 @@ const selectedStudent = ref(null);
 // Balance Map
 const balances = computed(() => new Map(props.balances || []));
 
-// Section Map
+// Section Map: maps student id to section object
 const sections = computed(
   () =>
     new Map(
       props.students.map((s) => [
         s.id,
-        props.sections.find((e) => e.id == s.sectionId),
+        props.sections.find((e) => e.id === s.sectionId),
       ])
     )
 );
 
-// RFID Tags (for dropdown)
+// RFID Tags (for dropdown or validation)
 const availableTags = computed(() => props.students?.map((s) => s.rfid) || []);
+
+function formatYear(year) {
+  if (!year) return "";
+  const y = parseInt(year);
+  const lastTwoDigits = y % 100;
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 13) return y + "th year";
+  switch (y % 10) {
+    case 1:
+      return y + "st year";
+    case 2:
+      return y + "nd year";
+    case 3:
+      return y + "rd year";
+    default:
+      return y + "th year";
+  }
+}
 
 // =======================
 // Modal Functions
@@ -345,36 +362,75 @@ const { api } = useApi();
 async function handleCreateStudent(studentData) {
   const form = new FormData();
   Object.keys(studentData).forEach((k) => form.append(k, studentData[k]));
-  await api
-    .post(`/section/${studentData.sectionId}/student`, form)
-    .catch(console.error);
-  emit("refresh");
-  closeCreateModal();
+  try {
+    await api.post(`/section/${studentData.sectionId}/student`, form);
+    emit("refresh");
+    closeCreateModal();
+  } catch (error) {
+    console.error(
+      "Failed to create student:",
+      error.response?.data || error.message
+    );
+  }
 }
 
 // ---- Edit ----
 function openEditModal(student) {
-  selectedStudent.value = student;
+  selectedStudent.value = {
+    ...student,
+    section: student.sectionId || "",
+  };
   isEditModalOpen.value = true;
 }
 function closeEditModal() {
   isEditModalOpen.value = false;
   selectedStudent.value = null;
 }
-async function handleUpdateStudent(updatedStudent) {
-  await api
-    .patch(
-      `/section/${updatedStudent.sectionId}/student/${updatedStudent?.id}`,
-      updatedStudent
-    )
-    .catch(console.error);
-  emit("refresh");
-  closeEditModal();
+async function handleUpdateStudent({ id, payload }) {
+  if (!id) {
+    console.error("Student ID is missing for update.");
+    return;
+  }
+  if (!payload.sectionId && payload.section) {
+    payload.sectionId = payload.section;
+    delete payload.section;
+  }
+  if (!payload.sectionId) {
+    console.error("Section ID is missing for update.");
+    return;
+  }
+
+  const url = `/section/${payload.sectionId}/student/${id}`;
+  const jsonPayload = {
+    sid: payload.sid || "",
+    rfid: payload.rfid || "",
+    name: payload.name || "",
+    email: payload.email || "",
+    photo: payload.photo || "",
+  };
+
+  try {
+    await api.patch(url, jsonPayload, {
+      headers: { "Content-Type": "application/json" },
+    });
+    emit("refresh");
+    closeEditModal();
+  } catch (error) {
+    console.error(
+      "Failed to update student:",
+      error.response?.data || error.message
+    );
+  }
 }
 
 // ---- View ----
 function openViewModal(student) {
-  selectedStudent.value = student;
+  const sectionObj = sections.value.get(student.id) || {};
+  selectedStudent.value = {
+    ...student,
+    sectionName: sectionObj.name || "",
+    sectionYear: formatYear(sectionObj.year),
+  };
   isViewModalOpen.value = true;
 }
 function closeViewModal() {
@@ -393,9 +449,16 @@ function closeDeleteModal() {
 }
 async function handleConfirmDelete() {
   const { id, sectionId } = selectedStudent.value;
-  await api.delete(`/section/${sectionId}/student/${id}`).catch(console.error);
-  emit("refresh");
-  closeDeleteModal();
+  try {
+    await api.delete(`/section/${sectionId}/student/${id}`);
+    emit("refresh");
+    closeDeleteModal();
+  } catch (error) {
+    console.error(
+      "Failed to delete student:",
+      error.response?.data || error.message
+    );
+  }
 }
 
 function sortBy(field) {
@@ -421,7 +484,7 @@ const filtered = computed(() => {
     return (
       (s.name || "").toLowerCase().includes(qq) ||
       (s.tag || "").toLowerCase().includes(qq) ||
-      (s.section || "").toLowerCase().includes(qq) ||
+      (sections.value.get(s.id)?.name || "").toLowerCase().includes(qq) ||
       (s.email || "").toLowerCase().includes(qq)
     );
   });
@@ -432,8 +495,21 @@ const sorted = computed(() => {
   const f = sort.value.field;
   const dir = sort.value.dir === "asc" ? 1 : -1;
   arr.sort((a, b) => {
-    const va = (a[f] || "").toString().toLowerCase();
-    const vb = (b[f] || "").toString().toLowerCase();
+    let va;
+    let vb;
+    if (f === "section") {
+      va = (sections.value.get(a.id)?.name || "").toString().toLowerCase();
+      vb = (sections.value.get(b.id)?.name || "").toString().toLowerCase();
+    } else if (f === "year") {
+      va = sections.value.get(a.id)?.year || 0;
+      vb = sections.value.get(b.id)?.year || 0;
+    } else if (f === "balance") {
+      va = balances.value.get(a.id) || 0;
+      vb = balances.value.get(b.id) || 0;
+    } else {
+      va = (a[f] || "").toString().toLowerCase();
+      vb = (b[f] || "").toString().toLowerCase();
+    }
     if (va < vb) return -1 * dir;
     if (va > vb) return 1 * dir;
     return 0;

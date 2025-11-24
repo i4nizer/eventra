@@ -140,7 +140,7 @@
           >
             <option value="">Select a section</option>
             <option v-for="s in sections" :key="s.id" :value="s.id">
-              {{ s.name }}
+              {{ s.name }} {{ formatYear(s.year) }}
             </option>
           </select>
           <input
@@ -215,6 +215,25 @@ watch(
     }
   }
 );
+
+function formatYear(year) {
+  const y = parseInt(year);
+  const lastDigit = y % 10;
+  const lastTwoDigits = y % 100;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 13) return y + "th year";
+
+  switch (lastDigit) {
+    case 1:
+      return y + "st year";
+    case 2:
+      return y + "nd year";
+    case 3:
+      return y + "rd year";
+    default:
+      return y + "th year";
+  }
+}
 
 function triggerFileInput() {
   if (photoInput.value) {

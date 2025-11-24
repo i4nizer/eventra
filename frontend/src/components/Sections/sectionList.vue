@@ -44,11 +44,17 @@
         <div class="section-info">
           <h3 class="section-title">
             {{ section.name }}
-            <span class="text-muted section-year">{{ formatYear(section.year) }} year</span>
+            <span class="text-muted section-year"
+              >{{ formatYear(section.year) }} year</span
+            >
           </h3>
           <div class="section-dates">
-            <small class="text-muted">Created: {{ formatDate(section.createdAt) }}</small>
-            <small class="text-muted">Updated: {{ formatDate(section.updatedAt) }}</small>
+            <small class="text-muted"
+              >Created: {{ formatDate(section.createdAt) }}</small
+            >
+            <small class="text-muted"
+              >Updated: {{ formatDate(section.updatedAt) }}</small
+            >
           </div>
         </div>
         <div class="section-actions">
@@ -60,7 +66,10 @@
             <i class="fa-solid fa-pen-to-square"></i>
             <span class="sr-only">Edit Section</span>
           </button>
-          <button class="action-btn btn-delete" @click="openDeleteModal(section)">
+          <button
+            class="action-btn btn-delete"
+            @click="openDeleteModal(section)"
+          >
             <i class="fa-solid fa-trash"></i>
             <span class="sr-only">Delete Section</span>
           </button>
