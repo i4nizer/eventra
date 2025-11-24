@@ -29,3 +29,4 @@
 
 ##### 11/24/2025
  - Added custom get all entry route.
+ - Added custom routes for esp32.
