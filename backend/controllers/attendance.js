@@ -28,6 +28,7 @@ const get = async (req, res) => {
         where: {
             ...(stuid && { studentId: stuid }),
             ...(entid && { entryId: entid }),
+            ...(parsed.data.idarr && { id: { [Op.in]: parsed.data.idarr } }),
             ...(parsed.data.alpha && { createdAt: { [Op.gte]: new Date(parsed.data.alpha) } }),
             ...(parsed.data.omega && { createdAt: { [Op.gte]: new Date(parsed.data.omega) } }),
         },
