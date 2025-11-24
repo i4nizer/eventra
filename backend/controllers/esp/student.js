@@ -11,7 +11,7 @@ const get = async (req, res) => {
     if (!student) return res.status(404).send("Student not registered.")
     
     // --- Find and sum all of the student's violations
-    const violations = await models.violation.Violation.findAll({ where: { studentId: stuid } })
+    const violations = await models.violation.Violation.findAll({ where: { studentId: student.id } })
     const fines = violations.reduce((prev, curr) => prev + curr.dataValues.fine, 0)
 
     // --- Find all payments for the violations
