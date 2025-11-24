@@ -30,6 +30,7 @@
 | /activity                                     |         |                                          |                                       |                                       |
 | ↳/                                            | get     |                                          | *pagination applied*                  | *array of activity object*            |
 | ↳/                                            | post    | name, description, startAt, finishAt     | *create activity*                     | *activity object*                     |
+| ↳/entry                                       | get     |                                          |                                       | *array of activity object*            |
 | ↳/:actid                                      | get     |                                          |                                       | *activity object*                     |
 | ↳/:actid                                      | patch   | *?: name, description, startAt, finishAt | *update activity*                     | *activity object*                     |
 | ↳/:actid                                      | delete  |                                          | *delete activity*                     |                                       |

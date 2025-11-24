@@ -26,3 +26,6 @@
 ##### 11/19/2025
  - Added custom get all student route.
  - Implemented handling of photo saving for students.
+
+##### 11/24/2025
+ - Added custom get all entry route.
