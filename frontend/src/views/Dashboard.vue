@@ -4,8 +4,6 @@
       <studentCount />
       <eventsCount />
       <sectionCount />
-      <tagCount />
-      <accountsCount />
     </div>
     <div class="charts">
       <eventChart />
@@ -13,21 +11,15 @@
     <div class="events">
       <upcomingEvents />
     </div>
-    <!-- <div class="tables">
-      <studentTable />
-    </div> -->
   </div>
 </template>
 
 <script setup>
 import studentCount from "@/components/students/studentCounts.vue";
 import sectionCount from "@/components/Sections/sectionCount.vue";
-import tagCount from "@/components/Tags/tagCount.vue";
-
 import eventsCount from "@/components/Events/eventsCount.vue";
 import eventChart from "@/components/Events/eventChart.vue";
 import upcomingEvents from "@/components/Events/upcomingEvents.vue";
-// import studentTable from "@/components/students/studentTable.vue";
 </script>
 
 <style scoped>
@@ -41,6 +33,8 @@ import upcomingEvents from "@/components/Events/upcomingEvents.vue";
 
 .stats {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
   width: 100%;
 }

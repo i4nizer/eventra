@@ -12,65 +12,83 @@
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
       </div>
 
-      <button class="btn-add" @click="showModal = true">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+      <button
+        class="btn-add"
+        @click="showModal = true"
+        aria-label="Add Section"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="icon-add"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+            clip-rule="evenodd"
+          />
         </svg>
         <span class="btn-text">Add Section</span>
       </button>
     </div>
 
-    <!-- Section Grid -->
-    <div class="section-grid">
-      <div v-for="section in filteredSections" :key="section.id" class="section-card">
-        <div class="section-card-header">
-          <h3 class="section-title">{{ section.name }}</h3>
-          <p class="section-year">{{ section.year }}</p>
+    <!-- Section List -->
+    <div class="section-list">
+      <div
+        v-for="section in filteredSections"
+        :key="section.id"
+        class="section-item"
+      >
+        <div class="section-info">
+          <h3 class="section-title">
+            {{ section.name }}
+            <span class="section-year"
+              >{{ formatYear(section.year) }} year</span
+            >
+          </h3>
         </div>
-
-        <div class="section-card-footer">
-          <button class="btn-close" @click="viewSection(section)">
+        <div class="section-actions">
+          <button class="btn-view" @click="viewSection(section)">
             <i class="fa-solid fa-eye"></i>
-            View Students
+            <span class="sr-only">View Students</span>
           </button>
-          <button class="btn-submit" @click="openEditModal(section)">
+          <button class="btn-edit" @click="openEditModal(section)">
             <i class="fa-solid fa-pen-to-square"></i>
-            Edit
+            <span class="sr-only">Edit Section</span>
           </button>
-          <button class="btn-cancel" @click="openDeleteModal(section)">
+          <button class="btn-delete" @click="openDeleteModal(section)">
             <i class="fa-solid fa-trash"></i>
-            Delete
+            <span class="sr-only">Delete Section</span>
           </button>
         </div>
       </div>
+
+      <div v-if="filteredSections.length === 0" class="empty-state-page">
+        <i class="fa-solid fa-folder-open empty-icon"></i>
+        <p class="empty-text">No sections found.</p>
+      </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-if="filteredSections.length === 0" class="empty-state-page">
-      <i class="fa-solid fa-folder-open empty-icon"></i>
-      <p class="empty-text">No sections found.</p>
-    </div>
-
-    <!-- Add Section Modal -->
-    <addSection :show="showModal" @close="showModal = false" @add="confirmAdd"/>
-
-    <!-- Edit Section Modal -->
+    <!-- Modals -->
+    <addSection
+      :show="showModal"
+      @close="showModal = false"
+      @add="confirmAdd"
+    />
     <editSection
       :show="showEditModal"
       :section="selectedSectionForEdit"
       @close="closeEditModal"
       @submit="confirmEdit"
     />
-
-    <!-- Read Section Modal -->
     <readSection
       :open="showReadModal"
       :students="selectedSectionStudents"
       :section-name="selectedSectionName"
       @close="closeReadModal"
     />
-
-    <!-- Delete Section Modal -->
     <deleteSection
       :open="showDeleteModal"
       :section="selectedSectionForDelete"
@@ -90,7 +108,6 @@ import { computed, onBeforeMount, ref } from "vue";
 
 const { api } = useApi();
 
-// --- Sections Fetching
 const sections = ref([]);
 
 const getSections = async () => {
@@ -100,7 +117,6 @@ const getSections = async () => {
     .catch(console.error);
 };
 
-// --- Section Create
 const showModal = ref(false);
 
 const confirmAdd = async (newSection) => {
@@ -111,7 +127,6 @@ const confirmAdd = async (newSection) => {
     .finally(() => (showModal.value = false));
 };
 
-// --- Section Edit
 const showEditModal = ref(false);
 const selectedSectionForEdit = ref(null);
 
@@ -129,7 +144,7 @@ const confirmEdit = async (updatedSection) => {
   await api
     .put(`/section/${updatedSection.id}`, {
       name: updatedSection.name,
-      year: updatedSection.year
+      year: updatedSection.year,
     })
     .then((res) => {
       const idx = sections.value.findIndex((s) => s.id === updatedSection.id);
@@ -141,7 +156,6 @@ const confirmEdit = async (updatedSection) => {
     .finally(() => closeEditModal());
 };
 
-// --- Section Delete
 const showDeleteModal = ref(false);
 const selectedSectionForDelete = ref(null);
 
@@ -157,7 +171,7 @@ const closeDeleteModal = () => {
 
 const confirmDelete = async () => {
   if (!selectedSectionForDelete.value) return;
-  
+
   await api
     .delete(`/section/${selectedSectionForDelete.value.id}`)
     .then(() => {
@@ -169,7 +183,19 @@ const confirmDelete = async () => {
     .finally(() => closeDeleteModal());
 };
 
-// --- View Section (Read Modal)
+const formatYear = (year) => {
+  const y = parseInt(year);
+  const last = y % 10;
+  const lastTwo = y % 100;
+
+  if (lastTwo >= 11 && lastTwo <= 13) return `${y}th`;
+
+  if (last === 1) return `${y}st`;
+  if (last === 2) return `${y}nd`;
+  if (last === 3) return `${y}rd`;
+  return `${y}th`;
+};
+
 const showReadModal = ref(false);
 const selectedSection = ref(null);
 const selectedSectionStudents = ref([]);
@@ -178,7 +204,7 @@ const selectedSectionName = ref("");
 const viewSection = async (section) => {
   selectedSection.value = section;
   selectedSectionName.value = `${section.name} - ${section.year}`;
-  
+
   await api
     .get(`/section/${section.id}/student`)
     .then((res) => {
@@ -195,7 +221,6 @@ const closeReadModal = () => {
   selectedSectionName.value = "";
 };
 
-// --- Filtering
 const searchQuery = ref("");
 
 const filteredSections = computed(() => {
@@ -211,129 +236,181 @@ onBeforeMount(getSections);
 <style scoped>
 .page-wrapper {
   width: 100%;
-  padding: 2.5rem;
-  min-height: 100vh;
-}
-
-@media (max-width: 768px) {
-  .page-wrapper { padding: 1rem; }
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: "Poppins", sans-serif;
+  color: var(--text);
 }
 
 .controls-wrapper {
-  max-width: 64rem;
-  margin: 0 auto 2rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-@media (min-width: 768px) {
-  .controls-wrapper {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .search-wrapper-section {
   position: relative;
-  flex: 1;
+  flex: 1 1 250px;
 }
 
-.search-wrapper-section .search-input {
-  padding-left: 2.5rem;
+.search-input {
+  width: 100%;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  font-size: 1rem;
+  color: var(--text);
+  transition: border-color 0.3s ease;
+  background: var(--surface);
 }
 
-.search-wrapper-section .search-icon {
+.search-input::placeholder {
+  color: var(--muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 6px var(--accent);
+}
+
+.search-icon {
   position: absolute;
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
+  color: var(--muted);
   pointer-events: none;
+  font-size: 1rem;
 }
 
-.section-grid {
-  max-width: 64rem;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 640px) {
-  .section-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (min-width: 1024px) {
-  .section-grid { grid-template-columns: repeat(3, 1fr); }
-}
-
-.section-card {
-  padding: 1.25rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  transition: all 0.2s;
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-add:hover {
+  background: #28b06d; /* Slightly darker accent */
+}
+
+.icon-add {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.btn-text {
+  line-height: 1;
+}
+
+/* Section List as vertical minimal cards */
+
+.section-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.section-card:hover {
+.section-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: var(--surface);
-  border-color: var(--accent);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  cursor: default;
 }
 
-.section-card-header { flex: 1; }
+.section-item:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(50, 204, 125, 0.15);
+}
+
+.section-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 70%;
+}
 
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 0.25rem;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .section-year {
   font-size: 0.875rem;
   color: var(--muted);
+  font-weight: 500;
 }
 
-.section-card-footer {
+.section-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  flex-shrink: 0;
 }
 
-.section-card-footer button {
-  width: 100%;
+.section-actions button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 1.125rem;
+  padding: 0.25rem;
+  border-radius: 8px;
+  transition: color 0.3s ease, background-color 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+}
+
+.section-actions button:hover {
+  color: var(--accent);
+  background: rgba(50, 204, 125, 0.15);
 }
 
 .empty-state-page {
-  max-width: 64rem;
-  margin: 4rem auto;
   text-align: center;
-  padding: 3rem 1rem;
+  color: var(--muted);
+  font-style: italic;
+  margin: 4rem 0;
+  user-select: none;
 }
 
 .empty-icon {
-  font-size: 4rem;
-  color: var(--muted);
-  opacity: 0.5;
+  font-size: 3rem;
+  opacity: 0.4;
   margin-bottom: 1rem;
 }
 
-.empty-text {
-  font-size: 1.125rem;
-  color: var(--muted);
-  font-style: italic;
+/* Accessibility helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
-
-.h-5 { height: 1.25rem; }
-.w-5 { width: 1.25rem; }
 </style>

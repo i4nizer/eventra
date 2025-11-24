@@ -10,9 +10,6 @@
     </div>
     <div class="studentHeader">
       <studentCounts :count="students.length" />
-      <studentWithoutRFID />
-      <studentWithRFID />
-      <summaryStudentChart :withRfid="20" :withoutRfid="10" :totalTags="30" />
     </div>
   </div>
 </template>
@@ -20,9 +17,6 @@
 <script setup>
 import studentCounts from "@/components/students/studentCounts.vue";
 import studentTable from "@/components/students/studentTable.vue";
-import studentWithRFID from "@/components/students/studentWithRFID.vue";
-import studentWithoutRFID from "@/components/students/studentWithoutRFID.vue";
-import summaryStudentChart from "@/components/students/summaryStudentChart.vue";
 import { useApi } from "@/composables/api";
 import { ref, onBeforeMount } from "vue";
 
