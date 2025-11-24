@@ -92,7 +92,7 @@
         </div>
 
         <footer class="modal-footer-expanded">
-          <button type="button" @click="handleClose" class="btn-cancel">
+          <button type="button" @click="handleClose" class="btn-close">
             Close
           </button>
         </footer>
@@ -179,19 +179,6 @@ function handleClose() {
   margin-top: 0.25rem;
 }
 
-.close-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--muted);
-  transition: color 0.2s ease;
-  padding: 0.25rem;
-}
-
-.close-btn:hover {
-  color: var(--accent);
-}
-
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -270,21 +257,6 @@ function handleClose() {
   margin-top: 2rem;
   display: flex;
   justify-content: flex-end;
-}
-
-.btn-cancel {
-  background-color: var(--accent);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-cancel:hover {
-  background-color: var(--accent-dark);
 }
 
 /* Scrollbar for modal content */
