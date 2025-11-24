@@ -386,43 +386,17 @@ function closeEditModal() {
   isEditModalOpen.value = false;
   selectedStudent.value = null;
 }
-async function handleUpdateStudent({ id, payload }) {
-  if (!id) {
-    console.error("Student ID is missing for update.");
-    return;
-  }
-  if (!payload.sectionId && payload.section) {
-    payload.sectionId = payload.section;
-    delete payload.section;
-  }
-  if (!payload.sectionId) {
-    console.error("Section ID is missing for update.");
-    return;
-  }
 
-  const url = `/section/${payload.sectionId}/student/${id}`;
-  const jsonPayload = {
-    sid: payload.sid || "",
-    rfid: payload.rfid || "",
-    name: payload.name || "",
-    email: payload.email || "",
-    photo: payload.photo || "",
-  };
-
+// ... inside your script setup or methods ...
+async function handleUpdateStudent({ id, originalSectionId, payload }) {
   try {
-    await api.patch(url, jsonPayload, {
-      headers: { "Content-Type": "application/json" },
-    });
+    await api.patch(`/section/${originalSectionId}/student/${id}`, payload);
     emit("refresh");
     closeEditModal();
   } catch (error) {
-    console.error(
-      "Failed to update student:",
-      error.response?.data || error.message
-    );
+    console.error("Failed to update student:", error);
   }
 }
-
 // ---- View ----
 function openViewModal(student) {
   const sectionObj = sections.value.get(student.id) || {};

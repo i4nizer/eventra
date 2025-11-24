@@ -1,8 +1,6 @@
 <template>
   <transition name="fade">
     <div v-if="open" class="modal-backdrop-simple">
-      <div class="modal-backdrop" @click="handleClose"></div>
-
       <div class="modal-form-expanded scrollable" @click.stop>
         <header class="modal-header-inline">
           <div>
@@ -35,12 +33,8 @@
         <div class="content-grid">
           <div class="photo-section">
             <label class="input-label">Photo</label>
-            <div class="photo-preview-container" v-if="student?.photoUrl">
-              <img
-                :src="student.photoUrl"
-                alt="Student photo"
-                class="preview-img"
-              />
+            <div class="photo-preview-container" v-if="student?.photo">
+              <img :src="photoUrl" alt="Student photo" class="preview-img" />
             </div>
             <div v-else class="upload-placeholder">
               <p class="upload-label">No photo available</p>
@@ -110,6 +104,16 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close"]);
+
+// Backend base URL to serve the photo
+const backendBaseUrl = "http://localhost:4000"; // Adjust accordingly or make dynamic
+
+const photoUrl = computed(() => {
+  if (props.student?.photo) {
+    return `${backendBaseUrl}/uploads/photo/${props.student.photo}`;
+  }
+  return "";
+});
 
 function formatYear(year) {
   if (!year) return "";
