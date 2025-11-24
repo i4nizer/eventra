@@ -7,6 +7,7 @@ import student from "./student.js"
 import attendance from "./attendance.js"
 import violation from "./violation.js"
 import payment from "./payment.js"
+import esp from "./esp/index.js"
 
 //
 
@@ -20,4 +21,5 @@ export default {
 	attendance,
 	violation,
 	payment,
+	esp,
 }
