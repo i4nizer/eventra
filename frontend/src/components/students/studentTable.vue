@@ -57,8 +57,13 @@
               Name
               <SortIcon :field="'name'" :sort="sort" />
             </th>
+
             <th class="p-3 cursor-pointer" @click="sortBy('section')">
               Section
+              <SortIcon :field="'section'" :sort="sort" />
+            </th>
+            <th class="p-3 cursor-pointer" @click="sortBy('Year')">
+              Year
               <SortIcon :field="'section'" :sort="sort" />
             </th>
             <th class="p-3">RFID Tags</th>
@@ -85,6 +90,9 @@
             </td>
             <td class="p-3 align-middle section-text">
               {{ sections.get(s.id)?.name }}
+            </td>
+            <td class="p-3 align-middle section-text">
+              {{ sections.get(s.id)?.year }}
             </td>
             <td class="p-3 align-middle">
               <span class="badge badge-tag">
@@ -174,12 +182,18 @@
               <div class="student-email">{{ s.email }}</div>
             </div>
           </div>
-
           <div class="card-row">
             <div class="card-label">Section</div>
-            <div class="card-value section-text">{{ s.section }}</div>
+            <div class="card-value section-text">
+              {{ sections.get(s.id)?.name }}
+            </div>
           </div>
-
+          <div class="card-row">
+            <div class="card-label">Year</div>
+            <div class="card-value section-text">
+              {{ sections.get(s.id)?.year }}
+            </div>
+          </div>
           <div class="card-row">
             <div class="card-label">RFID Tag</div>
             <div class="card-value">

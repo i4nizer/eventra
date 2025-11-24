@@ -95,7 +95,7 @@ const sidebarItems = computed(() =>
       icon: "fa-solid fa-user-graduate",
       label: "Students",
     },
-    { to: "/rfid-tags", icon: "fa-solid fa-id-badge", label: "RFID Tags" },
+    // { to: "/rfid-tags", icon: "fa-solid fa-id-badge", label: "RFID Tags" },
     { to: "/sections", icon: "fa-solid fa-tags", label: "Sections" },
     { to: "/events", icon: "fa-solid fa-calendar-days", label: "Events" },
     {
@@ -108,7 +108,11 @@ const sidebarItems = computed(() =>
       icon: "fa-solid fa-peso-sign",
       label: "Payment Logs",
     },
-    { to: "/violation-logs", icon: "fa-solid fa-triangle-exclamation", label: "Violation Logs" },
+    {
+      to: "/violation-logs",
+      icon: "fa-solid fa-triangle-exclamation",
+      label: "Violation Logs",
+    },
     { to: "/settings", icon: "fa-solid fa-cog", label: "Settings" },
   ].filter((item) => hasAccess(item.roles))
 );
