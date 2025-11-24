@@ -1,48 +1,49 @@
 <template>
-  <div
-    v-if="show"
-    class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-  >
-    <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Add Section</h2>
+  <Transition name="modal">
+    <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
+      <div class="modal-form">
+        <div class="modal-header-inline">
+          <h2 class="modal-title">Add Section</h2>
+          <button class="close-btn" @click="$emit('close')">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
 
-      <div class="mb-3">
-        <label class="text-sm text-gray-600">Name</label>
-        <input
-          type="text"
-          v-model="localData.name"
-          class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
-        />
-      </div>
+        <div class="modal-body-simple">
+          <div style="margin-bottom: 1rem">
+            <label class="input-label">Name</label>
+            <input
+              type="text"
+              v-model="localData.name"
+              placeholder="Enter section name"
+              class="input-field"
+            />
+          </div>
 
-      <div class="mb-5">
-        <label class="text-sm text-gray-600">Year</label>
-        <input
-          min="1"
-          max="4"
-          type="number"
-          v-model="localData.year"
-          class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
-        ></input>
-      </div>
+          <div style="margin-bottom: 1.5rem">
+            <label class="input-label">Year</label>
+            <input
+              min="1"
+              max="4"
+              type="number"
+              v-model="localData.year"
+              placeholder="Enter year (1-4)"
+              class="input-field"
+            />
+          </div>
+        </div>
 
-      <div class="flex justify-end gap-2">
-        <button
-          class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
-          @click="$emit('close')"
-        >
-          Cancel
-        </button>
-
-        <button
-          class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
-          @click="submit"
-        >
-          Add
-        </button>
+        <div class="modal-footer-inline">
+          <button class="btn-close" @click="$emit('close')">
+            Cancel
+          </button>
+          <button class="btn-submit" @click="submit">
+            Add
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script>
@@ -68,8 +69,12 @@ export default {
         year: this.localData.year,
       });
 
-      this.localData = { name: "", year: "" };
+      this.localData = { name: "", year: 1 };
     },
   },
 };
 </script>
+
+<style scoped>
+/* No custom styles needed - all using global CSS */
+</style>

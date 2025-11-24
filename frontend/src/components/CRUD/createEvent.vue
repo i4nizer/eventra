@@ -1,237 +1,217 @@
 <template>
-  <div v-if="open" class="modal-backdrop-simple">
-    <div class="modal-backdrop" @click="onClose"></div>
+  <Transition name="modal">
+    <div v-if="open" class="modal-overlay" @click.self="onClose">
+      <form @submit.prevent="handleSubmit" class="modal-form scrollable modal-large">
+        <header class="modal-header-inline">
+          <div>
+            <h3 class="modal-title">Create Event</h3>
+            <p class="modal-subtitle">Add a new event to the system.</p>
+          </div>
+          <button type="button" @click="onClose" class="close-btn">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </header>
 
-    <form @submit.prevent="handleSubmit" class="modal-form scrollable">
-      <header class="modal-header-inline">
-        <div>
-          <h3 class="modal-title">Create Event</h3>
-          <p class="modal-subtitle">Add a new event to the system.</p>
-        </div>
-        <button type="button" @click="onClose" class="close-btn">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </button>
-      </header>
-
-      <!-- Form content -->
-      <div class="space-y-4">
-        <div>
-          <label class="input-label">Event name</label>
-          <input
-            v-model="name"
-            class="input-field"
-            :class="{
-              'input-error': errors.name,
-            }"
-            placeholder="e.g. Math Club Meeting"
-            autofocus
-          />
-          <p v-if="errors.name" class="error-message">
-            {{ errors.name }}
-          </p>
-        </div>
-
-        <!-- Event Start & End Times -->
-        <div class="flex gap-4">
-          <div class="flex-1">
-            <label class="input-label">Start Time</label>
+        <!-- Form content -->
+        <div class="modal-body-simple">
+          <div style="margin-bottom: 1rem">
+            <label class="input-label">Event name</label>
             <input
-              v-model="startAt"
-              type="datetime-local"
+              v-model="name"
               class="input-field"
-              :class="{ 'input-error': errors.startAt }"
+              :class="{ 'input-error': errors.name }"
+              placeholder="e.g. Math Club Meeting"
+              autofocus
             />
-            <p v-if="errors.startAt" class="error-message">
-              {{ errors.startAt }}
+            <p v-if="errors.name" class="error-message">
+              {{ errors.name }}
             </p>
           </div>
 
-          <div class="flex-1">
-            <label class="input-label">Finish Time</label>
-            <input
-              v-model="finishAt"
-              type="datetime-local"
-              class="input-field"
-              :class="{ 'input-error': errors.finishAt }"
-            />
-            <p v-if="errors.finishAt" class="error-message">
-              {{ errors.finishAt }}
-            </p>
+          <!-- Event Start & End Times -->
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem">
+            <div style="flex: 1">
+              <label class="input-label">Start Time</label>
+              <input
+                v-model="startAt"
+                type="datetime-local"
+                class="input-field"
+                :class="{ 'input-error': errors.startAt }"
+              />
+              <p v-if="errors.startAt" class="error-message">
+                {{ errors.startAt }}
+              </p>
+            </div>
+
+            <div style="flex: 1">
+              <label class="input-label">Finish Time</label>
+              <input
+                v-model="finishAt"
+                type="datetime-local"
+                class="input-field"
+                :class="{ 'input-error': errors.finishAt }"
+              />
+              <p v-if="errors.finishAt" class="error-message">
+                {{ errors.finishAt }}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <!-- Multiple Time Entries -->
-        <div>
-          <label class="input-label">Event Entries</label>
-          <div
-            v-for="(entry, index) in timeEntries"
-            :key="index"
-            class="entry-group"
-          >
-            <div>
-              <label class="input-label">Entry Name</label>
-              <input
-                v-model="entry.name"
-                type="text"
-                class="input-field"
-                placeholder="e.g. Opening Ceremony"
-                :class="{
-                  'input-error': errors.timeEntries?.[index]?.name,
-                }"
-              />
-              <p v-if="errors.timeEntries?.[index]?.name" class="error-message">
-                {{ errors.timeEntries[index].name }}
-              </p>
-            </div>
-
-            <div>
-              <label class="input-label">Start Date & Time</label>
-              <input
-                v-model="entry.startTime"
-                type="datetime-local"
-                class="input-field"
-                :class="{
-                  'input-error': errors.timeEntries?.[index]?.startTime,
-                }"
-              />
-              <p
-                v-if="errors.timeEntries?.[index]?.startTime"
-                class="error-message"
-              >
-                {{ errors.timeEntries[index].startTime }}
-              </p>
-            </div>
-
-            <div>
-              <label class="input-label">End Date & Time</label>
-              <input
-                v-model="entry.endTime"
-                type="datetime-local"
-                class="input-field"
-                :class="{
-                  'input-error': errors.timeEntries?.[index]?.endTime,
-                }"
-              />
-              <p
-                v-if="errors.timeEntries?.[index]?.endTime"
-                class="error-message"
-              >
-                {{ errors.timeEntries[index].endTime }}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              class="btn-remove-entry"
-              @click="removeTimeEntry(index)"
+          <!-- Multiple Time Entries -->
+          <div style="margin-bottom: 1rem">
+            <label class="input-label">Event Entries</label>
+            <div
+              v-for="(entry, index) in timeEntries"
+              :key="index"
+              class="entry-group"
             >
-              <i class="fa-solid fa-trash"></i>
+              <div style="flex: 1">
+                <label class="input-label">Entry Name</label>
+                <input
+                  v-model="entry.name"
+                  type="text"
+                  class="input-field"
+                  placeholder="e.g. Opening Ceremony"
+                  :class="{ 'input-error': errors.timeEntries?.[index]?.name }"
+                />
+                <p v-if="errors.timeEntries?.[index]?.name" class="error-message">
+                  {{ errors.timeEntries[index].name }}
+                </p>
+              </div>
+
+              <div style="flex: 1">
+                <label class="input-label">Start Date & Time</label>
+                <input
+                  v-model="entry.startTime"
+                  type="datetime-local"
+                  class="input-field"
+                  :class="{ 'input-error': errors.timeEntries?.[index]?.startTime }"
+                />
+                <p v-if="errors.timeEntries?.[index]?.startTime" class="error-message">
+                  {{ errors.timeEntries[index].startTime }}
+                </p>
+              </div>
+
+              <div style="flex: 1">
+                <label class="input-label">End Date & Time</label>
+                <input
+                  v-model="entry.endTime"
+                  type="datetime-local"
+                  class="input-field"
+                  :class="{ 'input-error': errors.timeEntries?.[index]?.endTime }"
+                />
+                <p v-if="errors.timeEntries?.[index]?.endTime" class="error-message">
+                  {{ errors.timeEntries[index].endTime }}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="btn-delete action-btn"
+                @click="removeTimeEntry(index)"
+                style="margin-top: auto; padding: 0.5rem; height: 2.5rem; width: 2.5rem; display: flex; align-items: center; justify-content: center"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+            <button type="button" class="btn-add" @click="addTimeEntry">
+              <i class="fa-solid fa-plus"></i>
+              <span>Add Time Entry</span>
             </button>
           </div>
-          <button type="button" class="btn-add-entry" @click="addTimeEntry">
-            + Add Time Entry
-          </button>
-        </div>
 
-        <!-- Sections as checkboxes with search -->
-        <div>
-          <label class="input-label">Sections / Year Levels</label>
-          <input
-            v-model="searchQuery"
-            placeholder="Search sections..."
-            class="input-field mb-2"
-          />
-          <div class="flex items-center mb-2">
+          <!-- Sections as checkboxes with search -->
+          <div style="margin-bottom: 1rem">
+            <label class="input-label">Sections / Year Levels</label>
             <input
-              type="checkbox"
-              id="selectAll"
-              v-model="selectAll"
-              @change="toggleSelectAll"
+              v-model="searchQuery"
+              placeholder="Search sections..."
+              class="input-field"
+              style="margin-bottom: 0.5rem"
             />
-            <label for="selectAll" class="ml-2">Select All</label>
-          </div>
-          <div class="checkbox-list">
-            <div
-              v-for="s in filteredSections"
-              :key="s.id"
-              class="flex items-center mb-1"
-            >
+            <div style="display: flex; align-items: center; margin-bottom: 0.5rem; gap: 0.5rem">
               <input
                 type="checkbox"
-                :id="`section-${s.id}`"
-                :value="s.id"
-                v-model="selectedSections"
+                id="selectAll"
+                v-model="selectAll"
+                @change="toggleSelectAll"
+                class="checkbox-input"
               />
-              <label :for="`section-${s.id}`" class="ml-2">{{ s.label }}</label>
+              <label for="selectAll" class="checkbox-label">Select All</label>
             </div>
+            <div class="checkbox-list">
+              <div
+                v-for="s in filteredSections"
+                :key="s.id"
+                class="checkbox-item"
+              >
+                <input
+                  type="checkbox"
+                  :id="`section-${s.id}`"
+                  :value="s.id"
+                  v-model="selectedSections"
+                  class="checkbox-input"
+                />
+                <label :for="`section-${s.id}`" class="checkbox-label">{{ s.label }}</label>
+              </div>
+            </div>
+            <p v-if="errors.section" class="error-message">
+              {{ errors.section }}
+            </p>
           </div>
-          <p v-if="errors.section" class="error-message">
-            {{ errors.section }}
+
+          <!-- Fines Field -->
+          <div style="margin-bottom: 1rem">
+            <label class="input-label">Fines</label>
+            <input
+              v-model="fines"
+              type="number"
+              class="input-field"
+              :class="{ 'input-error': errors.fines }"
+              placeholder="e.g. 50"
+              min="0"
+              step="0.01"
+            />
+            <p v-if="errors.fines" class="error-message">
+              {{ errors.fines }}
+            </p>
+          </div>
+
+          <div style="margin-bottom: 1rem">
+            <label class="input-label">Description</label>
+            <textarea
+              v-model="description"
+              class="input-field"
+              :class="{ 'input-error': errors.description }"
+              placeholder="Describe the event..."
+              rows="3"
+            ></textarea>
+            <p v-if="errors.description" class="error-message">
+              {{ errors.description }}
+            </p>
+          </div>
+
+          <p v-if="errors.submit" class="error-message-submit">
+            {{ errors.submit }}
           </p>
         </div>
 
-        <!-- Fines Field -->
-        <div>
-          <label class="input-label">Fines</label>
-          <input
-            v-model="fines"
-            type="number"
-            class="input-field"
-            :class="{ 'input-error': errors.fines }"
-            placeholder="e.g. 50"
-            min="0"
-            step="0.01"
-          />
-          <p v-if="errors.fines" class="error-message">
-            {{ errors.fines }}
-          </p>
-        </div>
-
-        <div>
-          <label class="input-label">Description</label>
-          <textarea
-            v-model="description"
-            class="input-field"
-            :class="{ 'input-error': errors.description }"
-            placeholder="Describe the event..."
-            rows="3"
-          ></textarea>
-          <p v-if="errors.description" class="error-message">
-            {{ errors.description }}
-          </p>
-        </div>
-
-        <p v-if="errors.submit" class="error-message-submit">
-          {{ errors.submit }}
-        </p>
-      </div>
-
-      <footer class="modal-footer-inline">
-        <button
-          type="button"
-          @click="onClose"
-          class="btn-cancel"
-          :disabled="submitting"
-        >
-          Cancel
-        </button>
-        <button type="submit" class="btn-submit" :disabled="submitting">
-          {{ submitting ? "Creating..." : "Create Event" }}
-        </button>
-      </footer>
-    </form>
-  </div>
+        <footer class="modal-footer-inline">
+          <button
+            type="button"
+            @click="onClose"
+            class="btn-cancel"
+            :disabled="submitting"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn-submit" :disabled="submitting">
+            {{ submitting ? "Creating..." : "Create Event" }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -365,89 +345,51 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
+/* Entry group layout */
 .entry-group {
   display: flex;
-  align-items: center;
-  gap: 1vw;
-  padding: 1rem 2rem 1rem 2rem;
-}
-.modal-form {
-  max-width: 45vw; /* Increase the maximum width */
-  width: 100%; /* Adjust width to take up more space */
-  max-height: 90vh; /* Increase the maximum height */
-  height: auto; /* Allow height to adjust based on content */
-  background-color: white;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
-  padding: 1.5rem;
-  overflow-y: auto; /* Enable scrolling if content overflows */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
 }
 
-.modal-backdrop-simple {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Darken the backdrop */
-  z-index: 1000;
-}
-
+/* Checkbox list container */
 .checkbox-list {
   max-height: 10rem;
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
   padding: 0.5rem;
+  background: var(--surface);
 }
 
-.btn-add-entry {
-  background-color: var(--primary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
+/* Checkbox items */
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.checkbox-input {
   cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
 }
 
-.btn-remove-entry {
-  background-color: var(--danger);
-  color: #fff;
-  padding: 0.25rem;
-  border-radius: 0.375rem;
+.checkbox-label {
   cursor: pointer;
-  height: 2.5rem;
-  width: 2.5rem;
-  margin-top: auto;
+  font-size: 0.875rem;
+  color: var(--text);
+  user-select: none;
 }
 
-.btn-remove-entry i {
-  font-size: 1rem;
-}
-
-.btn-remove-entry:hover {
-  opacity: 0.85;
-}
-
-.input-field {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  font-size: 0.95rem;
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  transition: border 0.2s ease-in-out, box-shadow 0.2s;
-}
-
-.input-field:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(0, 118, 255, 0.25);
-}
-
-.error-message {
-  color: var(--danger);
-  font-size: 0.8rem;
-  margin-top: 0.2rem;
+.checkbox-label:hover {
+  color: var(--accent);
 }
 </style>
