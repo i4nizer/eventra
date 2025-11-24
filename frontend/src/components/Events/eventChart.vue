@@ -2,6 +2,8 @@
   <div class="chart surface p-4 rounded-lg shadow">
     <div class="chart-header">
       <h3 class="chart-title">Events: Registered vs Attendees</h3>
+
+      <!-- Category Filter -->
       <select
         v-model="selectedCategory"
         class="category-select"
@@ -13,6 +15,7 @@
         </option>
       </select>
     </div>
+
     <div class="chart-container">
       <Bar :data="chartData" :options="chartOptions" />
     </div>
@@ -40,14 +43,15 @@ Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 const selectedCategory = ref("all");
 const events = ref([]);
 const sections = ref([]);
-const students = ref([]); // all students cache
-
+const activitySections = ref([]); // all activity-section mappings
+const students = ref([]); // all students
 const chartRawData = ref({
   labels: [],
   registeredCounts: [],
   attendeesCounts: [],
 });
 
+// Compute unique category list from sections
 const categoryList = computed(() => {
   const cats = new Set();
   sections.value.forEach((sec) => {
@@ -56,6 +60,7 @@ const categoryList = computed(() => {
   return Array.from(cats);
 });
 
+// Fetch all sections
 async function fetchSections() {
   try {
     const res = await api.get("/section");
@@ -65,6 +70,7 @@ async function fetchSections() {
   }
 }
 
+// Fetch all students
 async function fetchStudents() {
   try {
     const res = await api.get("/section/student");
@@ -74,6 +80,7 @@ async function fetchStudents() {
   }
 }
 
+// Fetch all events (activities)
 async function fetchEvents() {
   try {
     const res = await api.get("/activity");
@@ -83,17 +90,27 @@ async function fetchEvents() {
   }
 }
 
-// Get sections for event
-async function getEventSections(eventId) {
-  try {
-    const res = await api.get(`/activity/${eventId}/section`);
-    return res.data; // array of section objects
-  } catch {
-    return [];
-  }
+// Fetch all activity-section mappings by fetching per event
+async function fetchActivitySections() {
+  activitySections.value = [];
+  if (!events.value.length) return;
+  await Promise.all(
+    events.value.map(async (event) => {
+      try {
+        const res = await api.get(`/activity/${event.id}/section`);
+        const mappings = res.data.map((sec) => ({
+          activityId: event.id,
+          sectionId: sec.id || sec.sectionId || sec,
+        }));
+        activitySections.value.push(...mappings);
+      } catch (e) {
+        // Ignore errors for individual event requests
+      }
+    })
+  );
 }
 
-// Get activity entries for event
+// Get activity entries for an event
 async function getEventEntries(eventId) {
   try {
     const res = await api.get(`/activity/${eventId}/entry`);
@@ -103,7 +120,7 @@ async function getEventEntries(eventId) {
   }
 }
 
-// Get attendances for activity entry
+// Get attendances for an activity entry
 async function getAttendancesForEntry(entryId) {
   try {
     const res = await api.get(`/attendance/activity-entry/${entryId}`);
@@ -115,29 +132,25 @@ async function getAttendancesForEntry(entryId) {
 
 async function fetchChartData() {
   await Promise.all([fetchEvents(), fetchSections(), fetchStudents()]);
+  await fetchActivitySections();
 
   let filteredEvents = events.value;
 
   if (selectedCategory.value !== "all") {
     const selectedCatLower = selectedCategory.value.toLowerCase();
 
-    const matchingSectionIds = sections.value
-      .filter((sec) => sec.name.toLowerCase() === selectedCatLower)
-      .map((sec) => sec.id);
-
-    // Filter events by those that have any matching section
-    const eventSectionsMap = {};
-
-    await Promise.all(
-      filteredEvents.map(async (event) => {
-        const evSections = await getEventSections(event.id);
-        eventSectionsMap[event.id] = evSections.map((s) => s.id);
-      })
+    // Filter sections by category name
+    const matchingSections = sections.value.filter(
+      (sec) => sec.name.toLowerCase() === selectedCatLower
     );
+    const matchingSectionIds = matchingSections.map((sec) => sec.id);
 
+    // Filter events that have any linked section in matchingSectionIds
     filteredEvents = filteredEvents.filter((event) =>
-      eventSectionsMap[event.id]?.some((secId) =>
-        matchingSectionIds.includes(secId)
+      activitySections.value.some(
+        (as) =>
+          as.activityId === event.id &&
+          matchingSectionIds.includes(as.sectionId)
       )
     );
   }
@@ -149,38 +162,20 @@ async function fetchChartData() {
   for (const event of filteredEvents) {
     labels.push(event.name);
 
-    const evSections = await getEventSections(event.id);
-    const evSectionIds = evSections.map((s) => s.id);
+    // Find all sectionIds linked to this event from activitySections
+    const linkedSectionIds = activitySections.value
+      .filter((as) => as.activityId === event.id)
+      .map((as) => as.sectionId);
 
+    // Count registered students: number of students with sectionId in linkedSectionIds
+    const registered = students.value.filter((stu) =>
+      linkedSectionIds.includes(stu.sectionId)
+    ).length;
+
+    // Get activity entries for event
     const entries = await getEventEntries(event.id);
 
-    // For "Registered":
-    // Gather unique studentIds that have attendances in any entry of this event
-    // Then count how many of those students belong to event's sections
-
-    const uniqueStudentIds = new Set();
-
-    for (const entry of entries) {
-      const entryAttendances = await getAttendancesForEntry(entry.id);
-      entryAttendances.forEach((att) => {
-        if (att.studentId) uniqueStudentIds.add(att.studentId);
-      });
-    }
-
-    // Count number of unique students belonging to event's sections
-    // students.value has all students with sectionId
-
-    let registered = 0;
-    uniqueStudentIds.forEach((stuId) => {
-      const student = students.value.find((s) => s.id === stuId);
-      if (student && evSectionIds.includes(student.sectionId)) {
-        registered++;
-      }
-    });
-
-    // For "Attendees":
-    // Assuming attendance records signify presence,
-    // total attendance records for event entries count as attendees
+    // Sum total attendance records for all entries (attendees)
     let attendees = 0;
     for (const entry of entries) {
       const entryAttendances = await getAttendancesForEntry(entry.id);
@@ -198,6 +193,7 @@ async function fetchChartData() {
   };
 }
 
+// Accent color helpers
 function getAccent() {
   try {
     const raw = getComputedStyle(document.documentElement)
