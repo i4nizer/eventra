@@ -386,41 +386,11 @@ function closeEditModal() {
   isEditModalOpen.value = false;
   selectedStudent.value = null;
 }
-async function handleUpdateStudent({ id, payload }) {
-  if (!id) {
-    console.error("Student ID is missing for update.");
-    return;
-  }
-  if (!payload.sectionId && payload.section) {
-    payload.sectionId = payload.section;
-    delete payload.section;
-  }
-  if (!payload.sectionId) {
-    console.error("Section ID is missing for update.");
-    return;
-  }
-
-  const url = `/section/${payload.sectionId}/student/${id}`;
-  const jsonPayload = {
-    sid: payload.sid || "",
-    rfid: payload.rfid || "",
-    name: payload.name || "",
-    email: payload.email || "",
-    photo: payload.photo || "",
-  };
-
-  try {
-    await api.patch(url, jsonPayload, {
-      headers: { "Content-Type": "application/json" },
-    });
-    emit("refresh");
-    closeEditModal();
-  } catch (error) {
-    console.error(
-      "Failed to update student:",
-      error.response?.data || error.message
-    );
-  }
+async function handleUpdateStudent(student) {
+  await api.patch(`/section/${student.sectionId}/student/${student.id}`, student)
+    .then(() => emit("refresh"))
+    .then(() => closeEditModal())
+    .catch(console.error)
 }
 
 // ---- View ----

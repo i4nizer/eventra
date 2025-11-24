@@ -290,18 +290,18 @@ async function handleSubmit() {
   if (Object.keys(err).length) return;
   submitting.value = true;
 
-  const payload = new FormData();
-  payload.append("sid", sid.value.trim());
-  payload.append("rfid", rfid.value.trim());
-  payload.append("name", name.value.trim());
-  payload.append("email", email.value.trim());
-  payload.append("sectionId", sectionId.value);
-  if (photo.value) {
-    payload.append("photo", photo.value);
+  const payload = {
+    id: props.student.id,
+    sid: sid.value.trim(),
+    rfid: rfid.value.trim(),
+    name: name.value.trim(),
+    email: email.value.trim(),
+    photo: photo.value ? photo.value.trim() : "",
+    sectionId: sectionId.value,
   }
 
   try {
-    if (props.onUpdate) await props.onUpdate({ id: props.student.id, payload });
+    if (props.onUpdate) await props.onUpdate(payload);
     submitting.value = false;
     props.onClose && props.onClose();
   } catch (e) {
