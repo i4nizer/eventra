@@ -3,7 +3,7 @@
     <div class="eventHeader">
       <div class="header-content">
         <eventsCount />
-        <button @click="openCreateModal" class="btn-add">
+        <button @click="activityCreateModal = true" class="btn-add">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -21,91 +21,155 @@
       </div>
     </div>
     <div class="eventList">
-      <eventList />
+      <!-- <eventList /> -->
     </div>
 
     <!-- Create Event Modal -->
     <createEvent
-      :open="isCreateModalOpen"
-      :onClose="closeCreateModal"
-      :onCreate="handleCreateEvent"
+      v-if="activityCreateModal"
       :sections="sections"
+      @close="activityCreateModal = false"
+      @create-activity="createActivity"
+      @create-activity-entry="createActivityEntry"
+      @create-activity-section="createActivitySection"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { useApi } from "@/composables/api";
 import eventsCount from "@/components/Events/eventsCount.vue";
 import eventList from "@/components/Events/eventList.vue";
 import createEvent from "@/components/CRUD/createEvent.vue";
 
-const { api } = useApi();
-const isCreateModalOpen = ref(false);
+//
 
+const { api } = useApi();
+
+//
+
+// --- Sections
 const sections = ref([]);
 
-const getSections = async () => {
-  await api
+const fetchSection = async () => {
+  return await api
     .get(`/section`)
-    .then((res) => {
-      sections.value = res.data.map((section) => ({
-        id: section.id,
-        label: `${section.name} / Year ${section.year}`,
-      }));
-    })
+    .then((res) => sections.value = res.data)
     .catch(console.error);
 };
 
-onMounted(getSections);
+// --- Activities (event)
+const activities = ref([])
+const activityCreateModal = ref(false);
 
-// Open the Create Event modal
-function openCreateModal() {
-  isCreateModalOpen.value = true;
+const fetchActivity = async () => {
+  return await api
+    .get("/activity")
+    .then((res) => activities.value = res.data)
+    .catch(console.error)
 }
 
-// Close the Create Event modal
-function closeCreateModal() {
-  isCreateModalOpen.value = false;
+const createActivity = async (data) => {
+  return await api
+    .post("/activity", data)
+    .then((res) => [res, activities.value.push(res.data)])
+    .then(([res]) => res)
+    .catch(console.error)
 }
 
-// Handle event creation
-async function handleCreateEvent(eventData) {
-  // *need to add desc, event start and end datetime
-  const event = {
-    name: eventData.name,
-    fine: eventData.fines,
-    description: eventData.description,
-    startAt: eventData.startAt,
-    finishAt: eventData.finishAt,
-  };
-
-  // --- Creates event
-  const activity = await api
-    .post("/activity", event)
-    .then((res) => res.data)
-    .catch(() => undefined);
-  if (!activity) return;
-
-  // --- Specifies sections included in the event
-  const secbase = `/activity/${activity.id}/section/section`;
-  const secprms = eventData.sections.map((s) =>
-    api.post(`${secbase}/${s}`).then((res) => res.data)
-  );
-  const actsecs = await Promise.all(secprms).catch(console.error);
-
-  // --- Lists times when to tap rfid
-  const entries = eventData.timeEntries.map((e) => ({
-    name: e.name,
-    startAt: e.startTime,
-    finishAt: e.endTime,
-  }));
-  const entprms = entries.map((e) =>
-    api.post(`/activity/${activity.id}/entry`, e).then((res) => res.data)
-  );
-  const actents = await Promise.all(entprms).catch(console.error);
+const updateActivity = async (data) => {
+  return await api
+    .patch(`/activity/${data.id}`, data)
+    .then((res) => [res, activities.value.findIndex((a) => a.id == data.id)])
+    .then(([res, idx]) => [res, activities.value.splice(idx, 1, res.data)])
+    .then(([res]) => res)
+    .catch(console.error)
 }
+
+const deleteActivity = async (data) => {
+  return await api
+    .delete(`/activity/${data.id}`)
+    .then(() => activities.value.findIndex((a) => a.id == data.id))
+    .then((idx) => activities.value.splice(idx, 1))
+    .catch(console.error)
+}
+
+// --- Activity Entries
+const activitiesEntries = ref([])
+
+const fetchActivityEntry = async () => {
+  return await api
+    .get("/activity/entry")
+    .then((res) => activitiesEntries.value = res.data)
+    .catch(console.error)
+}
+
+const createActivityEntry = async (actid, data) => {
+  return await api
+    .post(`/activity/${actid}/entry`, data)
+    .then((res) => [res, activitiesEntries.value.push(res.data)])
+    .then(([res]) => res)
+    .catch(console.error)
+}
+
+const updateActivityEntry = async (actid, data) => {
+  return await api
+    .patch(`/activity/${actid}/entry/${data.id}`, data)
+    .then((res) => [res, activitiesEntries.value.findIndex((a) => a.id == data.id)])
+    .then(([res, idx]) => [res, activitiesEntries.value.splice(idx, 1, res.data)])
+    .then(([res]) => res)
+    .catch(console.error)
+}
+
+const deleteActivityEntry = async (actid, data) => {
+  return await api
+    .delete(`/activity/${actid}/entry/${data.id}`)
+    .then(() => activitiesEntries.value.findIndex((a) => a.id == data.id))
+    .then((idx) => activitiesEntries.value.splice(idx, 1))
+    .catch(console.error)
+}
+
+// --- Activity Sections
+const activitiesSections = ref([])
+
+const fetchActivitySection = async () => {
+  return await api
+    .get("/activity/section")
+    .then((res) => activitiesSections.value = res.data)
+    .catch(console.error)
+}
+
+const createActivitySection = async (actid, data) => {
+  return await api
+    .post(`/activity/${actid}/section/section/${data.id}`)
+    .then((res) => [res, activitiesSections.value.push(res.data)])
+    .then(([res]) => res)
+    .catch(console.error)
+}
+
+const deleteActivitySection = async (actid, data) => {
+  return await api
+    .delete(`/activity/${actid}/section/${data.id}`)
+    .then(() => activitiesSections.value.findIndex((a) => a.id == data.id))
+    .then((idx) => activitiesSections.value.splice(idx, 1))
+    .catch(console.error)
+}
+
+// --- Data Fetching
+const getData = async () => {
+  await Promise.all([
+    fetchSection(),
+    fetchActivity(),
+    fetchActivityEntry(),
+    fetchActivitySection(),
+  ]).catch(console.error)
+}
+
+onBeforeMount(getData)
+
+//
+
 </script>
 
 <style scoped>

@@ -44,7 +44,7 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {{ formatDate(event.eventDate) }}
+              {{ format(new Date(event.eventDate), "MMMM d, yyyy, h:mm a") }}
             </p>
 
             <!-- Sections -->
@@ -123,7 +123,7 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {{ formatDate(event.createdAt) }}
+              {{ format(new Date(event.createdAt), "MMMM d, yyyy, h:mm a") }}
             </p>
 
             <!-- Elegant Description -->
@@ -144,8 +144,8 @@
 
     <!-- Event Modal -->
     <EventModal
-      v-if="selectedEvent"
-      :event="selectedEvent"
+      v-if="activityViewData"
+      :event="activityViewData"
       :sections="sections"
       @close="closeModal"
       @update="updateEvent"
@@ -156,182 +156,58 @@
 
 <script setup>
 import { format } from "date-fns"; // Import date-fns for formatting
-import { useApi } from "@/composables/api";
-import { ref, computed, onBeforeMount } from "vue";
+import { ref, watch } from "vue";
 import EventModal from "./EventModal.vue"; // ✅ Import modal component
 
 //
 
-const { api } = useApi();
+const props = defineProps({
+  sections: { type: Array, default: () => [] },
+  activities: { type: Array, default: () => [] },
+  onCreateActivity: { type: Function, default: () => (() => {}) },
+  onUpdateActivity: { type: Function, default: () => (() => {}) },
+  onDeleteActivity: { type: Function, default: () => (() => {}) },
+  activitiesEntries: { type: Array, default: () => [] },
+  onCreateActivityEntry: { type: Function, default: () => (() => {}) },
+  onUpdateActivityEntry: { type: Function, default: () => (() => {}) },
+  onDeleteActivityEntry: { type: Function, default: () => (() => {}) },
+  activitiesSections: { type: Array, default: () => [] },
+  onCreateActivitySection: { type: Function, default: () => (() => {}) },
+  onUpdateActivitySection: { type: Function, default: () => (() => {}) },
+  onDeleteActivitySection: { type: Function, default: () => (() => {}) },
+})
 
 //
 
-// --- Events
-const events = ref([
-  // {
-  //   id: 1,
-  //   name: "Orientation",
-  //   timeEntries: [
-  //     { name: "Opening", startTime: "08:00", endTime: "09:00" },
-  //     { name: "Main Event", startTime: "09:00", endTime: "10:00" },
-  //   ],
-  //   sections: ["BSIT 1A", "BSIT 1B"],
-  //   fines: 0,
-  //   eventDate: "2025-11-23",
-  //   createdAt: "2025-11-20",
-  // },
-]);
+// --- Activity
+const updateActivity = async (data) => {
+  await props.onUpdateActivity(data)
+}
 
-const getEvents = async () => {
-  const activities = await api
-    .get("/activity")
-    .then((res) => res.data)
-    .catch(() => undefined);
-  if (!activities) return console.error(`Failed to GET events.`);
+// --- Activity View
+const activityViewData = ref()
 
-  const eprms = [];
-  for (const activity of activities) {
-    // --- Fetch activity's entries and sections
-    const actentprms = api
-      .get(`/activity/${activity.id}/entry`)
-      .then((res) => res.data)
-      .catch(() => []);
-    const actsecprms = api
-      .get(`/activity/${activity.id}/section`)
-      .then((res) => res.data)
-      .catch(() => []);
+// --- Filtering & Sorting
+const filter = ref("")
+const sorter = ref("")
+const activities = ref([])
 
-    // --- Merge fetch then format into event
-    const eventprms = Promise.all([actentprms, actsecprms])
-      .then(([ents, secs]) => ({
-        id: activity.id,
-        name: activity.name,
-        fines: activity.fine,
-        description: activity.description,
-        eventDate: activity.startAt,
-        startAt: activity.startAt, // <--- actual start datetime
-        finishAt: activity.finishAt, // <--- actual finish datetime
-        createdAt: activity.createdAt,
-        sections: secs.map((s) => s.name),
-        timeEntries: ents.map((e) => ({
-          name: e.name,
-          startTime: e.startAt,
-          endTime: e.finishAt,
-        })),
-      }))
-      .then((res) => events.value.push(res))
-      .catch(console.error);
+const sortActivity = (sorter, activities) => {
+  const k = sorter
+  return [...activities].sort((a, b) => (a[k] > b[k]) - (a[k] < b[k]))
+}
 
-    // --- List only, handle later
-    eprms.push(eventprms);
-  }
+const filterActivity = (filter, activities) => {
+  const f = filter.toLowerCase()
+  return activities.filter((a) => a.name.toLowerCase().includes(f))
+}
 
-  // --- Handle all fetching and formatting in palalel
-  await Promise.all(eprms).catch(console.error);
-};
+watch([filter, sorter, props], ([f, s, p]) => activities.value = sortActivity(s, filterActivity(f, p.activities)))
 
-// --- Sections
-const sections = ref([]);
+//
 
-const getSections = async () => {
-  await api
-    .get("/section")
-    .then((res) =>
-      res.data.map((s) => ({ id: s.id, label: `${s.year}-${s.name}` }))
-    )
-    .then((res) => sections.value.push(...res))
-    .catch(console.error);
-};
-
-// --- Filtering/Sorting
-const searchQuery = ref("");
-const sortBy = ref("name");
-const selectedEvent = ref(null);
-
-const filteredAndSortedEvents = computed(() => {
-  let result = events.value;
-  if (searchQuery.value.trim()) {
-    const q = searchQuery.value.toLowerCase();
-    result = result.filter(
-      (e) =>
-        e.name.toLowerCase().includes(q) ||
-        e.sections.some((s) => s.toLowerCase().includes(q)) ||
-        e.timeEntries.some((entry) => entry.name.toLowerCase().includes(q)) ||
-        e.fines.toString().includes(q)
-    );
-  }
-  return [...result].sort((a, b) => {
-    if (a[sortBy.value] < b[sortBy.value]) return -1;
-    if (a[sortBy.value] > b[sortBy.value]) return 1;
-    return 0;
-  });
-});
-
-const openModal = (event) => (selectedEvent.value = event);
-const closeModal = () => (selectedEvent.value = null);
-
-const updateEvent = async (updatedEvent) => {
-  // *need to add desc, event end datetime
-  const event = {
-    name: updatedEvent.name,
-    fine: updatedEvent.fines,
-    description: "", // *desc
-    startAt: updatedEvent.eventDate, // *startTime
-    finishAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // *endTime
-  };
-
-  // --- Updates event
-  const activity = await api
-    .patch("/activity", event)
-    .then((res) => res.data)
-    .catch(() => undefined);
-  if (!activity) return;
-
-  // --- Entries needs id to keep trackable
-  const entries = await api
-    .get(`/activity/${activity.id}/section`)
-    .then((res) => res.data)
-    .catch(() => []);
-  // const entforadds = updatedEvent.timeEntries.filter((e) => !entries.some((n) => n.id == e.id))
-  // const entfordels = entries.filter((e) => !updatedEvent.timeEntries.some((t) => t.id == e.id))
-  // const entaddprms = entforadds.map((e) => api.post(`/activity/${activity.id}/entry`, e))
-  // const entdelprms = entfordels.map((e) => api.delete(`/activity/${activity.id}/entry/${e.id}`))
-  // await Promise.all([...entaddprms, ...entdelprms]).catch(console.error)
-
-  // --- Sections might change
-  const sections = await api
-    .get(`/activity/${activity.id}/section`)
-    .then((res) => res.data)
-    .catch(() => []);
-  const secforadds = updatedEvent.sections.filter(
-    (s) => !sections.some((o) => o.id == s)
-  );
-  const secfordels = sections.filter(
-    (s) => !updatedEvent.sections.includes(s.id)
-  );
-  const secaddprms = secforadds.map((s) =>
-    api.post(`/activity/${activity.id}/section/section/${s}`)
-  );
-  const secdelprms = secfordels.map((s) =>
-    api.delete(`/activity/${activity.id}/section/section/${s.id}`)
-  );
-  await Promise.all([...secaddprms, ...secdelprms]).catch(console.error);
-
-  const index = events.value.findIndex((e) => e.id === updatedEvent.id);
-  if (index !== -1) events.value[index] = updatedEvent;
-};
-
-const deleteEvent = async (id) => {
-  if (confirm("Are you sure you want to delete this event?")) {
-    await api.delete(`/activity/${id}`).catch(console.error);
-    events.value = events.value.filter((e) => e.id !== id);
-    closeModal();
-  }
-};
-
-// --- Data Fetching
-const getData = async () => await Promise.all([getEvents(), getSections()]);
-onBeforeMount(getData);
+const openModal = (event) => (activityViewData.value = event);
+const closeModal = () => (activityViewData.value = null);
 
 // Add a computed property to format the createdAt date
 const formatDate = (date) => {

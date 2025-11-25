@@ -1,7 +1,7 @@
 <template>
   <Transition name="modal">
-    <div v-if="open" class="modal-overlay" @click.self="onClose">
-      <form @submit.prevent="handleSubmit" class="modal-form scrollable modal-large">
+    <div class="modal-overlay" @click.self="onClose">
+      <form @submit.prevent="onSubmit" class="modal-form scrollable modal-large">
         <header class="modal-header-inline">
           <div>
             <h3 class="modal-title">Create Event</h3>
@@ -17,7 +17,7 @@
           <div style="margin-bottom: 1rem">
             <label class="input-label">Event name</label>
             <input
-              v-model="name"
+              v-model="activity.name"
               class="input-field"
               :class="{ 'input-error': errors.name }"
               placeholder="e.g. Math Club Meeting"
@@ -33,7 +33,7 @@
             <div style="flex: 1">
               <label class="input-label">Start Time</label>
               <input
-                v-model="startAt"
+                v-model="activity.startAt"
                 type="datetime-local"
                 class="input-field"
                 :class="{ 'input-error': errors.startAt }"
@@ -46,7 +46,7 @@
             <div style="flex: 1">
               <label class="input-label">Finish Time</label>
               <input
-                v-model="finishAt"
+                v-model="activity.finishAt"
                 type="datetime-local"
                 class="input-field"
                 :class="{ 'input-error': errors.finishAt }"
@@ -61,7 +61,7 @@
           <div style="margin-bottom: 1rem">
             <label class="input-label">Event Entries</label>
             <div
-              v-for="(entry, index) in timeEntries"
+              v-for="(entry, index) in entries"
               :key="index"
               class="entry-group"
             >
@@ -72,49 +72,49 @@
                   type="text"
                   class="input-field"
                   placeholder="e.g. Opening Ceremony"
-                  :class="{ 'input-error': errors.timeEntries?.[index]?.name }"
+                  :class="{ 'input-error': errors.entries?.[index]?.name }"
                 />
-                <p v-if="errors.timeEntries?.[index]?.name" class="error-message">
-                  {{ errors.timeEntries[index].name }}
+                <p v-if="errors.entries?.[index]?.name" class="error-message">
+                  {{ errors.entries[index].name }}
                 </p>
               </div>
 
               <div style="flex: 1">
                 <label class="input-label">Start Date & Time</label>
                 <input
-                  v-model="entry.startTime"
+                  v-model="entry.startAt"
                   type="datetime-local"
                   class="input-field"
-                  :class="{ 'input-error': errors.timeEntries?.[index]?.startTime }"
+                  :class="{ 'input-error': errors.entries?.[index]?.startAt }"
                 />
-                <p v-if="errors.timeEntries?.[index]?.startTime" class="error-message">
-                  {{ errors.timeEntries[index].startTime }}
+                <p v-if="errors.entries?.[index]?.startAt" class="error-message">
+                  {{ errors.entries[index].startAt }}
                 </p>
               </div>
 
               <div style="flex: 1">
                 <label class="input-label">End Date & Time</label>
                 <input
-                  v-model="entry.endTime"
+                  v-model="entry.finishAt"
                   type="datetime-local"
                   class="input-field"
-                  :class="{ 'input-error': errors.timeEntries?.[index]?.endTime }"
+                  :class="{ 'input-error': errors.entries?.[index]?.finishAt }"
                 />
-                <p v-if="errors.timeEntries?.[index]?.endTime" class="error-message">
-                  {{ errors.timeEntries[index].endTime }}
+                <p v-if="errors.entries?.[index]?.finishAt" class="error-message">
+                  {{ errors.entries[index].finishAt }}
                 </p>
               </div>
 
               <button
                 type="button"
                 class="btn-delete action-btn"
-                @click="removeTimeEntry(index)"
+                @click="removeActivityEntry(index)"
                 style="margin-top: auto; padding: 0.5rem; height: 2.5rem; width: 2.5rem; display: flex; align-items: center; justify-content: center"
               >
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
-            <button type="button" class="btn-add" @click="addTimeEntry">
+            <button type="button" class="btn-add" @click="appendActivityEntry">
               <i class="fa-solid fa-plus"></i>
               <span>Add Time Entry</span>
             </button>
@@ -124,7 +124,7 @@
           <div style="margin-bottom: 1rem">
             <label class="input-label">Sections / Year Levels</label>
             <input
-              v-model="searchQuery"
+              v-model="query"
               placeholder="Search sections..."
               class="input-field"
               style="margin-bottom: 0.5rem"
@@ -141,18 +141,18 @@
             </div>
             <div class="checkbox-list">
               <div
-                v-for="s in filteredSections"
+                v-for="s in filtered"
                 :key="s.id"
                 class="checkbox-item"
               >
                 <input
                   type="checkbox"
                   :id="`section-${s.id}`"
-                  :value="s.id"
-                  v-model="selectedSections"
+                  :value="s"
+                  v-model="selected"
                   class="checkbox-input"
                 />
-                <label :for="`section-${s.id}`" class="checkbox-label">{{ s.label }}</label>
+                <label :for="`section-${s.id}`" class="checkbox-label">{{ `${s.year}-${s.name}` }}</label>
               </div>
             </div>
             <p v-if="errors.section" class="error-message">
@@ -164,23 +164,23 @@
           <div style="margin-bottom: 1rem">
             <label class="input-label">Fines</label>
             <input
-              v-model="fines"
+              v-model="activity.fine"
               type="number"
               class="input-field"
-              :class="{ 'input-error': errors.fines }"
+              :class="{ 'input-error': errors.fine }"
               placeholder="e.g. 50"
               min="0"
               step="0.01"
             />
-            <p v-if="errors.fines" class="error-message">
-              {{ errors.fines }}
+            <p v-if="errors.fine" class="error-message">
+              {{ errors.fine }}
             </p>
           </div>
 
           <div style="margin-bottom: 1rem">
             <label class="input-label">Description</label>
             <textarea
-              v-model="description"
+              v-model="activity.description"
               class="input-field"
               :class="{ 'input-error': errors.description }"
               placeholder="Describe the event..."
@@ -215,133 +215,112 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, computed, reactive } from "vue";
+
+//
 
 const props = defineProps({
-  open: Boolean,
-  onClose: Function,
-  onCreate: Function,
   sections: { type: Array, default: () => [] },
-});
+  onClose: { type: Function, default: () => (() => {}) },
+  onCreateActivity: { type: Function, default: () => (() => {}) },
+  onCreateActivityEntry: { type: Function, default: () => (() => {}) },
+  onCreateActivitySection: { type: Function, default: () => (() => {}) },
+})
 
-const name = ref("");
-const timeEntries = ref([{ name: "", startTime: "", endTime: "" }]);
-const selectedSections = ref([]);
-const searchQuery = ref("");
+//
+
+// --- Activity
+const activity = reactive({
+  name: "",
+  fine: "",
+  description: "",
+  startAt: new Date(),
+  finishAt: new Date(),
+})
+
+// --- Error Display
 const errors = ref({});
-const submitting = ref(false);
-const selectAll = ref(false);
-const fines = ref("");
-const startAt = ref("");
-const finishAt = ref("");
-const description = ref("");
 
-watch(
-  () => props.open,
-  (val) => {
-    if (val) {
-      name.value = "";
-      fines.value = "";
-      timeEntries.value = [{ name: "", startTime: "", endTime: "" }];
-      selectedSections.value = [];
-      searchQuery.value = "";
-      errors.value = {};
-      submitting.value = false;
-      selectAll.value = false;
-      startAt.value = "";
-      finishAt.value = "";
-      description.value = "";
-    }
-  }
-);
+// --- Activity Entries
+const entries = reactive([{ name: "In AM", startAt: new Date(), finishAt: new Date() }])
 
-// Add a new time entry
-const addTimeEntry = () => {
-  timeEntries.value.push({ name: "", startTime: "", endTime: "" });
-};
+const appendActivityEntry = () => entries.push({ name: "", startAt: new Date(), finishAt: new Date() })
+const removeActivityEntry = (idx) => entries.splice(idx, 1)
 
-// Remove a time entry
-const removeTimeEntry = (index) => {
-  timeEntries.value.splice(index, 1);
-};
+// --- Activity Sections
+const query = ref("");
+const selected = reactive([])
+const filtered = computed(() => props.sections.filter((s) => s.name.toLowerCase().includes(query.value.toLowerCase())))
+const selectAll = ref(false)
 
-// Filter sections based on the search query
-const filteredSections = computed(() => {
-  return props.sections.filter((s) =>
-    s.label.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-
-// Toggle select all functionality
 const toggleSelectAll = () => {
-  if (selectAll.value) {
-    selectedSections.value = props.sections.map((s) => s.id);
-  } else {
-    selectedSections.value = [];
-  }
-};
+  selected.splice(0, selected.length)
+  if (selectAll.value) selected.push(...props.sections)
+}
 
-// Update the validation function to include fines
-function validate() {
+//
+
+// --- Validation
+const validate = () => {
   const err = {};
-  if (!name.value.trim()) err.name = "Event name is required.";
-  if (!description.value.trim()) err.description = "Description is required.";
-  if (fines.value === "" || fines.value < 0)
-    err.fines = "Fines must be a positive number.";
-  if (!startAt.value) err.startAt = "Event start time is required.";
-  if (!finishAt.value) err.finishAt = "Event end time is required.";
-  if (startAt.value && finishAt.value && startAt.value >= finishAt.value) {
-    err.finishAt = "Event end time must be after start time.";
-  }
+  const { name, fine, description, startAt, finishAt } = activity
 
-  err.timeEntries = timeEntries.value.map((entry) => {
+  if (!name.trim()) err.name = "Event name is required.";
+  if (!description.trim()) err.description = "Description is required.";
+  if (fine === "" || fine < 0) err.fine = "Fines must be a positive number.";
+  if (!startAt) err.startAt = "Event start time is required.";
+  if (!finishAt) err.finishAt = "Event end time is required.";
+  if (startAt && finishAt && startAt >= finishAt) err.finishAt = "Event end time must be after start time.";
+
+  const enterr = entries.map((entry) => {
     const entryErrors = {};
     if (!entry.name.trim()) entryErrors.name = "Entry name is required.";
-    if (!entry.startTime)
-      entryErrors.startTime = "Start date & time is required.";
-    if (!entry.endTime) entryErrors.endTime = "End date & time is required.";
-    if (entry.startTime && entry.endTime && entry.startTime >= entry.endTime) {
-      entryErrors.endTime = "End date & time must be after start date & time.";
-    }
+    if (!entry.startAt) entryErrors.startAt = "Start date & time is required.";
+    if (!entry.finishAt) entryErrors.finishAt = "End date & time is required.";
+    const isEndTimeErr = entry.startAt && entry.finishAt && entry.startAt >= entry.finishAt
+    if (isEndTimeErr) entryErrors.finishAt = "End date & time must be after start date & time.";
     return entryErrors;
-  });
-  if (err.timeEntries.some((entry) => Object.keys(entry).length > 0)) {
-    err.timeEntries = err.timeEntries;
-  } else {
-    delete err.timeEntries;
-  }
-  if (!selectedSections.value.length)
-    err.section = "Please select at least one section.";
+  }).filter((err) => Object.keys(err).length > 0)
+
+  if (enterr.length > 0) err.entries = enterr
+  if (!selected.length) err.section = "Please select at least one section.";
   return err;
 }
 
-// Include event start/end in payload
-async function handleSubmit() {
+//
+
+// --- Handling
+const submitting = ref(false)
+
+const onSubmit = async () => {
   const err = validate();
   errors.value = err;
-  if (Object.keys(err).length) return;
-
+  if (Object.keys(err).length) return console.error(err);
   submitting.value = true;
 
-  const payload = {
-    name: name.value.trim(),
-    fines: parseFloat(fines.value),
-    startAt: startAt.value,
-    finishAt: finishAt.value,
-    timeEntries: timeEntries.value,
-    sections: selectedSections.value,
-    description: description.value.trim(),
-  };
-
-  try {
-    if (props.onCreate) await props.onCreate(payload);
-    submitting.value = false;
-    props.onClose && props.onClose();
-  } catch (e) {
-    submitting.value = false;
-    errors.value.submit = e.message || "Failed to create event";
-  }
+  await props.onCreateActivity(activity)
+    .then((res) => [res, console.info(res)])
+    .then(([res]) => [res, entries.map((e) => props.onCreateActivityEntry(res.data.id, e))])
+    .then(([res, enp]) => [res, enp, selected.map((s) => props.onCreateActivitySection(res.data.id, s))])
+    .then(async (res, enp, sep) => await Promise.all([enp, sep]))
+    .then(onSubmitSuccess)
+    .catch((err) => errors.value.submit = err.message || "Failed to create event")
+    .finally(() => submitting.value = false)
 }
+
+const onSubmitSuccess = () => {
+  activity.name = ""
+  activity.fine = ""
+  activity.description = ""
+  activity.startAt = new Date()
+  activity.finishAt = new Date()
+  entries.splice(0, entries.length)
+  selected.splice(0, selected.length)
+  props.onClose()
+}
+
+//
+
 </script>
 
 <style scoped>
