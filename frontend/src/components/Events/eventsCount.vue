@@ -15,7 +15,7 @@
       ></div>
 
       <div v-else class="mt-1 text-2xl font-semibold stat-count">
-        {{ formattedCount }}
+        {{ activities.length }}
       </div>
 
       <div v-if="subtitle" class="text-xs text-muted mt-1">
@@ -26,35 +26,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from "vue";
-import { useApi } from "@/composables/api";
 
-const { api } = useApi();
-const loading = ref(true);
-
-//--- Events
-const events = ref([]);
-const getEvents = async () => {
-  loading.value = true;
-  await api
-    .get(`/activity`)
-    .then((res) => {
-      events.value = res.data;
-    })
-    .catch((error) => {
-      console.error("Error fetching events:", error);
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-};
-
-onBeforeMount(getEvents);
-const formattedCount = computed(() => events.value.length.toLocaleString());
+//
 
 const props = defineProps({
+  activities: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: () => false },
   title: { type: String, default: "Events" },
   subtitle: { type: String, default: "Number of active or past events" },
   icon: { type: String, default: "fa-solid fa-user-graduate" },
 });
+
+//
+
 </script>

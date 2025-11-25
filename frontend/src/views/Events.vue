@@ -2,7 +2,7 @@
   <div class="events">
     <div class="eventHeader">
       <div class="header-content">
-        <eventsCount />
+        <eventsCount :activities="activities" />
         <button @click="activityCreateModal = true" class="btn-add">
           <svg
             xmlns="http://www.w3.org/2000/svg"
