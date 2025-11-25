@@ -21,7 +21,13 @@
       </div>
     </div>
     <div class="eventList">
-      <!-- <eventList /> -->
+      <eventList
+        :sections="sections"
+        :activities="activities"
+        :activities-entries="activitiesEntries"
+        :activities-sections="activitiesSections"
+        @delete-activity="deleteActivity"
+      />
     </div>
 
     <!-- Create Event Modal -->

@@ -1,18 +1,18 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="event" class="modal-overlay" @click.self="handleClose">
+      <div class="modal-overlay" @click.self="onClose">
         <!-- Modal -->
         <div class="modal-container modal-scrollable modal-large">
           <!-- Header -->
           <div class="modal-header modal-header-sticky">
             <div>
-              <h2 class="modal-title">{{ event.name }}</h2>
+              <h2 class="modal-title">{{ activity.name }}</h2>
               <p class="modal-subtitle">Event details and information</p>
             </div>
             <button
               type="button"
-              @click="handleClose"
+              @click="onClose"
               class="close-btn"
               aria-label="Close modal"
             >
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                   <p class="info-label">Date</p>
-                  <p class="info-value">{{ formatDate(event.eventDate) }}</p>
+                  <p class="info-value">{{ formatDate(activity.startAt) }}</p>
                 </div>
               </div>
 
@@ -41,7 +41,7 @@
                 </div>
                 <div>
                   <p class="info-label">Start Time</p>
-                  <p class="info-value">{{ formatTime(event.startAt) }}</p>
+                  <p class="info-value">{{ formatTime(activity.startAt) }}</p>
                 </div>
               </div>
 
@@ -52,7 +52,7 @@
                 </div>
                 <div>
                   <p class="info-label">Finish Time</p>
-                  <p class="info-value">{{ formatTime(event.finishAt) }}</p>
+                  <p class="info-value">{{ formatTime(activity.finishAt) }}</p>
                 </div>
               </div>
 
@@ -64,7 +64,7 @@
                 <div>
                   <p class="info-label">Fines</p>
                   <p class="info-value" style="color: var(--accent)">
-                    ₱{{ event.fines.toLocaleString() }}
+                    ₱{{ activity.fine.toLocaleString() }}
                   </p>
                 </div>
               </div>
@@ -77,12 +77,7 @@
                 <p class="info-label">Sections:</p>
               </div>
               <p style="font-size: 0.875rem; color: var(--text); margin-left: 1.5rem">
-                {{
-                  event.sections
-                    .filter(Boolean)
-                    .map((s) => getSectionLabel(s))
-                    .join(", ") || "No sections"
-                }}
+                <span>{{ sections.map((s) => `${s.year}-${s.name}`).join(`, `) }}</span>
               </p>
             </div>
 
@@ -93,25 +88,25 @@
                 <p class="info-label">Description:</p>
               </div>
               <p style="font-size: 0.875rem; color: var(--text); margin-left: 1.5rem">
-                {{ event.description || "No description provided" }}
+                {{ activity.description || "No description provided" }}
               </p>
             </div>
 
             <!-- Event Entries -->
-            <div v-if="event.timeEntries && event.timeEntries.length" style="margin-top: 1.5rem">
+            <div v-if="activityEntries.length" style="margin-top: 1.5rem">
               <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--text); margin-bottom: 0.75rem">
                 Event Entries
               </h3>
               <div style="display: flex; flex-direction: column; gap: 0.5rem">
                 <div
-                  v-for="(entry, index) in event.timeEntries"
+                  v-for="(entry, index) in activityEntries"
                   :key="index"
                   class="entry-card"
                 >
                   <div>
                     <p style="font-weight: 600; color: var(--text)">{{ entry.name }}</p>
                     <p class="text-muted" style="font-size: 0.875rem">
-                      {{ formatDateTime(entry.startTime) }} – {{ formatDateTime(entry.endTime) }}
+                      {{ formatDateTime(entry.startAt) }} – {{ formatDateTime(entry.finishAt) }}
                     </p>
                   </div>
                 </div>
@@ -121,7 +116,7 @@
             <!-- Created Date -->
             <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1.5rem">
               <p class="text-muted" style="font-size: 0.75rem">
-                Created on {{ formatDateTime(event.createdAt) }}
+                Created on {{ formatDateTime(activity.createdAt) }}
               </p>
             </div>
           </div>
@@ -130,7 +125,7 @@
           <div class="modal-footer modal-footer-space-between modal-footer-sticky">
             <button
               type="button"
-              @click="handleClose"
+              @click="onClose"
               class="btn-close"
             >
               Close
@@ -139,7 +134,7 @@
             <div style="display: flex; gap: 0.75rem">
               <button
                 type="button"
-                @click="openEditModal"
+                @click="activityUpdateModal = true"
                 class="btn-submit"
               >
                 <i class="fa-solid fa-pen-to-square"></i>
@@ -148,7 +143,7 @@
 
               <button
                 type="button"
-                @click="$emit('delete', event.id)"
+                @click="deleteActivity(activity)"
                 class="btn-cancel"
               >
                 <i class="fa-solid fa-trash"></i>
@@ -161,13 +156,13 @@
     </Transition>
 
     <!-- Edit Modal -->
-    <EventEditModal
+    <!-- <EventEditModal
       :event="event"
       :sections="sections"
-      :show="showEditModal"
+      :show="activityUpdateModal"
       @close="closeEditModal"
       @update="updateEvent"
-    />
+    /> -->
   </Teleport>
 </template>
 
@@ -175,64 +170,63 @@
 import { ref } from "vue";
 import EventEditModal from "./editEventModal.vue";
 
+//
+
 const props = defineProps({
-  event: Object,
-  sections: Array,
+  sections: { type: Array, default: () => [] },
+  activity: { type: Object, default: () => ({}) },
+  activityEntries: { type: Array, default: () => [] },
+  activitySections: { type: Array, default: () => [] },
+  onClose: { type: Function, default: () => (() => {}) },
+  onCreateActivity: { type: Function, default: () => (() => {}) },
+  onUpdateActivity: { type: Function, default: () => (() => {}) },
+  onDeleteActivity: { type: Function, default: () => (() => {}) },
+  onCreateActivityEntry: { type: Function, default: () => (() => {}) },
+  onUpdateActivityEntry: { type: Function, default: () => (() => {}) },
+  onDeleteActivityEntry: { type: Function, default: () => (() => {}) },
+  onCreateActivitySection: { type: Function, default: () => (() => {}) },
+  onUpdateActivitySection: { type: Function, default: () => (() => {}) },
+  onDeleteActivitySection: { type: Function, default: () => (() => {}) },
 });
 
-const emit = defineEmits(["close", "delete", "update"]);
+//
 
-const showEditModal = ref(false);
-const openEditModal = () => (showEditModal.value = true);
-const closeEditModal = () => (showEditModal.value = false);
+// --- Activity
+const activityUpdateModal = ref(false);
 
-const handleClose = () => emit("close");
-const updateEvent = (updatedEvent) => emit("update", updatedEvent);
+const deleteActivity = async (data) => {
+  await Promise
+    .resolve()
+    .then(() => props.onDeleteActivity(data))
+    .then(() => props.onClose())
+    .catch(console.error)
+}
 
-// Helpers
-const getSectionLabel = (id) => {
-  const s = props.sections.find((sec) => sec.id === id);
-  return s?.label || id;
-};
-
+// --- Formatting
 const formatDate = (d) => {
-  try {
-    return new Date(d).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  } catch {
-    return d;
-  }
-};
+  const format = { year: "numeric", month: "long", day: "numeric" }
+  return new Date(d).toLocaleDateString("en-US", format)
+}
 
 const formatTime = (t) => {
-  try {
-    return new Date(t).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  } catch {
-    return t;
-  }
-};
+  const format = { hour: "2-digit", minute: "2-digit", hour12: true }
+  return new Date(t).toLocaleTimeString("en-US", format)
+}
 
 const formatDateTime = (d) => {
-  try {
-    return new Date(d).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  } catch {
-    return d;
+  const format = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
   }
-};
+  return new Date(d).toLocaleString("en-US", format)
+}
+
+//
+
 </script>
 
 <style scoped>

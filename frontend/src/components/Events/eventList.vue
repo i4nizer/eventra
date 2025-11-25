@@ -3,30 +3,30 @@
     <!-- Search & Sort -->
     <div class="header-controls">
       <input
-        v-model="searchQuery"
+        v-model="filter"
         type="text"
         placeholder="Search events..."
         class="search-input"
       />
 
-      <select v-model="sortBy" class="sort-select">
+      <select v-model="sorter" class="sort-select">
         <option value="name">Name</option>
-        <option value="eventDate">Event Date</option>
-        <option value="fines">Fines</option>
+        <option value="fine">Fines</option>
+        <option value="startAt">Event Date</option>
       </select>
     </div>
 
     <!-- Event Cards Grid -->
     <div class="event-cards">
       <div
-        v-for="event in filteredAndSortedEvents"
-        :key="event.id"
+        v-for="activity in activities"
+        :key="activity.id"
         class="event-card"
-        @click="openModal(event)"
+        @click="activityViewData = activity"
       >
         <div class="event-card-content">
           <div>
-            <h3 class="event-title">{{ event.name }}</h3>
+            <h3 class="event-title">{{ activity.name }}</h3>
 
             <!-- Event Date -->
             <p class="event-date flex items-center gap-1">
@@ -44,7 +44,7 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {{ format(new Date(event.eventDate), "MMMM d, yyyy, h:mm a") }}
+              {{ format(new Date(activity.startAt), "MMMM d, yyyy, h:mm a") }}
             </p>
 
             <!-- Sections -->
@@ -69,16 +69,17 @@
                   d="M12 14l6.16-3.422a12.083 12.083 0 01.34 6.825L12 14z"
                 />
               </svg>
-              {{
-                event.sections
-                  .map((id) => {
-                    const sec = sections.value?.find(
-                      (s) => Number(s.id) === Number(id)
-                    );
-                    return sec ? sec.label : `Unknown Section`; // fallback text instead of raw ID
-                  })
-                  .join(", ") || "No sections"
-              }}
+              <span v-if="activitiesSectionsMap.has(activity.id) ">
+                {{
+                  activitiesSectionsMap
+                    .get(activity.id)
+                    .map((asc) => sections.find((s) => s.id == asc.sectionId))
+                    .filter((s) => !!s)
+                    .map((s) => `${s.year}-${s.name}`)
+                    .join(`, `)
+                }}
+              </span>
+              <span v-else>No Sections</span>
             </p>
 
             <!-- Fines -->
@@ -103,7 +104,7 @@
                   d="M12 2v4m0 12v4M4 12H8m8 0h4"
                 />
               </svg>
-              ₱{{ event.fines.toLocaleString() }}
+              ₱{{ activity.fine.toLocaleString() }}
             </p>
 
             <!-- Created At -->
@@ -123,12 +124,12 @@
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {{ format(new Date(event.createdAt), "MMMM d, yyyy, h:mm a") }}
+              {{ format(new Date(activity.createdAt), "MMMM d, yyyy, h:mm a") }}
             </p>
 
             <!-- Elegant Description -->
             <p class="event-description">
-              {{ event.description }}
+              {{ activity.description }}
             </p>
           </div>
 
@@ -138,40 +139,41 @@
     </div>
 
     <!-- No Results -->
-    <p v-if="filteredAndSortedEvents.length === 0" class="no-results">
+    <p v-if="activities.length === 0" class="no-results">
       No events found.
     </p>
 
     <!-- Event Modal -->
     <EventModal
       v-if="activityViewData"
-      :event="activityViewData"
       :sections="sections"
-      @close="closeModal"
-      @update="updateEvent"
-      @delete="deleteEvent"
+      :activity="activityViewData"
+      :activity-entries="activitiesEntriesMap.get(activityViewData.id) || []"
+      :activity-sections="activitiesSectionsMap.get(activityViewData.id) || []"
+      @close="activityViewData = undefined"
+      @delete-activity="deleteActivity"
     />
   </div>
 </template>
 
 <script setup>
-import { format } from "date-fns"; // Import date-fns for formatting
-import { ref, watch } from "vue";
-import EventModal from "./EventModal.vue"; // ✅ Import modal component
+import { format } from "date-fns"
+import { reactive, ref, watch } from "vue"
+import EventModal from "./EventModal.vue"
 
 //
 
 const props = defineProps({
   sections: { type: Array, default: () => [] },
   activities: { type: Array, default: () => [] },
+  activitiesEntries: { type: Array, default: () => [] },
+  activitiesSections: { type: Array, default: () => [] },
   onCreateActivity: { type: Function, default: () => (() => {}) },
   onUpdateActivity: { type: Function, default: () => (() => {}) },
   onDeleteActivity: { type: Function, default: () => (() => {}) },
-  activitiesEntries: { type: Array, default: () => [] },
   onCreateActivityEntry: { type: Function, default: () => (() => {}) },
   onUpdateActivityEntry: { type: Function, default: () => (() => {}) },
   onDeleteActivityEntry: { type: Function, default: () => (() => {}) },
-  activitiesSections: { type: Array, default: () => [] },
   onCreateActivitySection: { type: Function, default: () => (() => {}) },
   onUpdateActivitySection: { type: Function, default: () => (() => {}) },
   onDeleteActivitySection: { type: Function, default: () => (() => {}) },
@@ -181,38 +183,49 @@ const props = defineProps({
 
 // --- Activity
 const updateActivity = async (data) => {
-  await props.onUpdateActivity(data)
+  await Promise
+    .resolve()
+    .then(() => props.onUpdateActivity(data))
+    .catch(console.error)
+}
+
+const deleteActivity = async (data) => {
+  await Promise
+    .resolve()
+    .then(() => props.onDeleteActivity(data))
+    .catch(console.error)
 }
 
 // --- Activity View
 const activityViewData = ref()
 
+// --- Activity Mapping
+const activitiesEntriesMap = reactive(new Map())
+const activitiesSectionsMap = reactive(new Map())
+
+watch(() => [props.activities, props.activitiesEntries, props.activitiesSections], ([acts, ents, ascs]) => {
+  activitiesEntriesMap.clear()
+  activitiesSectionsMap.clear()
+  acts.forEach((a) => {
+    activitiesEntriesMap.set(a.id, ents.filter((e) => e.activityId == a.id))
+    activitiesSectionsMap.set(a.id, ascs.filter((s) => s.activityId == a.id))
+  })
+})
+
 // --- Filtering & Sorting
 const filter = ref("")
-const sorter = ref("")
-const activities = ref([])
+const sorter = ref("name")
+const activities = reactive([])
 
-const sortActivity = (sorter, activities) => {
-  const k = sorter
-  return [...activities].sort((a, b) => (a[k] > b[k]) - (a[k] < b[k]))
-}
-
-const filterActivity = (filter, activities) => {
-  const f = filter.toLowerCase()
-  return activities.filter((a) => a.name.toLowerCase().includes(f))
-}
-
-watch([filter, sorter, props], ([f, s, p]) => activities.value = sortActivity(s, filterActivity(f, p.activities)))
+watch([filter, sorter, () => props.activities], ([f, s, a]) => {
+  const filtered = a.filter((a) => !f || a.name.toLowerCase().includes(f))
+  filtered.sort((a, b) => (a[s] > b[s]) - (a[s] < b[s]))
+  activities.splice(0, activities.length)
+  activities.push(...filtered)
+}, { deep: true })
 
 //
 
-const openModal = (event) => (activityViewData.value = event);
-const closeModal = () => (activityViewData.value = null);
-
-// Add a computed property to format the createdAt date
-const formatDate = (date) => {
-  return format(new Date(date), "MMMM d, yyyy, h:mm a"); // Example: "November 23, 2025, 5:31 PM"
-};
 </script>
 
 <style scoped>
