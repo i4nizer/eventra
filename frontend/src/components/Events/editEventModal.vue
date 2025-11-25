@@ -1,9 +1,9 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="show" class="modal-overlay" @click.self="close">
+      <div class="modal-overlay" @click.self="onClose">
         <!-- Modal -->
-        <form @submit.prevent="saveChanges" class="modal-container modal-scrollable modal-large">
+        <form @submit.prevent="onSubmit" class="modal-container modal-scrollable modal-large">
           <!-- Header -->
           <header class="modal-header modal-header-sticky">
             <div>
@@ -14,7 +14,7 @@
             </div>
             <button
               type="button"
-              @click="close"
+              @click="onClose"
               class="close-btn"
               aria-label="Close modal"
             >
@@ -28,7 +28,7 @@
             <div>
               <label class="input-label">Event Name</label>
               <input
-                v-model="editableEvent.name"
+                v-model="activity.name"
                 class="input-field"
                 :class="{ 'input-error': errors.name }"
                 placeholder="e.g. Math Club Meeting"
@@ -42,25 +42,25 @@
               <div class="flex-1">
                 <label class="input-label">Start Time</label>
                 <input
-                  v-model="editableEvent.startAt"
+                  v-model="activity.startAt"
                   type="datetime-local"
                   class="input-field"
                   :class="{ 'input-error': errors.startAt }"
                 />
                 <p v-if="errors.startAt" class="error-message">
-                  {{ errors.startAt }}
+                  {{ activity.startAt }}
                 </p>
               </div>
               <div class="flex-1">
                 <label class="input-label">Finish Time</label>
                 <input
-                  v-model="editableEvent.finishAt"
+                  v-model="activity.finishAt"
                   type="datetime-local"
                   class="input-field"
                   :class="{ 'input-error': errors.finishAt }"
                 />
                 <p v-if="errors.finishAt" class="error-message">
-                  {{ errors.finishAt }}
+                  {{ activity.finishAt }}
                 </p>
               </div>
             </div>
@@ -69,7 +69,7 @@
             <div>
               <label class="input-label">Event Entries</label>
               <div
-                v-for="(entry, index) in editableEvent.timeEntries"
+                v-for="(entry, index) in entries"
                 :key="index"
                 class="entry-group"
               >
@@ -81,63 +81,63 @@
                     class="input-field"
                     placeholder="e.g. Opening Ceremony"
                     :class="{
-                      'input-error': errors.timeEntries?.[index]?.name,
+                      'input-error': errors.entries?.[index]?.name,
                     }"
                   />
                   <p
-                    v-if="errors.timeEntries?.[index]?.name"
+                    v-if="errors.entries?.[index]?.name"
                     class="error-message"
                   >
-                    {{ errors.timeEntries[index].name }}
+                    {{ errors.entries[index].name }}
                   </p>
                 </div>
 
                 <div class="flex-1">
                   <label class="input-label">Start Date & Time</label>
                   <input
-                    v-model="entry.startTime"
+                    v-model="entry.startAt"
                     type="datetime-local"
                     class="input-field"
                     :class="{
-                      'input-error': errors.timeEntries?.[index]?.startTime,
+                      'input-error': errors.entries?.[index]?.startAt,
                     }"
                   />
                   <p
-                    v-if="errors.timeEntries?.[index]?.startTime"
+                    v-if="errors.entries?.[index]?.startAt"
                     class="error-message"
                   >
-                    {{ errors.timeEntries[index].startTime }}
+                    {{ errors.entries[index].startAt }}
                   </p>
                 </div>
 
                 <div class="flex-1">
                   <label class="input-label">End Date & Time</label>
                   <input
-                    v-model="entry.endTime"
+                    v-model="entry.finishAt"
                     type="datetime-local"
                     class="input-field"
                     :class="{
-                      'input-error': errors.timeEntries?.[index]?.endTime,
+                      'input-error': errors.entries?.[index]?.finishAt,
                     }"
                   />
                   <p
-                    v-if="errors.timeEntries?.[index]?.endTime"
+                    v-if="errors.entries?.[index]?.finishAt"
                     class="error-message"
                   >
-                    {{ errors.timeEntries[index].endTime }}
+                    {{ errors.entries[index].finishAt }}
                   </p>
                 </div>
 
                 <button
                   type="button"
                   class="btn-remove-entry"
-                  @click="removeTimeEntry(index)"
+                  @click="removeActivityEntry(index)"
                 >
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
 
-              <button type="button" class="btn-add" @click="addTimeEntry">
+              <button type="button" class="btn-add" @click="appendActivityEntry">
                 + Add Time Entry
               </button>
             </div>
@@ -146,7 +146,7 @@
             <div>
               <label class="input-label">Sections / Year Levels</label>
               <input
-                v-model="searchQuery"
+                v-model="query"
                 placeholder="Search sections..."
                 class="input-field mb-2"
               />
@@ -161,18 +161,18 @@
               </div>
               <div class="checkbox-list">
                 <div
-                  v-for="s in filteredSections"
+                  v-for="s in filtered"
                   :key="s.id"
                   class="flex items-center mb-1"
                 >
                   <input
                     type="checkbox"
                     :id="`section-${s.id}`"
-                    :value="s.id"
-                    v-model="editableEvent.sections"
+                    :value="s"
+                    v-model="selected"
                   />
                   <label :for="`section-${s.id}`" class="ml-2">{{
-                    s.label
+                    s.name
                   }}</label>
                 </div>
               </div>
@@ -185,16 +185,16 @@
             <div>
               <label class="input-label">Fines</label>
               <input
-                v-model.number="editableEvent.fines"
+                v-model.number="activity.fine"
                 type="number"
                 class="input-field"
-                :class="{ 'input-error': errors.fines }"
+                :class="{ 'input-error': errors.fine }"
                 placeholder="e.g. 50"
                 min="0"
                 step="0.01"
               />
-              <p v-if="errors.fines" class="error-message">
-                {{ errors.fines }}
+              <p v-if="errors.fine" class="error-message">
+                {{ errors.fine }}
               </p>
             </div>
 
@@ -202,7 +202,7 @@
             <div>
               <label class="input-label">Description</label>
               <textarea
-                v-model="editableEvent.description"
+                v-model="activity.description"
                 class="input-field"
                 :class="{ 'input-error': errors.description }"
                 placeholder="Describe the event..."
@@ -223,7 +223,7 @@
             <button
               type="button"
               class="btn-close"
-              @click="close"
+              @click="onClose"
               :disabled="submitting"
             >
               Close
@@ -240,23 +240,28 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, reactive } from "vue";
+
+//
 
 const props = defineProps({
-  event: Object,
-  sections: Array,
-  show: Boolean,
-});
+  sections: { type: Array, default: () => [] },
+  activity: { type: Object, default: () => ({}) },
+  activityEntries: { type: Array, default: () => [] },
+  activitySections: { type: Array, default: () => [] },
+  onClose: { type: Function, default: () => (() => {}) },
+  onUpdateActivity: { type: Function, default: () => (() => {}) },
+  onCreateActivityEntry: { type: Function, default: () => (() => {}) },
+  onUpdateActivityEntry: { type: Function, default: () => (() => {}) },
+  onDeleteActivityEntry: { type: Function, default: () => (() => {}) },
+  onCreateActivitySection: { type: Function, default: () => (() => {}) },
+  onDeleteActivitySection: { type: Function, default: () => (() => {}) },
+})
 
-const emit = defineEmits(["close", "update"]);
+//
 
-const searchQuery = ref("");
-const selectAll = ref(false);
-const errors = ref({});
-const submitting = ref(false);
-
-// Helper: format date for datetime-local input
-const formatForInput = (date) => {
+// --- Formatting
+const format = (date) => {
   if (!date) return "";
   const d = new Date(date);
   const year = d.getFullYear();
@@ -265,129 +270,113 @@ const formatForInput = (date) => {
   const hours = String(d.getHours()).padStart(2, "0");
   const minutes = String(d.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
+}
 
-// Editable event with formatted startAt/finishAt and entries
-const editableEvent = ref({});
+// --- Activity
+const activity = reactive({
+  ...props.activity,
+  startAt: format(props.activity.startAt),
+  finishAt: format(props.activity.finishAt),
+})
 
-watch(
-  () => props.event,
-  (newVal) => {
-    if (!newVal) return;
-    editableEvent.value = {
-      ...newVal,
-      startAt: formatForInput(newVal.startAt),
-      finishAt: formatForInput(newVal.finishAt),
-      timeEntries:
-        newVal.timeEntries?.map((e) => ({
-          ...e,
-          startTime: formatForInput(e.startTime),
-          endTime: formatForInput(e.endTime),
-        })) || [],
-    };
-  },
-  { immediate: true }
-);
+const sections = reactive([...props.activitySections])
 
-const filteredSections = computed(() =>
-  props.sections.filter((s) =>
-    s.label.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-);
+// --- Error Display
+const errors = ref({})
 
-watch(
-  () => editableEvent.value.sections,
-  () => {
-    selectAll.value =
-      editableEvent.value.sections.length === props.sections.length;
-  }
-);
+// --- Activity Entries
+const entries = reactive([...props.activityEntries.map((e) => ({
+  ...e,
+  startAt: format(e.startAt),
+  finishAt: format(e.finishAt),
+}))])
+
+const appendActivityEntry = () => entries.push({ name: "", startAt: new Date(), finishAt: new Date() })
+const removeActivityEntry = (idx) => entries.splice(idx, 1)
+
+// --- Activity Sections
+const query = ref("");
+const selected = reactive([...sections.map((a) => props.sections.find((s) => s.id == a.sectionId))])
+const filtered = computed(() => props.sections.filter((s) => s.name.toLowerCase().includes(query.value.toLowerCase())))
+const selectAll = ref(false)
 
 const toggleSelectAll = () => {
-  if (selectAll.value)
-    editableEvent.value.sections = props.sections.map((s) => s.id);
-  else editableEvent.value.sections = [];
-};
+  selected.splice(0, selected.length)
+  if (selectAll.value) selected.push(...props.sections)
+}
 
-const addTimeEntry = () =>
-  editableEvent.value.timeEntries.push({
-    name: "",
-    startTime: "",
-    endTime: "",
-  });
+//
 
-const removeTimeEntry = (index) =>
-  editableEvent.value.timeEntries.splice(index, 1);
-
-const close = () => emit("close");
-
+// --- Validation
 const validate = () => {
-  errors.value = {};
-  let valid = true;
+  const err = {};
+  const { name, fine, description, startAt, finishAt } = activity
 
-  if (!editableEvent.value.name?.trim()) {
-    errors.value.name = "Event name is required";
-    valid = false;
-  }
-  if (!editableEvent.value.sections?.length) {
-    errors.value.sections = "Select at least one section";
-    valid = false;
-  }
-  if (editableEvent.value.fines < 0) {
-    errors.value.fines = "Fines cannot be negative";
-    valid = false;
-  }
+  if (!name.trim()) err.name = "Event name is required.";
+  if (!description.trim()) err.description = "Description is required.";
+  if (fine === "" || fine < 0) err.fine = "Fines must be a positive number.";
+  if (!startAt) err.startAt = "Event start time is required.";
+  if (!finishAt) err.finishAt = "Event end time is required.";
+  if (startAt && finishAt && startAt >= finishAt) err.finishAt = "Event end time must be after start time.";
 
-  editableEvent.value.timeEntries.forEach((e, i) => {
-    if (!e.name) {
-      errors.value.timeEntries = errors.value.timeEntries || {};
-      errors.value.timeEntries[i] = errors.value.timeEntries[i] || {};
-      errors.value.timeEntries[i].name = "Entry name required";
-      valid = false;
-    }
-    if (!e.startTime) {
-      errors.value.timeEntries[i].startTime = "Start time required";
-      valid = false;
-    }
-    if (!e.endTime) {
-      errors.value.timeEntries[i].endTime = "End time required";
-      valid = false;
-    }
-  });
+  const enterr = entries.map((entry) => {
+    const entryErrors = {};
+    if (!entry.name.trim()) entryErrors.name = "Entry name is required.";
+    if (!entry.startAt) entryErrors.startAt = "Start date & time is required.";
+    if (!entry.finishAt) entryErrors.finishAt = "End date & time is required.";
+    const isEndTimeErr = entry.startAt && entry.finishAt && entry.startAt >= entry.finishAt
+    if (isEndTimeErr) entryErrors.finishAt = "End date & time must be after start date & time.";
+    return entryErrors;
+  }).filter((err) => Object.keys(err).length > 0)
 
-  if (!editableEvent.value.startAt) {
-    errors.value.startAt = "Start time required";
-    valid = false;
-  }
-  if (!editableEvent.value.finishAt) {
-    errors.value.finishAt = "Finish time required";
-    valid = false;
-  }
+  if (enterr.length > 0) err.entries = enterr
+  if (!selected.length) err.section = "Please select at least one section.";
+  return err;
+}
 
-  return valid;
-};
+// --- Submittion
+const submitting = ref(false);
 
-const saveChanges = () => {
-  if (!validate()) return;
-  submitting.value = true;
+const onSubmit = async () => {
+  const err = validate()
+  errors.value = err
+  if (Object.keys(err).length) return console.error(err)
+  submitting.value = true
 
-  const updatedEvent = {
-    ...editableEvent.value,
-    startAt: new Date(editableEvent.value.startAt).toISOString(),
-    finishAt: new Date(editableEvent.value.finishAt).toISOString(),
-    timeEntries: editableEvent.value.timeEntries.map((e) => ({
-      ...e,
-      startTime: new Date(e.startTime).toISOString(),
-      endTime: new Date(e.endTime).toISOString(),
-    })),
-  };
+  const newents = entries.filter((e) => !e.id)
+  const updents = entries.filter((e) => !!e.id && props.activityEntries.some((a) => a.id == e.id))
+  const delents = entries.filter((e) => !!e.id && props.activityEntries.every((a) => a.id != e.id))
 
-  setTimeout(() => {
-    emit("update", updatedEvent);
-    submitting.value = false;
-    close();
-  }, 200);
-};
+  const newsecs = selected.filter((s) => props.activitySections.some((a) => a.sectionId == s.id))
+  const delsecs = props.activitySections.filter((a) => !selected.some((s) => s.id == a.sectionId))
+
+  console.info("Create Entries: ")
+  console.table(newents)
+  console.info("Update Entries: ")
+  console.table(updents)
+  console.info("Delete Entries: ")
+  console.table(delents)
+  console.info("Create Sections: ")
+  console.table(newsecs)
+  console.info("Delete Sections: ")
+  console.table(delsecs)
+
+  await Promise.resolve()
+    .then(() => props.onUpdateActivity(activity))
+    .then((res) => res.data)
+    .then((act) => [act, Promise.all(newents.map((e) => props.onCreateActivityEntry(act.id, e)))])
+    .then((res) => [...res, Promise.all(updents.map((e) => props.onUpdateActivityEntry(res[0].id, e)))])
+    .then((res) => [...res, Promise.all(delents.map((e) => props.onDeleteActivityEntry(res[0].id, e)))])
+    .then((res) => [...res, Promise.all(newsecs.map((s) => props.onCreateActivitySection(res[0].id, s)))])
+    .then((res) => [...res, Promise.all(delsecs.map((s) => props.onDeleteActivitySection(res[0].id, s)))])
+    .then((res) => Promise.all(res.flat().slice(1)))
+    .then(() => props.onClose())
+    .catch((err) => errors.value.submit = err?.message || "Failed to update activity.")
+    .finally(() => submitting.value = false)
+}
+
+//
+
 </script>
 
 <style scoped>

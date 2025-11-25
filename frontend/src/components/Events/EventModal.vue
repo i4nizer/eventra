@@ -143,7 +143,7 @@
 
               <button
                 type="button"
-                @click="deleteActivity(activity)"
+                @click="onDeleteActivity(activity)"
                 class="btn-cancel"
               >
                 <i class="fa-solid fa-trash"></i>
@@ -156,13 +156,20 @@
     </Transition>
 
     <!-- Edit Modal -->
-    <!-- <EventEditModal
-      :event="event"
+    <EventEditModal
+      v-if="activityUpdateModal"
+      :activity="activity"
       :sections="sections"
-      :show="activityUpdateModal"
-      @close="closeEditModal"
-      @update="updateEvent"
-    /> -->
+      :activity-entries="activityEntries"
+      :activity-sections="activitySections"
+      @close="activityUpdateModal = false"
+      @update-activity="onUpdateActivity"
+      @create-activity-entry="(i, v) => onCreateActivityEntry(i, v)"
+      @update-activity-entry="(i, v) => onUpdateActivityEntry(i, v)"
+      @delete-activity-entry="(i, v) => onDeleteActivityEntry(i, v)"
+      @create-activity-section="(i, v) => onCreateActivitySection(i, v)"
+      @delete-activity-section="(i, v) => onDeleteActivitySection(i, v)"
+    />
   </Teleport>
 </template>
 
@@ -178,14 +185,12 @@ const props = defineProps({
   activityEntries: { type: Array, default: () => [] },
   activitySections: { type: Array, default: () => [] },
   onClose: { type: Function, default: () => (() => {}) },
-  onCreateActivity: { type: Function, default: () => (() => {}) },
   onUpdateActivity: { type: Function, default: () => (() => {}) },
   onDeleteActivity: { type: Function, default: () => (() => {}) },
   onCreateActivityEntry: { type: Function, default: () => (() => {}) },
   onUpdateActivityEntry: { type: Function, default: () => (() => {}) },
   onDeleteActivityEntry: { type: Function, default: () => (() => {}) },
   onCreateActivitySection: { type: Function, default: () => (() => {}) },
-  onUpdateActivitySection: { type: Function, default: () => (() => {}) },
   onDeleteActivitySection: { type: Function, default: () => (() => {}) },
 });
 
@@ -193,14 +198,6 @@ const props = defineProps({
 
 // --- Activity
 const activityUpdateModal = ref(false);
-
-const deleteActivity = async (data) => {
-  await Promise
-    .resolve()
-    .then(() => props.onDeleteActivity(data))
-    .then(() => props.onClose())
-    .catch(console.error)
-}
 
 // --- Formatting
 const formatDate = (d) => {

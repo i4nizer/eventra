@@ -26,7 +26,13 @@
         :activities="activities"
         :activities-entries="activitiesEntries"
         :activities-sections="activitiesSections"
+        @update-activity="updateActivity"
         @delete-activity="deleteActivity"
+        @create-activity-entry="createActivityEntry"
+        @update-activity-entry="updateActivityEntry"
+        @delete-activity-entry="deleteActivityEntry"
+        @create-activity-section="createActivitySection"
+        @delete-activity-section="deleteActivitySection"
       />
     </div>
 

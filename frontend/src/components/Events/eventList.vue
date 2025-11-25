@@ -151,7 +151,13 @@
       :activity-entries="activitiesEntriesMap.get(activityViewData.id) || []"
       :activity-sections="activitiesSectionsMap.get(activityViewData.id) || []"
       @close="activityViewData = undefined"
-      @delete-activity="deleteActivity"
+      @update-activity="onUpdateActivity"
+      @delete-activity="onDeleteActivity"
+      @create-activity-entry="onCreateActivityEntry"
+      @update-activity-entry="onUpdateActivityEntry"
+      @delete-activity-entry="onDeleteActivityEntry"
+      @create-activity-section="onCreateActivitySection"
+      @delete-activity-section="onDeleteActivitySection"
     />
   </div>
 </template>
@@ -180,21 +186,6 @@ const props = defineProps({
 })
 
 //
-
-// --- Activity
-const updateActivity = async (data) => {
-  await Promise
-    .resolve()
-    .then(() => props.onUpdateActivity(data))
-    .catch(console.error)
-}
-
-const deleteActivity = async (data) => {
-  await Promise
-    .resolve()
-    .then(() => props.onDeleteActivity(data))
-    .catch(console.error)
-}
 
 // --- Activity View
 const activityViewData = ref()

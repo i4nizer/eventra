@@ -298,9 +298,9 @@ const onSubmit = async () => {
   if (Object.keys(err).length) return console.error(err);
   submitting.value = true;
 
-  await props.onCreateActivity(activity)
-    .then((res) => [res, console.info(res)])
-    .then(([res]) => [res, entries.map((e) => props.onCreateActivityEntry(res.data.id, e))])
+  await Promise.resolve()
+    .then(() => props.onCreateActivity(activity))
+    .then((res) => [res, entries.map((e) => props.onCreateActivityEntry(res.data.id, e))])
     .then(([res, enp]) => [res, enp, selected.map((s) => props.onCreateActivitySection(res.data.id, s))])
     .then(async (res, enp, sep) => await Promise.all([enp, sep]))
     .then(onSubmitSuccess)
