@@ -12,7 +12,7 @@ let token = ""
 
 //
 
-export const useApi = (prefix = `${window.location.protocol}//${window.location.hostname}:4000`) => {
+export const useApi = (prefix = `${window.location.protocol}//${window.location.hostname}:4000/api`) => {
 
     token = cookie.parse(document.cookie)?.token || ""
     api = axios.create({ baseURL: prefix, withCredentials: false, headers: { Authorization: `Bearer ${token}` } })
