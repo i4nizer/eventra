@@ -79,7 +79,7 @@ const getData = async () => {
   await Promise.all([getEntries(entids), getStudents(stuids)]).catch(console.error)
 
   if (entries.value.length <= 0) return
-  const actids = entries.value.map((e) => e.activityId)
+  const actids = entries.value.map((e) => e?.activityId)
   await getActivities(actids).catch(console.error)
 }
 

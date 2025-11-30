@@ -374,7 +374,7 @@ const formatted = computed(() => props.attendances.map((a) => ({
   studentId: props.students.find((s) => s.id == a.studentId)?.sid,
   studentName: props.students.find((s) => s.id == a.studentId)?.name,
   activityEntryId: a.entryId,
-  activityName: props.activities.find((a) => a.id == props.entries.find((e) => e.id == a.entryId).activityId)?.name,
+  activityName: props.activities.find((a) => a.id == props.entries.find((e) => e.id == a.entryId)?.activityId)?.name,
   createdAt: a.createdAt,
   updatedAt: a.updatedAt,
 })))

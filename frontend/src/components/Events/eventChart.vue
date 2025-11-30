@@ -149,7 +149,7 @@ async function fetchChartData() {
     filteredEvents = filteredEvents.filter((event) =>
       activitySections.value.some(
         (as) =>
-          as.activityId === event.id &&
+          as?.activityId === event.id &&
           matchingSectionIds.includes(as.sectionId)
       )
     );
@@ -164,7 +164,7 @@ async function fetchChartData() {
 
     // Find all sectionIds linked to this event from activitySections
     const linkedSectionIds = activitySections.value
-      .filter((as) => as.activityId === event.id)
+      .filter((as) => as?.activityId === event.id)
       .map((as) => as.sectionId);
 
     // Count registered students: number of students with sectionId in linkedSectionIds

@@ -198,8 +198,8 @@ watch(() => [props.activities, props.activitiesEntries, props.activitiesSections
   activitiesEntriesMap.clear()
   activitiesSectionsMap.clear()
   acts.forEach((a) => {
-    activitiesEntriesMap.set(a.id, ents.filter((e) => e.activityId == a.id))
-    activitiesSectionsMap.set(a.id, ascs.filter((s) => s.activityId == a.id))
+    activitiesEntriesMap.set(a.id, ents.filter((e) => e?.activityId == a.id))
+    activitiesSectionsMap.set(a.id, ascs.filter((s) => s?.activityId == a.id))
   })
 })
 

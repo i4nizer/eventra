@@ -191,7 +191,7 @@ async function fetchViolations() {
     violations.value = violationsRes.data.map(v => {
       const student = studentMap.get(v.studentId) || {};
       const entry = entryMap.get(v.entryId) || {};
-      const activity = activityMap.get(entry.activityId) || {};
+      const activity = activityMap.get(entry?.activityId) || {};
       const payments = paymentsByViolation[v.id] || [];
       const totalPaid = payments.reduce((sum, p) => sum + Number(p.value), 0);
       const entryTime = entry.startAt ? new Date(entry.startAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : `Entry #${v.activityEntryId}`;
