@@ -286,7 +286,7 @@ const SortIcon = {
 const props = defineProps({
   violationId: { type: Number, default: null },
   defaultPerPage: { type: Number, default: 10 },
-  apiUrl: { type: String, default: "http://localhost:4000" },
+  apiUrl: { type: String, default: `${window.location.protocol}//${window.location.hostname}/api` },
 });
 
 const emit = defineEmits(["error", "success"]);
