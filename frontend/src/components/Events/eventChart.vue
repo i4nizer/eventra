@@ -1,7 +1,7 @@
 <template>
   <div class="chart surface p-4 rounded-lg shadow">
     <div class="chart-header">
-      <h3 class="chart-title">Events: Registered vs Attendees</h3>
+      <h3 class="chart-title">Events: Attendees</h3>
 
       <!-- Category Filter -->
       <select
@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { Bar } from "vue-chartjs";
 import {
   Chart,
@@ -47,7 +47,6 @@ const activitySections = ref([]); // all activity-section mappings
 const students = ref([]); // all students
 const chartRawData = ref({
   labels: [],
-  registeredCounts: [],
   attendeesCounts: [],
 });
 
@@ -139,56 +138,43 @@ async function fetchChartData() {
   if (selectedCategory.value !== "all") {
     const selectedCatLower = selectedCategory.value.toLowerCase();
 
-    // Filter sections by category name
     const matchingSections = sections.value.filter(
       (sec) => sec.name.toLowerCase() === selectedCatLower
     );
-    const matchingSectionIds = matchingSections.map((sec) => sec.id);
+    const matchingSectionIds = matchingSections.map((sec) => String(sec.id));
 
-    // Filter events that have any linked section in matchingSectionIds
     filteredEvents = filteredEvents.filter((event) =>
       activitySections.value.some(
         (as) =>
-          as?.activityId === event.id &&
-          matchingSectionIds.includes(as.sectionId)
+          as.activityId === event.id &&
+          matchingSectionIds.includes(String(as.sectionId))
       )
     );
   }
 
   const labels = [];
-  const registeredCounts = [];
   const attendeesCounts = [];
 
   for (const event of filteredEvents) {
     labels.push(event.name);
 
-    // Find all sectionIds linked to this event from activitySections
-    const linkedSectionIds = activitySections.value
-      .filter((as) => as?.activityId === event.id)
-      .map((as) => as.sectionId);
-
-    // Count registered students: number of students with sectionId in linkedSectionIds
-    const registered = students.value.filter((stu) =>
-      linkedSectionIds.includes(stu.sectionId)
-    ).length;
-
     // Get activity entries for event
     const entries = await getEventEntries(event.id);
 
-    // Sum total attendance records for all entries (attendees)
+    // Sum attendance records for all entries
     let attendees = 0;
     for (const entry of entries) {
-      const entryAttendances = await getAttendancesForEntry(entry.id);
-      attendees += entryAttendances.length;
+      const attendances = await getAttendancesForEntry(entry.id);
+      attendees += attendances.length;
     }
 
-    registeredCounts.push(registered);
+    console.log(`Event: ${event.name} | Attendees: ${attendees}`);
+
     attendeesCounts.push(attendees);
   }
 
   chartRawData.value = {
     labels,
-    registeredCounts,
     attendeesCounts,
   };
 }
@@ -216,23 +202,18 @@ function hexToRgba(hex, alpha = 1) {
 }
 
 const accentRaw = getAccent();
-const registeredColor = accentRaw;
 const attendeesColor = hexToRgba(accentRaw, 0.78);
 
 const chartData = computed(() => ({
   labels: chartRawData.value.labels,
   datasets: [
     {
-      label: "Registered",
-      data: chartRawData.value.registeredCounts,
-      backgroundColor: chartRawData.value.labels.map(() => registeredColor),
-      borderRadius: 6,
-    },
-    {
       label: "Attendees",
       data: chartRawData.value.attendeesCounts,
       backgroundColor: chartRawData.value.labels.map(() => attendeesColor),
       borderRadius: 6,
+      barPercentage: 0.6,
+      categoryPercentage: 0.6,
     },
   ],
 }));
@@ -288,6 +269,30 @@ onMounted(() => {
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
+  scales: {
+    x: {
+      stacked: false,
+      ticks: {
+        color: chartTextColor.value,
+        font: { size: isMobile.value ? 9 : 11 },
+        maxRotation: 45,
+        minRotation: 45,
+        autoSkip: false,
+      },
+      grid: { display: false },
+    },
+    y: {
+      stacked: false,
+      beginAtZero: true,
+      ticks: {
+        precision: 0,
+        color: chartTextColor.value,
+      },
+      grid: {
+        borderDash: [3, 3],
+      },
+    },
+  },
   plugins: {
     legend: {
       position: isMobile.value ? "bottom" : "top",
@@ -302,33 +307,14 @@ const chartOptions = computed(() => ({
       callbacks: {
         title: (ctx) => ctx[0].label,
         label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}`,
-        afterBody: (ctx) => {
-          const idx = ctx[0].dataIndex;
-          const reg = chartRawData.value.registeredCounts[idx] || 1;
-          const att = chartRawData.value.attendeesCounts[idx] || 0;
-          const pct = Math.round((att / reg) * 100);
-          return `Present %: ${pct}%`;
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      ticks: {
-        color: chartTextColor.value,
-        font: { size: isMobile.value ? 9 : 11 },
-      },
-      grid: { display: false },
-    },
-    y: {
-      beginAtZero: true,
-      ticks: {
-        precision: 0,
-        color: chartTextColor.value,
       },
     },
   },
 }));
+
+watch(selectedCategory, () => {
+  fetchChartData();
+});
 </script>
 
 <style scoped>
@@ -373,16 +359,16 @@ const chartOptions = computed(() => ({
   height: calc(100% - 60px);
   width: 100%;
   position: relative;
+  min-height: 320px;
+  overflow-x: auto;
 }
 
 .chart-container canvas,
 .chart-container svg {
   width: 100% !important;
-  max-width: 100% !important;
+  max-width: none !important;
   height: 100% !important;
   display: block;
   box-sizing: border-box;
 }
-
-/* Responsive styling omitted for brevity */
 </style>
