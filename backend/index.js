@@ -34,7 +34,7 @@ import config from "./config/index.js";
 const app = express();
 app.use(cors({ origin: "*", credentials: false }));
 app.use(express.json());
-app.use("/", routes);
+app.use("/api", routes);
 
 //
 
